@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Nanogel Funcionalizado con AgNPs y Corona de Romero · Visualización Científica 3D</title>
+  <title>Nanogel Funcionalizado con Plata Verde · Simulador 3D Interactivo</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
   <style>
     * {
       box-sizing: border-box;
@@ -23,16 +23,14 @@
       height: 100%;
       overflow: hidden;
       overscroll-behavior: none;
-      background-color: #0B121C;
+      background-color: #080D18;
       font-family: 'Inter', system-ui, sans-serif;
-      color: #F1F5F9;
+      color: #F8F9FA;
     }
     .font-mono-tech {
       font-family: 'JetBrains Mono', monospace;
       font-variant-numeric: tabular-nums;
     }
-
-    /* Visor Principal con Iluminación de Fondo Estudio Editorial */
     #canvas-container {
       position: fixed;
       top: 3rem;
@@ -42,7 +40,7 @@
       z-index: 1;
       cursor: grab;
       touch-action: none;
-      background: radial-gradient(ellipse at 50% 45%, #182638 0%, #0E1724 58%, #090F18 100%);
+      background: radial-gradient(ellipse at 50% 44%, #162336 0%, #0B1320 58%, #070C15 100%);
     }
     @media (min-width: 768px) {
       #canvas-container {
@@ -54,38 +52,26 @@
       cursor: grabbing;
     }
 
-    /* Marco sutil de figura editorial científica */
-    #editorial-frame {
-      position: fixed;
-      top: 3.5rem;
-      left: 0;
-      right: 0;
-      bottom: 1.75rem;
-      pointer-events: none;
-      z-index: 5;
-      border: 1px solid rgba(203, 213, 225, 0.06);
+    /* Superficies Minimalistas con la estética de la Presentación Final */
+    .pres-panel {
+      background: rgba(14, 21, 35, 0.86);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(148, 163, 184, 0.14);
+      box-shadow: 0 10px 32px rgba(0, 0, 0, 0.52);
     }
-
-    /* Superficies Editoriales Sobrias */
-    .editorial-panel {
-      background: rgba(13, 20, 32, 0.86);
-      backdrop-filter: blur(14px);
-      -webkit-backdrop-filter: blur(14px);
-      border: 1px solid rgba(203, 213, 225, 0.13);
-      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.42);
-    }
-    .editorial-divider {
-      height: 2px;
-      width: 22px;
-      background: #4FB3BF;
+    .pres-accent-bar {
+      width: 24px;
+      height: 3px;
+      background: #2DD4BF;
       border-radius: 999px;
     }
 
-    /* Controles deslizantes limpios */
+    /* Sliders minimalistas */
     input[type="range"] {
       -webkit-appearance: none;
       appearance: none;
-      background: rgba(51, 65, 85, 0.85);
+      background: rgba(31, 41, 55, 0.95);
       height: 4px;
       border-radius: 999px;
       outline: none;
@@ -96,13 +82,18 @@
       width: 13px;
       height: 13px;
       border-radius: 50%;
-      background: #5EC2CC;
-      border: 2px solid #0B121C;
+      background: #2DD4BF;
+      border: 2px solid #0B111E;
       cursor: pointer;
+      box-shadow: 0 0 6px rgba(45, 212, 191, 0.45);
       transition: transform 0.15s ease;
     }
     input[type="range"]::-webkit-slider-thumb:hover {
       transform: scale(1.18);
+    }
+    input[type="range"].slider-amber::-webkit-slider-thumb {
+      background: #F59E0B;
+      box-shadow: 0 0 6px rgba(245, 158, 11, 0.45);
     }
 
     .no-scrollbar::-webkit-scrollbar {
@@ -113,50 +104,9 @@
       scrollbar-width: none;
     }
 
-    /* Etiquetas Editoriales 3D -> 2D con línea guía discreta */
-    #labels-overlay {
-      position: fixed;
-      top: 3rem;
-      left: 0;
-      right: 0;
-      bottom: 1.5rem;
-      z-index: 12;
-      pointer-events: none;
-      overflow: hidden;
-    }
-    @media (min-width: 768px) {
-      #labels-overlay {
-        top: 3.5rem;
-        bottom: 1.75rem;
-      }
-    }
-    .editorial-callout {
-      position: absolute;
-      transform: translate(-50%, -50%);
-      pointer-events: auto;
-      cursor: pointer;
-      padding: 3px 8px;
-      border-radius: 6px;
-      background: rgba(13, 20, 32, 0.82);
-      border: 1px solid rgba(203, 213, 225, 0.22);
-      color: #E2E8F0;
-      font-size: 10px;
-      font-weight: 500;
-      letter-spacing: 0.01em;
-      white-space: nowrap;
-      backdrop-filter: blur(8px);
-      transition: opacity 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
-    }
-    .editorial-callout:hover,
-    .editorial-callout.callout-selected {
-      border-color: rgba(94, 194, 204, 0.75);
-      background: rgba(20, 32, 48, 0.94);
-      color: #FFFFFF;
-    }
-
-    /* Paneles Responsivos:
-       - Móvil (<768px): Hojas inferiores deslizables (con scroll interno)
-       - Escritorio (>=768px): Paneles laterales fijos SIN scroll y minimizables */
+    /* Comportamiento Responsivo:
+       - Móvil (<768px): Bottom Sheets deslizables CON scroll interno
+       - Escritorio (>=768px): Paneles laterales flotantes SIN scroll y minimizables */
     @media (max-width: 767px) {
       .adaptive-left-panel,
       .adaptive-right-panel {
@@ -165,7 +115,7 @@
         right: 0;
         bottom: 0;
         z-index: 50;
-        max-height: 75vh;
+        max-height: 76vh;
         overflow-y: auto;
         border-bottom-left-radius: 0;
         border-bottom-right-radius: 0;
@@ -181,8 +131,8 @@
     @media (min-width: 768px) {
       .adaptive-left-panel {
         position: fixed;
-        top: 4.25rem;
-        left: 0.85rem;
+        top: 4.1rem;
+        left: 0.75rem;
         width: 16.75rem;
         z-index: 20;
         overflow: hidden !important;
@@ -195,8 +145,8 @@
       }
       .adaptive-right-panel {
         position: fixed;
-        top: 4.25rem;
-        right: 0.85rem;
+        top: 4.1rem;
+        right: 0.75rem;
         width: 16.75rem;
         z-index: 20;
         overflow: hidden !important;
@@ -219,155 +169,141 @@
     }
 
     .stage-card-active {
-      background: rgba(79, 179, 191, 0.18) !important;
-      border-color: rgba(94, 194, 204, 0.65) !important;
+      background: rgba(15, 118, 110, 0.32) !important;
+      border-color: rgba(45, 212, 191, 0.65) !important;
     }
     .nav-btn-active {
-      background: rgba(79, 179, 191, 0.2);
-      color: #BAE6FD;
-      border-color: rgba(94, 194, 204, 0.45);
+      background: rgba(15, 118, 110, 0.32);
+      color: #99F6E4;
+      border-color: rgba(45, 212, 191, 0.45);
     }
-    .ident-row-active {
-      background: rgba(79, 179, 191, 0.15);
-      border-color: rgba(94, 194, 204, 0.45);
+    .ident-chip-active {
+      background: rgba(15, 118, 110, 0.28);
+      border-color: rgba(45, 212, 191, 0.5);
+      color: #FFFFFF;
     }
   </style>
 </head>
 <body>
 
-  <!-- BARRA SUPERIOR EDITORIAL -->
-  <header class="fixed top-0 left-0 right-0 h-12 md:h-14 z-40 bg-[#0B121C]/95 backdrop-blur-xl border-b border-slate-800/80 px-2.5 md:px-4 flex items-center justify-between gap-2">
-    <div class="flex items-center gap-2.5 min-w-0">
-      <div class="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-[#4FB3BF]/15 border border-[#5EC2CC]/35 flex items-center justify-center shrink-0">
-        <svg class="w-4 h-4 text-[#5EC2CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="8" stroke-width="1.6"/>
-          <circle cx="12" cy="12" r="3" stroke-width="1.6"/>
+  <!-- ENCABEZADO SUPERIOR (Estética Presentación Final + Móvil Optimizado) -->
+  <header class="fixed top-0 left-0 right-0 h-12 md:h-14 z-40 bg-[#0B111E]/95 backdrop-blur-xl border-b border-slate-800/80 px-2.5 md:px-4 flex items-center justify-between gap-2">
+    <div class="flex items-center gap-2 min-w-0">
+      <div class="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-[#0F766E]/30 border border-[#2DD4BF]/40 flex items-center justify-center shrink-0">
+        <svg class="w-4 h-4 text-[#2DD4BF]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/>
         </svg>
       </div>
       <div class="min-w-0">
-        <div class="flex items-center gap-2">
-          <span class="hidden sm:inline text-[9px] font-mono-tech uppercase tracking-widest text-[#5EC2CC]">FIG. 1 · MODELO CONCEPTUAL</span>
-          <span id="header-status-badge" class="text-[8px] md:text-[9px] font-mono-tech uppercase px-1.5 py-0.2 rounded bg-slate-800/90 text-slate-300 border border-slate-700/80">
-            ETAPA 1 · ESTRUCTURA
+        <h1 class="text-[11px] md:text-sm font-bold text-white truncate leading-tight">
+          Nanogel Funcionalizado con Plata Verde
+        </h1>
+        <div class="flex items-center gap-1.5 mt-0.5">
+          <span id="header-status-badge" class="text-[8px] md:text-[9px] font-mono-tech uppercase px-1.5 py-0.2 rounded bg-[#0F766E]/35 text-[#99F6E4] border border-[#2DD4BF]/25">
+            ESTABLE pH 7.4
+          </span>
+          <span class="hidden lg:inline text-[11px] text-slate-400 truncate">
+            Nanocelulosa + <span class="italic">Rosmarinus officinalis</span>
           </span>
         </div>
-        <h1 class="text-[11px] md:text-sm font-semibold text-slate-100 truncate leading-tight">
-          Nanogel Funcionalizado con AgNPs y Corona Fitoquímica (<span class="italic font-normal text-slate-300">Rosmarinus officinalis</span>)
-        </h1>
       </div>
     </div>
 
-    <!-- Herramientas de Visualización -->
+    <!-- Botones de Acción Rápida -->
     <div class="flex items-center gap-1 md:gap-1.5 shrink-0">
-      <button id="btn-xray" class="nav-btn-active p-1.5 md:px-2.5 md:py-1.5 rounded-lg border border-slate-700/70 text-[11px] font-medium flex items-center gap-1.5 transition" title="Alternar Corte Hemisférico del Nanogel (X)">
+      <button id="btn-xray" class="nav-btn-active p-1.5 md:px-2.5 md:py-1.5 rounded-lg border border-slate-700/70 text-[11px] font-medium flex items-center gap-1.5 transition" title="Alternar Corte de Inspección Interna (X)">
         <svg class="w-4 h-4 md:w-3.5 md:h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
         <span class="hidden lg:inline">Corte</span>
       </button>
 
-      <button id="btn-labels" class="nav-btn-active p-1.5 md:px-2.5 md:py-1.5 rounded-lg border border-slate-700/70 text-[11px] font-medium flex items-center gap-1.5 transition" title="Mostrar / Ocultar Rótulos Editoriales (L)">
-        <svg class="w-4 h-4 md:w-3.5 md:h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-        <span class="hidden lg:inline">Rótulos</span>
+      <button id="btn-pulse" class="p-1.5 md:px-2.5 md:py-1.5 rounded-lg border border-[#B45309]/60 bg-[#B45309]/20 text-[#FDE68A] hover:bg-[#B45309]/35 text-[11px] font-semibold flex items-center gap-1 transition" title="Impulso Cinético">
+        <svg class="w-4 h-4 md:w-3.5 md:h-3.5 text-[#F59E0B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        <span class="hidden lg:inline">Impulso</span>
       </button>
 
-      <button id="btn-autorotate" class="nav-btn-active p-1.5 md:px-2.5 md:py-1.5 rounded-lg border border-slate-700/70 text-[11px] font-medium flex items-center gap-1.5 transition" title="Rotación Suave de Estudio (R)">
+      <button id="btn-autorotate" class="nav-btn-active p-1.5 md:px-2.5 md:py-1.5 rounded-lg border border-slate-700/70 text-[11px] font-medium flex items-center gap-1.5 transition" title="Rotación Suave 360° (R)">
         <svg class="w-4 h-4 md:w-3.5 md:h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
         <span class="hidden xl:inline">Rotar</span>
       </button>
 
-      <button id="btn-reset" class="hidden sm:flex p-1.5 md:px-2.5 md:py-1.5 rounded-lg border border-slate-700/70 text-slate-300 hover:text-white text-[11px] font-medium items-center gap-1 transition" title="Reiniciar vista y animación">
+      <button id="btn-reset" class="hidden sm:flex p-1.5 md:px-2.5 md:py-1.5 rounded-lg border border-slate-700/70 text-slate-300 hover:text-white text-[11px] font-medium items-center gap-1 transition" title="Reiniciar simulación">
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
       </button>
 
-      <!-- Botón Móvil: Abrir Tabla de Identificadores y Controles -->
-      <button id="btn-mobile-telemetry" class="md:hidden p-1.5 rounded-lg bg-[#4FB3BF]/20 border border-[#5EC2CC]/40 text-[#BAE6FD] flex items-center justify-center transition" title="Abrir Tabla de Identificadores">
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h10"/></svg>
+      <!-- Botón Móvil: Abrir Telemetría y Tabla de Identificadores -->
+      <button id="btn-mobile-telemetry" class="md:hidden p-1.5 rounded-lg bg-[#0F766E]/35 border border-[#2DD4BF]/40 text-[#99F6E4] flex items-center justify-center transition" title="Abrir Telemetría e Identificadores">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
       </button>
 
-      <!-- Botón Escritorio: QR Móvil -->
-      <button id="btn-open-qr" class="hidden md:flex px-2.5 py-1.5 rounded-lg border border-[#5EC2CC]/35 bg-[#4FB3BF]/15 hover:bg-[#4FB3BF]/30 text-[#BAE6FD] text-[11px] font-medium items-center gap-1.5 transition" title="Código QR para dispositivos móviles">
+      <!-- Botón Escritorio: Código QR Móvil para Exposición -->
+      <button id="btn-open-qr" class="hidden md:flex px-2.5 py-1.5 rounded-lg border border-[#2DD4BF]/40 bg-[#0F766E]/25 hover:bg-[#0F766E]/45 text-[#99F6E4] text-[11px] font-medium items-center gap-1.5 transition" title="Código QR para interacción móvil en vivo">
         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
         <span>QR Móvil</span>
       </button>
 
-      <!-- Botón Escritorio: Minimizar Paneles -->
-      <button id="btn-toggle-all-panels" class="hidden md:flex px-2.5 py-1.5 rounded-lg border border-slate-700/70 text-slate-300 hover:text-white text-[11px] font-medium items-center gap-1.5 transition" title="Minimizar / Mostrar Paneles Laterales (H)">
-        <svg class="w-3.5 h-3.5 text-[#5EC2CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 6h16M4 12h16M4 18h7"/></svg>
+      <!-- Botón Escritorio: Minimizar/Mostrar Paneles -->
+      <button id="btn-toggle-all-panels" class="hidden md:flex px-2.5 py-1.5 rounded-lg border border-slate-700/70 text-slate-300 hover:text-white text-[11px] font-medium items-center gap-1.5 transition" title="Minimizar / Mostrar paneles laterales (H)">
+        <svg class="w-3.5 h-3.5 text-[#2DD4BF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 6h16M4 12h16M4 18h7"/></svg>
         <span class="hidden lg:inline">Paneles</span>
       </button>
     </div>
   </header>
 
-  <!-- VISOR 3D WEBGL -->
+  <!-- CONTENEDOR WEBGL 3D (Modelado Scientific Editorial Render) -->
   <div id="canvas-container"></div>
-  <div id="editorial-frame" class="hidden md:block"></div>
 
-  <!-- CAPA DE RÓTULOS CIENTÍFICOS DISCRETOS (SVG Líneas Guía + Etiquetas) -->
-  <div id="labels-overlay">
-    <svg id="callout-svg" class="w-full h-full">
-      <line id="line-nanogel" stroke="rgba(186,230,253,0.42)" stroke-width="1" />
-      <circle id="dot-nanogel" r="2.5" fill="#5EC2CC" />
-      <line id="line-matrix" stroke="rgba(186,230,253,0.42)" stroke-width="1" />
-      <circle id="dot-matrix" r="2.5" fill="#99F6E4" />
-      <line id="line-agnp" stroke="rgba(226,232,240,0.5)" stroke-width="1" />
-      <circle id="dot-agnp" r="2.5" fill="#E2E8F0" />
-      <line id="line-corona" stroke="rgba(134,239,172,0.5)" stroke-width="1" />
-      <circle id="dot-corona" r="2.5" fill="#52A788" />
-      <line id="line-tumor" stroke="rgba(253,164,175,0.48)" stroke-width="1" />
-      <circle id="dot-tumor" r="2.5" fill="#B86B77" />
-    </svg>
-
-    <button id="lbl-nanogel" data-inspect="nanogel" class="editorial-callout">Nanogel</button>
-    <button id="lbl-matrix" data-inspect="polymer_matrix" class="editorial-callout">Matriz polimérica</button>
-    <button id="lbl-agnp" data-inspect="agnp" class="editorial-callout">AgNP</button>
-    <button id="lbl-corona" data-inspect="rosemary_corona" class="editorial-callout">Corona fitoquímica de romero</button>
-    <button id="lbl-tumor" data-inspect="tumor_cell" class="editorial-callout hidden">Célula tumoral</button>
-  </div>
-
-  <!-- ACCESOS RÁPIDOS FLOTANTES SOLO EN MÓVIL -->
-  <div class="md:hidden fixed top-14 left-2.5 z-20">
-    <button id="btn-mobile-pill-ident" class="editorial-panel px-2.5 py-1 rounded-lg flex items-center gap-1.5 text-[10px] font-mono-tech text-slate-200">
-      <span class="w-2 h-2 rounded-full bg-[#5EC2CC]"></span>
-      <span>Identificadores</span>
+  <!-- MINI PÍLDORAS FLOTANTES EN MÓVIL -->
+  <div class="md:hidden fixed top-14 left-2.5 z-20 pointer-events-none">
+    <button id="btn-mobile-pill-telemetry" class="pres-panel px-2.5 py-1 rounded-lg pointer-events-auto flex items-center gap-1.5 text-[10px] font-mono-tech">
+      <span class="w-1.5 h-1.5 rounded-full bg-[#2DD4BF] animate-pulse"></span>
+      <span class="text-slate-400">pH</span>
+      <span id="mobile-val-ph" class="text-[#2DD4BF] font-bold">7.4</span>
+      <span class="text-slate-600">|</span>
+      <span class="text-slate-400">ROS</span>
+      <span id="mobile-val-ros" class="text-[#F59E0B] font-bold">5%</span>
     </button>
   </div>
 
   <div class="md:hidden fixed top-14 right-2.5 z-20">
-    <button id="btn-mobile-inspect" class="editorial-panel px-2.5 py-1 rounded-lg text-[10px] font-mono-tech text-slate-200 flex items-center gap-1">
-      <svg class="w-3 h-3 text-[#5EC2CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-      <span>Ficha</span>
+    <button id="btn-mobile-inspect" class="pres-panel px-2.5 py-1 rounded-lg text-[10px] font-mono-tech text-slate-200 flex items-center gap-1 active:scale-95 transition">
+      <svg class="w-3 h-3 text-[#2DD4BF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+      <span>Especies</span>
     </button>
   </div>
 
   <div id="mobile-backdrop" class="md:hidden fixed inset-0 bg-black/55 z-40 hidden backdrop-blur-[2px]"></div>
 
-  <!-- TOOLTIP DISCRETO -->
-  <div id="hover-tooltip" class="fixed z-30 pointer-events-none hidden px-2.5 py-1 rounded-md editorial-panel text-[11px] shadow-lg transform -translate-x-1/2 -translate-y-full -mt-2">
-    <span id="hover-tooltip-title" class="font-medium text-white block"></span>
+  <!-- TOOLTIP DISCRETO EN ESCRITORIO -->
+  <div id="hover-tooltip" class="fixed z-30 pointer-events-none hidden px-2.5 py-1 rounded-lg pres-panel text-[11px] shadow-xl transform -translate-x-1/2 -translate-y-full -mt-2.5">
+    <span id="hover-tooltip-title" class="font-semibold text-white block"></span>
+    <span class="text-[9px] font-mono-tech text-[#2DD4BF] block">Clic para ver ficha</span>
   </div>
 
-  <!-- PESTAÑAS DE RESTAURACIÓN EN ESCRITORIO -->
-  <button id="btn-restore-left" class="hidden fixed top-[4.25rem] left-3 z-30 editorial-panel hover:border-[#5EC2CC]/60 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 items-center gap-1.5 transition">
-    <span class="w-2 h-2 rounded-full bg-[#5EC2CC]"></span>
-    <span class="font-mono-tech text-[10px] uppercase tracking-wider">Identificadores</span>
-    <svg class="w-3.5 h-3.5 text-[#5EC2CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+  <!-- PESTAÑAS DE RESTAURACIÓN CUANDO SE MINIMIZAN LOS PANELES -->
+  <button id="btn-restore-left" class="hidden fixed top-[4.1rem] left-3 z-30 pres-panel hover:border-[#2DD4BF]/60 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 items-center gap-1.5 transition">
+    <span class="w-2 h-2 rounded-full bg-[#2DD4BF]"></span>
+    <span class="font-mono-tech text-[10px] uppercase tracking-wider">Telemetría</span>
+    <svg class="w-3.5 h-3.5 text-[#2DD4BF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
   </button>
 
-  <button id="btn-restore-right" class="hidden fixed top-[4.25rem] right-3 z-30 editorial-panel hover:border-[#5EC2CC]/60 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 items-center gap-1.5 transition">
-    <svg class="w-3.5 h-3.5 text-[#5EC2CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-    <span class="font-mono-tech text-[10px] uppercase tracking-wider">Información</span>
+  <button id="btn-restore-right" class="hidden fixed top-[4.1rem] right-3 z-30 pres-panel hover:border-[#2DD4BF]/60 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 items-center gap-1.5 transition">
+    <svg class="w-3.5 h-3.5 text-[#2DD4BF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+    <span class="font-mono-tech text-[10px] uppercase tracking-wider">Ficha</span>
+    <span class="w-2 h-2 rounded-full bg-[#F59E0B]"></span>
   </button>
 
   <!-- =======================================================================
-       PANEL IZQUIERDO: TABLA DE IDENTIFICADORES + AJUSTES DE VISTA EDITORIAL
-       (Sin scroll en Escritorio / Hoja deslizable en Móvil)
+       PANEL IZQUIERDO: TELEMETRÍA + SUPERFICIE + PARÁMETROS + TABLA IDENTIFICADORES
+       (Sin scroll en Escritorio / Bottom Sheet en Móvil)
        ======================================================================= -->
-  <aside id="left-panel" class="adaptive-left-panel mobile-closed editorial-panel rounded-2xl p-3.5 flex flex-col gap-2.5 pointer-events-auto">
-    <div id="left-sheet-handle" class="md:hidden w-10 h-1 bg-slate-700 rounded-full mx-auto -mt-1 mb-0.5 cursor-pointer"></div>
+  <aside id="left-panel" class="adaptive-left-panel mobile-closed pres-panel rounded-2xl p-3 flex flex-col gap-2 pointer-events-auto">
+    <div id="left-sheet-handle" class="md:hidden w-10 h-1 bg-slate-700 rounded-full mx-auto -mt-0.5 mb-0.5 cursor-pointer"></div>
 
-    <div class="flex items-center justify-between border-b border-slate-800/90 pb-2">
+    <!-- Cabecera -->
+    <div class="flex items-center justify-between border-b border-slate-800/80 pb-1.5">
       <div class="flex items-center gap-1.5">
-        <span class="w-2 h-2 rounded-full bg-[#5EC2CC]"></span>
-        <span class="text-[10px] font-mono-tech font-semibold uppercase tracking-wider text-slate-200">Tabla de Identificadores</span>
+        <span class="w-2 h-2 rounded-full bg-[#2DD4BF]"></span>
+        <span class="text-[10px] font-mono-tech font-semibold uppercase tracking-wider text-slate-200">Estado Bioquímico</span>
       </div>
       <button id="btn-min-left" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800/80 transition" title="Minimizar panel ([)">
         <svg class="hidden md:block w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
@@ -375,158 +311,204 @@
       </button>
     </div>
 
-    <!-- Tabla Codificada de Componentes del Modelo -->
-    <div class="flex flex-col gap-1 text-[11px]">
-      <button data-inspect="nanogel" class="ident-row ident-row-active inspect-legend flex items-center justify-between px-2 py-1.5 rounded-lg border border-transparent hover:bg-slate-800/70 transition text-left">
-        <span class="flex items-center gap-2 min-w-0">
-          <span class="w-2.5 h-2.5 rounded-full bg-[#4FB3BF] ring-2 ring-[#4FB3BF]/30 shrink-0"></span>
-          <span class="text-slate-100 font-medium truncate">Nanogel</span>
-        </span>
-        <span class="text-[9px] font-mono-tech text-slate-400 shrink-0">Esfera hidratada</span>
-      </button>
-
-      <button data-inspect="polymer_matrix" class="ident-row inspect-legend flex items-center justify-between px-2 py-1.5 rounded-lg border border-transparent hover:bg-slate-800/70 transition text-left">
-        <span class="flex items-center gap-2 min-w-0">
-          <span class="w-2.5 h-2.5 rounded-full bg-[#99F6E4] shrink-0"></span>
-          <span class="text-slate-200 truncate">Matriz polimérica</span>
-        </span>
-        <span class="text-[9px] font-mono-tech text-slate-400 shrink-0">Red / Poros</span>
-      </button>
-
-      <button data-inspect="crosslinks" class="ident-row inspect-legend flex items-center justify-between px-2 py-1.5 rounded-lg border border-transparent hover:bg-slate-800/70 transition text-left">
-        <span class="flex items-center gap-2 min-w-0">
-          <span class="w-2.5 h-2.5 rounded-full bg-[#2DD4BF] shrink-0"></span>
-          <span class="text-slate-200 truncate">Entrecruzamientos</span>
-        </span>
-        <span class="text-[9px] font-mono-tech text-slate-400 shrink-0">Nodos red 3D</span>
-      </button>
-
-      <button data-inspect="agnp" class="ident-row inspect-legend flex items-center justify-between px-2 py-1.5 rounded-lg border border-transparent hover:bg-slate-800/70 transition text-left">
-        <span class="flex items-center gap-2 min-w-0">
-          <span class="w-2.5 h-2.5 rounded-full bg-[#CBD5E1] ring-1 ring-white/40 shrink-0"></span>
-          <span class="text-slate-200 truncate">AgNP (Plata)</span>
-        </span>
-        <span class="text-[9px] font-mono-tech text-slate-400 shrink-0">Núcleo metálico</span>
-      </button>
-
-      <button data-inspect="rosemary_corona" class="ident-row inspect-legend flex items-center justify-between px-2 py-1.5 rounded-lg border border-transparent hover:bg-slate-800/70 transition text-left">
-        <span class="flex items-center gap-2 min-w-0">
-          <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background: linear-gradient(135deg, #4E9F7E 55%, #CFA358 45%);"></span>
-          <span class="text-slate-200 truncate">Corona de romero</span>
-        </span>
-        <span class="text-[9px] font-mono-tech text-slate-400 shrink-0">Capa fitoquímica</span>
-      </button>
-
-      <button data-inspect="tumor_cell" class="ident-row inspect-legend flex items-center justify-between px-2 py-1.5 rounded-lg border border-transparent hover:bg-slate-800/70 transition text-left">
-        <span class="flex items-center gap-2 min-w-0">
-          <span class="w-2.5 h-2.5 rounded-full bg-[#A85D69] shrink-0"></span>
-          <span class="text-slate-200 truncate">Célula tumoral</span>
-        </span>
-        <span class="text-[9px] font-mono-tech text-slate-400 shrink-0">Entorno diana</span>
-      </button>
-    </div>
-
-    <!-- Controles Ópticos de Inspección -->
-    <div class="pt-2 border-t border-slate-800/90 space-y-2">
+    <!-- Telemetría Minimalista -->
+    <div class="space-y-1.5">
       <div>
-        <div class="flex justify-between text-[10px] mb-1">
-          <span class="text-slate-300">Transparencia del Nanogel</span>
-          <span id="label-gel-opacity" class="font-mono-tech text-[#5EC2CC]">Media</span>
+        <div class="flex justify-between text-[10px] mb-0.5">
+          <span class="text-slate-400">pH del Medio</span>
+          <span id="val-ph" class="font-mono-tech font-semibold text-[#2DD4BF]">7.4 (Sano)</span>
         </div>
-        <input id="slider-opacity" type="range" min="10" max="85" value="45" class="w-full block" />
+        <div class="w-full h-1 bg-slate-800 rounded-full overflow-hidden">
+          <div id="bar-ph" class="h-full bg-gradient-to-r from-[#0F766E] to-[#2DD4BF] rounded-full transition-all duration-150" style="width: 100%"></div>
+        </div>
       </div>
 
-      <div class="text-[9px] text-slate-400 leading-snug bg-slate-900/70 rounded-lg px-2.5 py-1.5 border border-slate-800/80">
-        <span class="font-mono-tech uppercase text-[#5EC2CC]">Nota editorial:</span> Representación conceptual multiescala. Las interacciones terapéuticas corresponden a mecanismos propuestos.
+      <div>
+        <div class="flex justify-between text-[10px] mb-0.5">
+          <span class="text-slate-400">Liberación Ag⁺</span>
+          <span id="val-ag-rel" class="font-mono-tech font-semibold text-slate-200">0%</span>
+        </div>
+        <div class="w-full h-1 bg-slate-800 rounded-full overflow-hidden">
+          <div id="bar-ag-rel" class="h-full bg-gradient-to-r from-slate-400 to-[#99F6E4] rounded-full transition-all duration-150" style="width: 4%"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="flex justify-between text-[10px] mb-0.5">
+          <span class="text-slate-400">Glutatión (GSH)</span>
+          <span id="val-gsh" class="font-mono-tech font-semibold text-[#2DD4BF]">100%</span>
+        </div>
+        <div class="w-full h-1 bg-slate-800 rounded-full overflow-hidden">
+          <div id="bar-gsh" class="h-full bg-[#0F766E] rounded-full transition-all duration-150" style="width: 100%"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="flex justify-between text-[10px] mb-0.5">
+          <span class="text-slate-400">ROS / Caspasa 9→3</span>
+          <span id="val-ros-apop" class="font-mono-tech font-semibold text-[#F59E0B]">5% · Inactiva</span>
+        </div>
+        <div class="w-full h-1 bg-slate-800 rounded-full overflow-hidden">
+          <div id="bar-ros-apop" class="h-full bg-gradient-to-r from-[#B45309] via-[#F59E0B] to-fuchsia-500 rounded-full transition-all duration-150" style="width: 5%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Selector de Variante Superficial -->
+    <div class="pt-1.5 border-t border-slate-800/80">
+      <div class="text-[9px] font-mono-tech uppercase tracking-wider text-slate-400 mb-1">Funcionalización</div>
+      <div class="grid grid-cols-3 gap-1 bg-slate-900/90 p-0.5 rounded-lg border border-slate-800">
+        <button data-ligand="base" class="ligand-btn text-[10px] font-medium py-1 px-1 rounded-md transition text-center bg-[#0F766E]/40 text-[#99F6E4] border border-[#2DD4BF]/40">
+          Base
+        </button>
+        <button data-ligand="folate" class="ligand-btn text-[10px] font-medium py-1 px-1 rounded-md transition text-center text-slate-400 hover:text-slate-200 border border-transparent">
+          +Folato
+        </button>
+        <button data-ligand="compare" class="ligand-btn text-[10px] font-medium py-1 px-1 rounded-md transition text-center text-slate-400 hover:text-slate-200 border border-transparent">
+          Ambas
+        </button>
+      </div>
+    </div>
+
+    <!-- Sliders Cinéticos -->
+    <div class="pt-1.5 border-t border-slate-800/80 space-y-1.5">
+      <div>
+        <div class="flex justify-between text-[10px] mb-0.5">
+          <span class="text-slate-300">Concentración Ag⁺</span>
+          <span id="label-ag-conc" class="font-mono-tech text-[#2DD4BF]">65%</span>
+        </div>
+        <input id="slider-ag" type="range" min="15" max="100" value="65" class="w-full block" />
+      </div>
+
+      <div>
+        <div class="flex justify-between text-[10px] mb-0.5">
+          <span class="text-slate-300">Tasa de ROS</span>
+          <span id="label-ros-rate" class="font-mono-tech text-[#F59E0B]">60%</span>
+        </div>
+        <input id="slider-ros" type="range" min="15" max="100" value="60" class="w-full slider-amber block" />
+      </div>
+    </div>
+
+    <!-- Tabla de Identificadores Codificada por Color -->
+    <div class="pt-1.5 border-t border-slate-800/80">
+      <div class="text-[9px] font-mono-tech uppercase tracking-wider text-slate-400 mb-1">Tabla de Identificadores</div>
+      <div class="grid grid-cols-2 gap-1 text-[10px]">
+        <button data-inspect="nanocellulose" class="ident-chip ident-chip-active inspect-legend flex items-center gap-1.5 px-1.5 py-1 rounded border border-transparent hover:bg-slate-800/80 text-slate-300 truncate transition">
+          <span class="w-2 h-2 rounded-full bg-[#5EC2CC] shrink-0"></span><span class="truncate">Nanogel / Red</span>
+        </button>
+        <button data-inspect="ag0_core" class="ident-chip inspect-legend flex items-center gap-1.5 px-1.5 py-1 rounded border border-transparent hover:bg-slate-800/80 text-slate-300 truncate transition">
+          <span class="w-2 h-2 rounded-full bg-[#E2E8F0] shrink-0"></span><span class="truncate">AgNP (Plata)</span>
+        </button>
+        <button data-inspect="rosemary_corona" class="ident-chip inspect-legend flex items-center gap-1.5 px-1.5 py-1 rounded border border-transparent hover:bg-slate-800/80 text-slate-300 truncate transition">
+          <span class="w-2 h-2 rounded-full shrink-0" style="background: linear-gradient(135deg, #489878 55%, #CFA358 45%);"></span><span class="truncate">Corona Romero</span>
+        </button>
+        <button data-inspect="folate_np" class="ident-chip inspect-legend flex items-center gap-1.5 px-1.5 py-1 rounded border border-transparent hover:bg-slate-800/80 text-slate-300 truncate transition">
+          <span class="w-2 h-2 rounded-full bg-[#EAB308] shrink-0"></span><span class="truncate">Ácido Fólico</span>
+        </button>
+        <button data-inspect="clathrin" class="ident-chip inspect-legend flex items-center gap-1.5 px-1.5 py-1 rounded border border-transparent hover:bg-slate-800/80 text-slate-300 truncate transition">
+          <span class="w-2 h-2 rounded-full bg-[#2DD4BF] shrink-0"></span><span class="truncate">Clatrina (CME)</span>
+        </button>
+        <button data-inspect="warburg_tumor" class="ident-chip inspect-legend flex items-center gap-1.5 px-1.5 py-1 rounded border border-transparent hover:bg-slate-800/80 text-slate-300 truncate transition">
+          <span class="w-2 h-2 rounded-full bg-[#B85D68] shrink-0"></span><span class="truncate">Célula Tumoral</span>
+        </button>
+        <button data-inspect="gsh" class="ident-chip inspect-legend flex items-center gap-1.5 px-1.5 py-1 rounded border border-transparent hover:bg-slate-800/80 text-slate-300 truncate transition">
+          <span class="w-2 h-2 rounded-full bg-[#34D399] shrink-0"></span><span class="truncate">Escudo GSH</span>
+        </button>
+        <button data-inspect="apoptosome" class="ident-chip inspect-legend flex items-center gap-1.5 px-1.5 py-1 rounded border border-transparent hover:bg-slate-800/80 text-slate-300 truncate transition">
+          <span class="w-2 h-2 rounded-full bg-[#C084FC] shrink-0"></span><span class="truncate">Caspasa 9→3</span>
+        </button>
       </div>
     </div>
   </aside>
 
   <!-- =======================================================================
-       PANEL DERECHO: INFORMACIÓN DEL COMPONENTE SELECCIONADO
+       PANEL DERECHO: FICHA MOLECULAR MINIMALISTA (Sin scroll en PC / Sheet en Móvil)
        ======================================================================= -->
-  <aside id="right-panel" class="adaptive-right-panel mobile-closed editorial-panel rounded-2xl p-3.5 flex flex-col gap-2 pointer-events-auto">
+  <aside id="right-panel" class="adaptive-right-panel mobile-closed pres-panel rounded-2xl p-3.5 flex flex-col gap-2 pointer-events-auto">
     <div id="right-sheet-handle" class="md:hidden w-10 h-1 bg-slate-700 rounded-full mx-auto -mt-1 mb-0.5 cursor-pointer"></div>
 
     <div class="flex items-start justify-between gap-2">
-      <span id="inspector-tag" class="text-[9px] font-mono-tech uppercase tracking-wider px-2 py-0.5 rounded bg-[#4FB3BF]/15 text-[#BAE6FD] border border-[#5EC2CC]/30">
-        Matriz Hidratada
+      <span id="inspector-tag" class="text-[9px] font-mono-tech uppercase tracking-wider px-2 py-0.5 rounded bg-[#0F766E]/30 text-[#2DD4BF] border border-[#2DD4BF]/25">
+        Vehículo Polimérico
       </span>
-      <button id="btn-min-right" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800/80 transition shrink-0" title="Minimizar panel (])">
+      <button id="btn-min-right" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800/80 transition shrink-0" title="Minimizar ficha (])">
         <svg class="hidden md:block w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
         <svg class="md:hidden w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
       </button>
     </div>
 
-    <div class="editorial-divider"></div>
+    <div class="pres-accent-bar"></div>
 
     <h2 id="inspector-title" class="text-xs md:text-sm font-bold text-white leading-snug">
-      Nanogel Polimérico
+      Nanogel de Nanocelulosa
     </h2>
 
-    <div id="inspector-meta" class="text-[10px] font-mono-tech text-[#BAE6FD] bg-[#080D15]/90 px-2.5 py-1 rounded-md border border-slate-800">
-      Red tridimensional hidratada (~80–100 nm)
+    <div id="inspector-formula" class="text-[10px] font-mono-tech text-[#99F6E4] bg-[#080D18]/90 px-2.5 py-1 rounded-lg border border-slate-800/90">
+      80–100 nm · Red porosa entrecruzada
     </div>
 
     <p id="inspector-desc" class="text-[11px] text-slate-300 leading-relaxed">
-      Esfera polimérica semitransparente con volumen definido, cavidades porosas interconectadas y retención acuosa.
+      Esfera polimérica hidratada con filamentos internos, nodos de entrecruzamiento y cavidades porosas definidas.
     </p>
 
-    <div class="bg-[#090F18]/90 rounded-lg p-2.5 border border-slate-800/90">
-      <div id="inspector-note-label" class="text-[9px] font-mono-tech uppercase tracking-wider text-[#CFA358] font-semibold mb-0.5">
-        Papel Estructural
-      </div>
+    <div class="bg-[#0B111E]/90 rounded-lg p-2.5 border border-slate-800/90">
+      <div class="text-[9px] font-mono-tech uppercase tracking-wider text-[#F59E0B] font-semibold mb-0.5">Función Clave</div>
       <p id="inspector-impact" class="text-[11px] text-slate-200 leading-snug">
-        Aloja y estabiliza espacialmente las nanopartículas de plata funcionalizadas dentro de su arquitectura porosa.
+        Inmoviliza las AgNPs, fluye bajo presión en la inyección y mantiene el depósito localizado dentro del tumor.
       </p>
+    </div>
+
+    <div class="text-[9px] font-mono-tech text-slate-400 flex items-center gap-1 pt-0.5">
+      <span class="w-1.5 h-1.5 rounded-full bg-[#2DD4BF]"></span>
+      <span>Toca cualquier estructura 3D para inspeccionar</span>
     </div>
   </aside>
 
-  <!-- BOTÓN RESTAURAR SECUENCIA INFERIOR -->
-  <button id="btn-restore-bottom" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-30 hidden editorial-panel hover:border-[#5EC2CC]/60 rounded-full px-3.5 py-1 text-[10px] font-mono-tech text-[#BAE6FD] items-center gap-1.5 shadow-xl transition">
-    <span>Mostrar Secuencia (4 Etapas)</span>
+  <!-- BOTÓN RESTAURAR BARRA INFERIOR -->
+  <button id="btn-restore-bottom" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-30 hidden pres-panel hover:border-[#2DD4BF]/60 rounded-full px-3.5 py-1 text-[10px] font-mono-tech text-[#99F6E4] items-center gap-1.5 shadow-xl transition">
+    <span>Mostrar Fases (1 – 7)</span>
     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
   </button>
 
   <!-- =======================================================================
-       BARRA INFERIOR: SECUENCIA EDITORIAL EN 4 ETAPAS + PAUSA / VELOCIDAD
+       BARRA INFERIOR MINIMALISTA: VELOCIDAD + PROGRESIÓN + LAS 7 FASES EN MOVIMIENTO
        ======================================================================= -->
   <div id="bottom-panel" class="bottom-dock fixed bottom-7 md:bottom-8 left-2 right-2 md:left-3 md:right-3 z-20 flex justify-center pointer-events-none">
-    <div class="editorial-panel rounded-xl md:rounded-2xl p-2 md:px-3.5 md:py-2.5 w-full max-w-3xl pointer-events-auto">
+    <div class="pres-panel rounded-xl md:rounded-2xl p-2 md:px-3.5 md:py-2.5 w-full max-w-4xl pointer-events-auto">
       
       <div class="flex items-center justify-between gap-2 mb-1.5">
         <div class="flex items-center gap-1.5 min-w-0">
-          <button id="btn-prev-stage" class="hidden sm:flex w-7 h-7 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 items-center justify-center transition shrink-0" title="Etapa anterior (←)">
+          <button id="btn-prev-stage" class="hidden sm:flex w-7 h-7 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 items-center justify-center transition shrink-0" title="Fase anterior (←)">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
           </button>
 
-          <button id="btn-play-pause" class="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-[#4FB3BF]/25 hover:bg-[#4FB3BF]/40 border border-[#5EC2CC]/50 flex items-center justify-center text-[#BAE6FD] transition shrink-0" title="Reproducir / Pausar (Espacio)">
+          <button id="btn-play-pause" class="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-[#0F766E]/40 hover:bg-[#0F766E]/65 border border-[#2DD4BF]/50 flex items-center justify-center text-[#99F6E4] transition shrink-0" title="Reproducir / Pausar (Espacio)">
             <svg id="icon-play" class="w-3.5 h-3.5 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/></svg>
             <svg id="icon-pause" class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M5.75 3a.75.75 0 00-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 00.75-.75V3.75A.75.75 0 007.25 3h-1.5zM12.75 3a.75.75 0 00-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 00.75-.75V3.75a.75.75 0 00-.75-.75h-1.5z"/></svg>
           </button>
 
-          <button id="btn-next-stage" class="hidden sm:flex w-7 h-7 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 items-center justify-center transition shrink-0" title="Siguiente etapa (→)">
+          <button id="btn-next-stage" class="hidden sm:flex w-7 h-7 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 items-center justify-center transition shrink-0" title="Siguiente fase (→)">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
           </button>
 
-          <!-- Selector de Velocidad -->
-          <button id="btn-speed" class="px-2 h-7 rounded-lg text-[10px] font-mono-tech font-semibold border border-slate-700/80 bg-slate-900/70 text-[#5EC2CC] hover:border-[#5EC2CC]/50 transition shrink-0" title="Ajustar velocidad de reproducción">
+          <!-- Botón Ajustar Velocidad -->
+          <button id="btn-speed" class="px-2 h-7 rounded-lg text-[10px] font-mono-tech font-semibold border border-slate-700/80 bg-slate-900/70 text-[#2DD4BF] hover:border-[#2DD4BF]/50 transition shrink-0" title="Ajustar velocidad de simulación">
             1.0×
           </button>
 
-          <button id="btn-loop-stage" class="hidden md:inline-flex items-center px-2 h-7 rounded-lg text-[10px] font-mono-tech border border-slate-700/80 text-slate-400 hover:text-white transition shrink-0" title="Mantener en la etapa actual">
-            Fijar Etapa: OFF
+          <button id="btn-loop-stage" class="hidden md:inline-flex items-center px-2 h-7 rounded-lg text-[10px] font-mono-tech border border-slate-700/80 text-slate-400 hover:text-white transition shrink-0" title="Repetir fase actual en bucle">
+            Bucle: OFF
           </button>
 
-          <div class="flex items-center gap-1.5 min-w-0 ml-1">
-            <span id="stage-badge" class="text-[9px] md:text-[10px] font-mono-tech font-semibold uppercase px-1.5 py-0.5 rounded bg-[#4FB3BF]/20 text-[#BAE6FD] shrink-0">1 / 4</span>
-            <h3 id="stage-title" class="text-[11px] md:text-xs font-semibold text-white truncate">Estructura: Nanogel y Red Polimérica</h3>
+          <div class="flex items-center gap-1.5 min-w-0 ml-0.5">
+            <span id="stage-badge" class="text-[9px] md:text-[10px] font-mono-tech font-bold uppercase px-1.5 py-0.5 rounded bg-[#0F766E]/35 text-[#2DD4BF] shrink-0">1 / 7</span>
+            <h3 id="stage-title" class="text-[11px] md:text-xs font-semibold text-white truncate">Inmovilización en Nanocelulosa</h3>
           </div>
         </div>
 
         <div class="flex items-center gap-2 shrink-0">
-          <span id="progress-percent" class="text-[10px] md:text-xs font-mono-tech font-semibold text-[#5EC2CC]">0%</span>
-          <button id="btn-min-bottom" class="hidden sm:block text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800/80 transition" title="Minimizar controles inferiores">
+          <span id="progress-percent" class="text-[10px] md:text-xs font-mono-tech font-bold text-[#2DD4BF]">0%</span>
+          <button id="btn-min-bottom" class="hidden sm:block text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800/80 transition" title="Minimizar barra inferior">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
           </button>
         </div>
@@ -536,26 +518,41 @@
         <input id="slider-progress" type="range" min="0" max="100" step="0.1" value="0" class="w-full block" />
       </div>
 
-      <!-- Las 4 Etapas Editoriales -->
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-1 md:gap-1.5">
-        <button data-stage="0" class="stage-btn stage-card-active text-left px-2.5 py-1.5 rounded-lg border border-slate-800 bg-slate-900/60 hover:border-slate-600 transition">
-          <div class="text-[8px] md:text-[9px] font-mono-tech text-[#5EC2CC] font-semibold truncate">01 · ESTRUCTURA</div>
-          <div class="text-[9px] md:text-[10px] text-slate-200 truncate">Red polimérica porosa</div>
+      <!-- Las 7 Fases Completas del Tratamiento -->
+      <div class="flex md:grid md:grid-cols-7 gap-1 md:gap-1.5 overflow-x-auto no-scrollbar snap-x">
+        <button data-stage="0" class="stage-btn stage-card-active snap-start shrink-0 w-[5.4rem] md:w-auto text-left px-2 py-1 md:py-1.5 rounded-lg border border-slate-800 bg-slate-900/60 hover:border-slate-600 transition">
+          <div class="text-[8px] md:text-[9px] font-mono-tech text-[#2DD4BF] font-semibold truncate">01 · NANOGEL</div>
+          <div class="text-[9px] md:text-[10px] text-slate-200 truncate">Red Porosa 3D</div>
         </button>
 
-        <button data-stage="1" class="stage-btn text-left px-2.5 py-1.5 rounded-lg border border-slate-800 bg-slate-900/60 hover:border-slate-600 transition">
-          <div class="text-[8px] md:text-[9px] font-mono-tech text-slate-200 font-semibold truncate">02 · FUNCIONALIZACIÓN</div>
-          <div class="text-[9px] md:text-[10px] text-slate-300 truncate">Nanopartículas AgNPs</div>
+        <button data-stage="1" class="stage-btn snap-start shrink-0 w-[5.4rem] md:w-auto text-left px-2 py-1 md:py-1.5 rounded-lg border border-slate-800 bg-slate-900/60 hover:border-slate-600 transition">
+          <div class="text-[8px] md:text-[9px] font-mono-tech text-[#2DD4BF] font-semibold truncate">02 · INYECCIÓN</div>
+          <div class="text-[9px] md:text-[10px] text-slate-300 truncate">pH Warburg</div>
         </button>
 
-        <button data-stage="2" class="stage-btn text-left px-2.5 py-1.5 rounded-lg border border-slate-800 bg-slate-900/60 hover:border-slate-600 transition">
-          <div class="text-[8px] md:text-[9px] font-mono-tech text-[#68B693] font-semibold truncate">03 · CORONA FITOQUÍMICA</div>
-          <div class="text-[9px] md:text-[10px] text-slate-300 truncate">Recubrimiento de romero</div>
+        <button data-stage="2" class="stage-btn snap-start shrink-0 w-[5.4rem] md:w-auto text-left px-2 py-1 md:py-1.5 rounded-lg border border-slate-800 bg-slate-900/60 hover:border-slate-600 transition">
+          <div class="text-[8px] md:text-[9px] font-mono-tech text-[#F59E0B] font-semibold truncate">03 · LIGANDOS</div>
+          <div class="text-[9px] md:text-[10px] text-slate-300 truncate">Base / Folato</div>
         </button>
 
-        <button data-stage="3" class="stage-btn text-left px-2.5 py-1.5 rounded-lg border border-slate-800 bg-slate-900/60 hover:border-slate-600 transition">
-          <div class="text-[8px] md:text-[9px] font-mono-tech text-[#D48C96] font-semibold truncate">04 · APLICACIÓN ONCOLÓGICA</div>
-          <div class="text-[9px] md:text-[10px] text-slate-300 truncate">Proximidad tumoral (propuesta)</div>
+        <button data-stage="3" class="stage-btn snap-start shrink-0 w-[5.4rem] md:w-auto text-left px-2 py-1 md:py-1.5 rounded-lg border border-slate-800 bg-slate-900/60 hover:border-slate-600 transition">
+          <div class="text-[8px] md:text-[9px] font-mono-tech text-[#2DD4BF] font-semibold truncate">04 · ENDOCITOSIS</div>
+          <div class="text-[9px] md:text-[10px] text-slate-300 truncate">Vía Clatrina</div>
+        </button>
+
+        <button data-stage="4" class="stage-btn snap-start shrink-0 w-[5.4rem] md:w-auto text-left px-2 py-1 md:py-1.5 rounded-lg border border-slate-800 bg-slate-900/60 hover:border-slate-600 transition">
+          <div class="text-[8px] md:text-[9px] font-mono-tech text-[#F59E0B] font-semibold truncate">05 · ENDOSOMA</div>
+          <div class="text-[9px] md:text-[10px] text-slate-300 truncate">Caballo Troya</div>
+        </button>
+
+        <button data-stage="5" class="stage-btn snap-start shrink-0 w-[5.4rem] md:w-auto text-left px-2 py-1 md:py-1.5 rounded-lg border border-slate-800 bg-slate-900/60 hover:border-slate-600 transition">
+          <div class="text-[8px] md:text-[9px] font-mono-tech text-orange-400 font-semibold truncate">06 · MITOCONDRIA</div>
+          <div class="text-[9px] md:text-[10px] text-slate-300 truncate">GSH y ROS</div>
+        </button>
+
+        <button data-stage="6" class="stage-btn snap-start shrink-0 w-[5.4rem] md:w-auto text-left px-2 py-1 md:py-1.5 rounded-lg border border-slate-800 bg-slate-900/60 hover:border-slate-600 transition">
+          <div class="text-[8px] md:text-[9px] font-mono-tech text-fuchsia-400 font-semibold truncate">07 · APOPTOSIS</div>
+          <div class="text-[9px] md:text-[10px] text-slate-300 truncate">Caspasa 9→3</div>
         </button>
       </div>
     </div>
@@ -563,26 +560,26 @@
 
   <!-- MODAL QR PARA DISPOSITIVOS MÓVILES -->
   <div id="qr-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 backdrop-blur-sm p-4">
-    <div class="editorial-panel rounded-2xl p-5 max-w-xs w-full text-center relative">
+    <div class="pres-panel rounded-2xl p-5 max-w-xs w-full text-center relative">
       <button id="btn-close-qr" class="absolute top-3 right-3 text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
       </button>
-      <div class="editorial-divider mx-auto mb-2.5"></div>
-      <h3 class="text-sm font-bold text-white">Acceso Móvil Interactivo</h3>
-      <p class="text-[11px] text-slate-400 mt-1 mb-3.5">Escanea para explorar el modelo 3D desde tu dispositivo.</p>
+      <div class="pres-accent-bar mx-auto mb-2.5"></div>
+      <h3 class="text-sm font-bold text-white">Explora el Render en Móvil</h3>
+      <p class="text-[11px] text-slate-400 mt-1 mb-3.5">Escanea para rotar e inspeccionar todas las fases en tiempo real.</p>
       <div id="qrcode-box" class="bg-white p-3 rounded-xl inline-block mx-auto shadow-lg"></div>
-      <div class="mt-3 flex items-center gap-1.5 bg-[#080D15] border border-slate-800 rounded-lg px-2.5 py-1.5">
-        <span id="qr-url-label" class="text-[10px] font-mono-tech text-[#BAE6FD] truncate flex-1 text-left">https://thalosroy.github.io/nanogel-plata-verde-3d/</span>
-        <button id="btn-copy-url" class="text-[10px] font-mono-tech px-2 py-0.5 rounded bg-[#4FB3BF]/30 text-white hover:bg-[#4FB3BF]/50 transition shrink-0">Copiar</button>
+      <div class="mt-3 flex items-center gap-1.5 bg-[#080D18] border border-slate-800 rounded-lg px-2.5 py-1.5">
+        <span id="qr-url-label" class="text-[10px] font-mono-tech text-[#99F6E4] truncate flex-1 text-left">https://thalosroy.github.io/nanogel-plata-verde-3d/</span>
+        <button id="btn-copy-url" class="text-[10px] font-mono-tech px-2 py-0.5 rounded bg-[#0F766E]/40 text-white hover:bg-[#0F766E] transition shrink-0">Copiar</button>
       </div>
     </div>
   </div>
 
-  <!-- PIE DE FIGURA CIENTÍFICA -->
-  <footer class="fixed bottom-0 left-0 right-0 h-6 md:h-7 z-30 bg-[#090F18]/95 border-t border-slate-800/80 px-3 md:px-4 flex items-center justify-between text-[9px] md:text-[10px] font-mono-tech text-slate-400">
+  <!-- PIE DE PÁGINA EDITORIAL -->
+  <footer class="fixed bottom-0 left-0 right-0 h-6 md:h-7 z-30 bg-[#080D18]/95 border-t border-slate-800/80 px-3 md:px-4 flex items-center justify-between text-[9px] md:text-[10px] font-mono-tech text-slate-400">
     <span class="truncate">SCIENTIFIC EDITORIAL RENDER · NANOGEL AgNPs–ROMERO</span>
-    <span class="hidden sm:inline text-slate-400">MODELO CONCEPTUAL MULTIESCALA</span>
-    <span class="sm:hidden text-[#5EC2CC]">3D INTERACTIVO</span>
+    <span class="hidden sm:inline text-[#2DD4BF]">SIMULACIÓN INTERACTIVA MULTIESCALA</span>
+    <span class="sm:hidden text-[#2DD4BF]">INTERACTIVO EN VIVO</span>
   </footer>
 
   <script>
@@ -590,94 +587,145 @@
       const PUBLIC_SHARE_URL = "https://thalosroy.github.io/nanogel-plata-verde-3d/";
 
       /**
-       * ========================================================================
-       * BASE DE DATOS EDITORIAL DE COMPONENTES (Rigor Científico / Sin Extrapolación)
-       * ========================================================================
+       * FICHAS MINIMALISTAS (Alineadas a la Presentación Final)
        */
-      const COMPONENT_INFO = {
-        nanogel: {
-          tag: "Vehículo Coloidal",
-          title: "Nanogel Polimérico Hidratado",
-          meta: "Esfera tridimensional (~80–100 nm)",
-          desc: "Volumen polimérico semitransparente de superficie continua que conserva agua e integridad estructural en medio fisiológico.",
-          noteLabel: "Función en el Diseño",
-          impact: "Actúa como soporte tridimensional para alojar y estabilizar las nanopartículas metálicas funcionalizadas."
+      const MOLECULE_INFO = {
+        nanocellulose: {
+          tag: "Vehículo Polimérico",
+          title: "Nanogel Poroso de Nanocelulosa",
+          formula: "80–100 nm · Filamentos y Nodos 3D",
+          desc: "Esfera polimérica hidratada con red interna de filamentos, puntos de entrecruzamiento y cavidades porosas definidas.",
+          impact: "Inmoviliza las AgNPs, fluye bajo presión en la jeringa y conserva su volumen sólido en el tumor."
         },
-        polymer_matrix: {
-          tag: "Arquitectura Interna",
-          title: "Matriz Polimérica y Cavidades Porosas",
-          meta: "Red de filamentos de nanocelulosa",
-          desc: "Entramado interno organizado de cadenas poliméricas que delimita espacios porosos interconectados dentro del nanogel.",
-          noteLabel: "Propiedad Física",
-          impact: "Proporciona retención espacial de la carga nanoparticulada y permeabilidad controlada al medio acuoso."
-        },
-        crosslinks: {
-          tag: "Estabilidad Estructural",
-          title: "Puntos de Entrecruzamiento",
-          meta: "Interacciones físicas / Puentes de hidrógeno",
-          desc: "Nodos de unión entre filamentos poliméricos que consolidan la geometría esférica de la red sin requerir agentes tóxicos.",
-          noteLabel: "Comportamiento Mecánico",
-          impact: "Mantiene la cohesión tridimensional del nanogel evitando su disolución prematura."
-        },
-        agnp: {
-          tag: "Fase Inorgánica",
-          title: "Nanopartículas de Plata (AgNPs)",
-          meta: "Esferas metálicas (~12–22 nm · óptimo ~17.5 nm)",
-          desc: "Núcleos esféricos de plata elemental con acabado metálico satinado, distribuidos en los poros de la matriz polimérica.",
-          noteLabel: "Mecanismo Propuesto",
-          impact: "Reservorio inorgánico propuesto para respuesta dependiente de pH en microambientes ácidos."
+        ag0_core: {
+          tag: "Núcleo Metálico",
+          title: "Nanopartícula de Plata (AgNP)",
+          formula: "Esfera metálica Ag⁰ (~17.5 nm)",
+          desc: "Núcleo esférico de plata con acabado satinado alojado dentro de los poros de la matriz polimérica.",
+          impact: "Actúa como reservorio sólido que permanece estable a pH 7.4 y responde frente a medios ácidos."
         },
         rosemary_corona: {
-          tag: "Recubrimiento Orgánico",
-          title: "Corona Fitoquímica de Romero",
-          meta: "Extracto de Rosmarinus officinalis (–COOH / –OH)",
-          desc: "Capa molecular discreta de metabolitos vegetales adherida a la superficie de cada AgNP mediante enlaces cortos.",
-          noteLabel: "Estabilización y Hipótesis pH",
-          impact: "Previene la agregación entre núcleos metálicos; se propone su protonación como modulador superficial frente a cambios de pH."
+          tag: "Recubrimiento Fitoquímico",
+          title: "Corona Molecular de Romero",
+          formula: "Rosmarinus officinalis · –COOH y –OH",
+          desc: "Capa superficial organizada de elementos orgánicos verdes y dorados unidos por enlaces cortos a cada AgNP.",
+          impact: "Evita la agregación metálica a pH fisiológico y se protona frente a la acidez tumoral y endosomal."
         },
-        tumor_cell: {
-          tag: "Contexto Biológico",
-          title: "Célula Tumoral ( aproximación conceptual )",
-          meta: "Microambiente tumoral ácido propuesto (pH ~6.2–6.8)",
-          desc: "Representación morfológica de una célula tumoral empleada como referencia espacial de escala y posicionamiento local.",
-          noteLabel: "Alcance Conceptual",
-          impact: "Ilustra la proximidad terapéutica propuesta del nanogel; los procesos de captura e interacción intracelular constituyen hipótesis de estudio."
+        syringe_gel: {
+          tag: "Barrera 1 · Nivel Órgano",
+          title: "Inyección Pseudoplástica Local",
+          formula: "Flujo bajo presión → Depósito in situ",
+          desc: "El nanogel fluye a través de la cánula al presionar el émbolo y recupera su red esférica al entrar al tejido.",
+          impact: "Retiene las nanopartículas dentro del tumor evitando la fuga sistémica hacia hígado y bazo."
+        },
+        healthy_tissue: {
+          tag: "Control Fisiológico",
+          title: "Tejido Sano",
+          formula: "pH 7.4 · Nanogel Inactivo",
+          desc: "Células ordenadas con pH extracelular neutro donde el recubrimiento de romero conserva su estabilidad.",
+          impact: "Impide la liberación prematura de plata y protege los tejidos sanos circundantes."
+        },
+        warburg_tumor: {
+          tag: "Gatillo Metabólico",
+          title: "Célula Tumoral y Efecto Warburg",
+          formula: "pH 6.2 – 6.8 · Lactato y H⁺",
+          desc: "El metabolismo glucolítico tumoral acidifica el entorno extracelular alrededor del depósito del nanogel.",
+          impact: "Activa la Fase 1 liberando gradualmente las AgNPs funcionalizadas hacia la superficie tumoral."
+        },
+        base_np: {
+          tag: "Versión Base Localizada",
+          title: "AgNP No Funcionalizada",
+          formula: "Ag⁰ + Corona Fitoquímica de Romero",
+          desc: "Partícula con su recubrimiento vegetal nativo sin ligandos adicionales, depositada directamente en el tumor.",
+          impact: "No requiere funcionalización obligatoria en administración local, manteniendo una síntesis simple."
+        },
+        folate_np: {
+          tag: "Variante Selectiva",
+          title: "AgNP Funcionalizada con Ácido Fólico",
+          formula: "Corona + Ligandos Folato → Receptor FR-α",
+          desc: "Recubrimiento conjugado con cadenas moleculares de ácido fólico orientadas hacia receptores celulares.",
+          impact: "Acelera el reconocimiento selectivo en células tumorales que sobreexpresan el receptor FR-α."
+        },
+        fr_alpha: {
+          tag: "Diana en Membrana",
+          title: "Receptor de Folato (FR-α)",
+          formula: "Sobreexpresado en tumores epiteliales",
+          desc: "Proteína receptora presente en alta densidad sobre la membrana plasmática de células tumorales.",
+          impact: "Captura con alta afinidad las AgNPs funcionalizadas promoviendo su internalización activa."
+        },
+        lipid_bilayer: {
+          tag: "Barrera 2 · Nivel Celular",
+          title: "Membrana Plasmática",
+          formula: "Bicapa fosfolipídica selectiva",
+          desc: "Doble capa lipídica que impide físicamente el paso por difusión pasiva de nanopartículas hidrofílicas.",
+          impact: "Requiere invaginación vesicular activa para permitir el ingreso intracelular del tratamiento."
+        },
+        clathrin: {
+          tag: "Vía Principal de Ingreso",
+          title: "Endocitosis Mediada por Clatrina (CME)",
+          formula: "Red poliédrica (~80–100 nm) + Dinamina",
+          desc: "Los trisqueliones de clatrina ensamblan una canasta estructurada que curva la membrana y dinamina escinde el cuello.",
+          impact: "Conduce las AgNPs recubiertas hacia el interior celular dentro de vesículas endosomales."
+        },
+        vatpase: {
+          tag: "Barrera 3 · Caballo de Troya",
+          title: "Disolución Oxidativa Endosomal",
+          formula: "4Ag⁰ + O₂ + 4H⁺ → 4Ag⁺ + 2H₂O (pH 4.5)",
+          desc: "Las bombas V-ATPasa acidifican el endosoma, protonando la corona (–COO⁻ a –COOH) y exponiendo el núcleo Ag⁰.",
+          impact: "El nanomaterial no escapa intacto: genera iones Ag⁺ y ROS que oxidan y abren la membrana endosomal."
+        },
+        ag: {
+          tag: "Especie Activa",
+          title: "Iones de Plata (Ag⁺)",
+          formula: "Afinidad química por grupos tiol (–SH)",
+          desc: "Cationes metálicos liberados al citosol tras la disolución oxidativa ácida en el endosoma.",
+          impact: "Se enlazan a los grupos tiol del glutatión reducido (GSH), inactivando el escudo antioxidante."
+        },
+        gsh: {
+          tag: "Defensa Neutralizada",
+          title: "Glutatión Reducido (GSH)",
+          formula: "Bloqueo de grupos –SH por Ag⁺",
+          desc: "Principal antioxidante intracelular encargado de neutralizar especies oxidantes en condiciones basales.",
+          impact: "Su secuestro por Ag⁺ deja a la mitocondria vulnerable a la acumulación aguda de ROS."
+        },
+        ros: {
+          tag: "Estrés Oxidativo",
+          title: "Especies Reactivas de Oxígeno (ROS)",
+          formula: "Peroxidación lipídica mitocondrial",
+          desc: "Especies oxidantes generadas masivamente tras el bloqueo de GSH sobre las membranas mitocondriales.",
+          impact: "Desestabilizan la estructura de las crestas y la bicapa mitocondrial desencadenando su colapso."
+        },
+        membrane: {
+          tag: "Blanco Subcelular",
+          title: "Membranas y Crestas Mitocondriales",
+          formula: "Doble membrana y pliegues internos",
+          desc: "Ultraestructura energética celular expuesta al daño oxidativo tras la pérdida de defensa antioxidante.",
+          impact: "Su permeabilización permite la salida de Citocromo c hacia el citosol tumoral."
+        },
+        cytc: {
+          tag: "Señal Pro-Apoptótica",
+          title: "Liberación de Citocromo c",
+          formula: "Translocación mitocondria → citosol",
+          desc: "Proteína liberada desde el espacio intermembrana mitocondrial tras el daño oxidativo.",
+          impact: "Activa en el citosol la cascada enzimática de muerte celular programada."
+        },
+        apoptosome: {
+          tag: "Desenlace Terapéutico",
+          title: "Apoptosis vía Caspasa 9 → 3",
+          formula: "Citocromo c → Caspasa 9 → Caspasa 3",
+          desc: "Activación secuencial de complejos de caspasas ejecutoras en el interior de la célula tumoral.",
+          impact: "Produce una muerte celular programada limpia en cuerpos apoptóticos sin inflamación periférica."
         }
       };
 
       const STAGES_DATA = [
-        {
-          badge: "1 / 4",
-          headerBadge: "ETAPA 1 · ESTRUCTURA",
-          title: "Estructura: Nanogel Hidratado y Red Polimérica",
-          defaultComp: "nanogel",
-          cam: { theta: 0.46, phi: 1.26, radius: 15.6 },
-          focus: new THREE.Vector3(0, -0.35, 0)
-        },
-        {
-          badge: "2 / 4",
-          headerBadge: "ETAPA 2 · FUNCIONALIZACIÓN",
-          title: "Funcionalización: Distribución de Nanopartículas de Plata",
-          defaultComp: "agnp",
-          cam: { theta: 0.68, phi: 1.22, radius: 14.4 },
-          focus: new THREE.Vector3(0, -0.30, 0)
-        },
-        {
-          badge: "3 / 4",
-          headerBadge: "ETAPA 3 · CORONA FITOQUÍMICA",
-          title: "Corona Fitoquímica: Recubrimiento Molecular de Romero",
-          defaultComp: "rosemary_corona",
-          cam: { theta: 0.48, phi: 1.28, radius: 4.55 },
-          focus: new THREE.Vector3(0, 0, 0) // Se ajusta dinámicamente a la AgNP focal
-        },
-        {
-          badge: "4 / 4",
-          headerBadge: "ETAPA 4 · APLICACIÓN ONCOLÓGICA",
-          title: "Aplicación Oncológica: Posicionamiento junto a Célula Tumoral",
-          defaultComp: "tumor_cell",
-          cam: { theta: 0.22, phi: 1.26, radius: 21.2 },
-          focus: new THREE.Vector3(2.4, -0.55, 0)
-        }
+        { badge: "1 / 7", title: "Inmovilización en Nanogel Poroso de Nanocelulosa", defaultMol: "nanocellulose", cam: { theta: 0.46, phi: 1.25, radius: 15.2 }, focus: new THREE.Vector3(0, -0.25, 0) },
+        { badge: "2 / 7", title: "Inyección Pseudoplástica y Gatillo de pH Warburg", defaultMol: "syringe_gel", cam: { theta: 0.18, phi: 1.26, radius: 19.2 }, focus: new THREE.Vector3(0.5, -0.2, 0) },
+        { badge: "3 / 7", title: "Comparativa: Versión Base vs. Funcionalizada (+Folato)", defaultMol: "folate_np", cam: { theta: 0.0, phi: 1.30, radius: 15.8 }, focus: new THREE.Vector3(0, -0.3, 0) },
+        { badge: "4 / 7", title: "Ingreso Activo: Endocitosis Mediada por Clatrina", defaultMol: "clathrin", cam: { theta: 0.28, phi: 1.18, radius: 16.5 }, focus: new THREE.Vector3(0, -0.3, 0) },
+        { badge: "5 / 7", title: "Escape Endosomal: Efecto Caballo de Troya (pH 4.5)", defaultMol: "vatpase", cam: { theta: -0.20, phi: 1.30, radius: 15.5 }, focus: new THREE.Vector3(0, -0.2, 0) },
+        { badge: "6 / 7", title: "Ataque a la Mitocondria: Bloqueo GSH y Estrés ROS", defaultMol: "gsh", cam: { theta: 0.34, phi: 1.24, radius: 17.6 }, focus: new THREE.Vector3(0, -0.25, 0) },
+        { badge: "7 / 7", title: "Colapso Mitocondrial y Apoptosis (Caspasa 9 → 3)", defaultMol: "apoptosome", cam: { theta: 0.36, phi: 1.20, radius: 18.8 }, focus: new THREE.Vector3(0.2, -0.2, 0) }
       ];
 
       const SPEED_OPTIONS = [0.5, 1.0, 1.5, 2.0];
@@ -686,48 +734,48 @@
         progress: 0,
         isPlaying: true,
         loopStage: false,
-        baseSpeed: 2.6,
+        baseSpeed: 2.0,
         speedIdx: 1,
         xrayMode: true,
-        labelsVisible: true,
         autoRotate: true,
-        gelOpacitySetting: 0.45,
+        ligandMode: 'base',
+        agConcentration: 0.65,
+        rosRate: 0.60,
+        pulseBoost: 0,
         currentStage: 0,
-        selectedComp: 'nanogel',
+        selectedMol: 'nanocellulose',
         leftDesktopMin: false,
         rightDesktopMin: false,
         bottomMin: false,
         mobileSheet: null
       };
 
-      // Variables de escena Three.js
       let scene, camera, renderer, clock;
-      let nanogelAssembly;
-      let outerSphereFull, outerSphereCut, innerCoreVolume;
-      let filamentMeshes = [], crosslinkMeshes = [];
-      let agnpUnits = []; // { group, coreMesh, coronaGroup, coronaBeads, coronaBonds, basePos }
-      let focalAgNPPos = new THREE.Vector3(0.85, 0.55, 1.15);
-      let tumorCellGroup, tumorMembraneMesh, tumorNucleusMesh;
+      let stageGroups = [];
       let interactiveObjects = [];
+      let shockwaveRings = [];
 
-      // Puntos de anclaje 3D para los rótulos editoriales
-      const labelAnchors = {
-        nanogel: { world: new THREE.Vector3(-3.35, 2.15, 0.2), offset: { x: -72, y: -34 }, lineId: 'line-nanogel', dotId: 'dot-nanogel', elId: 'lbl-nanogel' },
-        matrix: { world: new THREE.Vector3(-1.75, -1.85, 1.1), offset: { x: -82, y: 36 }, lineId: 'line-matrix', dotId: 'dot-matrix', elId: 'lbl-matrix' },
-        agnp: { world: new THREE.Vector3(0.85, 0.55, 1.15), offset: { x: 86, y: -42 }, lineId: 'line-agnp', dotId: 'dot-agnp', elId: 'lbl-agnp' },
-        corona: { world: new THREE.Vector3(1.22, 0.28, 1.42), offset: { x: 108, y: 34 }, lineId: 'line-corona', dotId: 'dot-corona', elId: 'lbl-corona' },
-        tumor: { world: new THREE.Vector3(5.2, -1.1, 0.6), offset: { x: 64, y: -44 }, lineId: 'line-tumor', dotId: 'dot-tumor', elId: 'lbl-tumor' }
-      };
+      // Materiales compartidos estilo Scientific Editorial Studio
+      let matSilverSatin, matRosemaryGreen, matRosemaryGold, matShortBond, matFolateLigand;
+
+      // Estructuras por Fase
+      const s1 = { nanogelGroup: null, sphereFull: null, sphereCut: null, agUnits: [] };
+      const s2 = { plunger: null, streamDrops: [], depotGel: null, releasedUnits: [], protons: [] };
+      const s3 = { baseUnit: null, folateUnit: null, dockingRings: [] };
+      const s4 = { headsTop: [], headsBot: [], tails: [], clathrinGroup: null, dynaminRing: null, cargoUnit: null };
+      const s5 = { endoFull: null, endoCut: null, pumps: [], protons: [], coreMesh: null, coronaBeads: [], agIons: [], rosParticles: [] };
+      const s6 = { mitoGroup: null, outerMem: null, innerCristae: null, innerOrigPos: null, lipids: [], dnaGroup: null, dnaA: null, dnaRungs: [], padlocks: [], gshList: [], agList: [], rosList: [] };
+      const s7 = { mitoMini: null, releasePore: null, cytStream: [], caspaseComplexes: [], cellMembrane: null, cellOrigPos: null, apoptoticBodies: [] };
 
       const orbit = {
-        theta: 0.42,
-        phi: 1.28,
-        radius: 11.2,
-        targetTheta: 0.42,
-        targetPhi: 1.28,
-        targetRadius: 11.2,
-        focus: new THREE.Vector3(0, 0, 0),
-        targetFocus: new THREE.Vector3(0, 0, 0),
+        theta: 0.46,
+        phi: 1.25,
+        radius: 15.2,
+        targetTheta: 0.46,
+        targetPhi: 1.25,
+        targetRadius: 15.2,
+        focus: new THREE.Vector3(0, -0.25, 0),
+        targetFocus: new THREE.Vector3(0, -0.25, 0),
         isDragging: false,
         prevX: 0,
         prevY: 0,
@@ -737,14 +785,13 @@
       const raycaster = new THREE.Raycaster();
       const mouse = new THREE.Vector2(-999, -999);
 
-      function registerInteractive(mesh, compKey, label) {
-        mesh.userData = Object.assign(mesh.userData || {}, { compKey, label });
+      function registerInteractive(mesh, molType, label, stageIdx) {
+        mesh.userData = Object.assign(mesh.userData || {}, { molType, label, stageIdx });
         interactiveObjects.push(mesh);
       }
 
       /**
-       * Genera un mapa de entorno de estudio fotográfico suave (PMREM) sin dependencias externas
-       * para lograr reflejos plateados satinados realistas y volumen en el hidrogel.
+       * Mapa de Entorno Fotográfico de Estudio (PMREM) para acabados metálicos satinados y volumen hidratado
        */
       function createStudioEnvironment(webglRenderer) {
         try {
@@ -752,9 +799,8 @@
           pmrem.compileEquirectangularShader();
 
           const envScene = new THREE.Scene();
-          envScene.background = new THREE.Color(0x0f1724);
+          envScene.background = new THREE.Color(0x0d1624);
 
-          // Softbox principal superior izquierda
           const softboxKey = new THREE.Mesh(
             new THREE.PlaneGeometry(18, 12),
             new THREE.MeshBasicMaterial({ color: 0xf8fafc, side: THREE.DoubleSide })
@@ -763,7 +809,6 @@
           softboxKey.lookAt(0, 0, 0);
           envScene.add(softboxKey);
 
-          // Panel de relleno frontal suave frío
           const softboxFill = new THREE.Mesh(
             new THREE.PlaneGeometry(16, 10),
             new THREE.MeshBasicMaterial({ color: 0x99d5df, side: THREE.DoubleSide })
@@ -772,7 +817,6 @@
           softboxFill.lookAt(0, 0, 0);
           envScene.add(softboxFill);
 
-          // Contorno superior sutil
           const softboxRim = new THREE.Mesh(
             new THREE.PlaneGeometry(20, 8),
             new THREE.MeshBasicMaterial({ color: 0xcbd5e1, side: THREE.DoubleSide })
@@ -784,13 +828,252 @@
           const envRT = pmrem.fromScene(envScene, 0.045);
           pmrem.dispose();
           return envRT.texture;
-        } catch (err) {
+        } catch (e) {
           return null;
         }
       }
 
       /**
-       * Inicialización de la Escena Científica Editorial
+       * CONSTRUCTOR REUTILIZABLE EDITORIAL:
+       * AgNP Esférica Satinada + Corona Fitoquímica Discreta de Romero (Verde/Dorado + Enlaces cortos)
+       * + Cadenas moleculares discretas de Ácido Fólico opcionales (SIN cubos flotantes)
+       */
+      function createEditorialAgNP(agRadius, detailLevel, withFolate, stageIdx) {
+        const unit = new THREE.Group();
+
+        // 1. Esfera metálica plateada satinada
+        const coreMesh = new THREE.Mesh(
+          new THREE.SphereGeometry(agRadius, detailLevel === 'high' ? 44 : 24, detailLevel === 'high' ? 32 : 18),
+          matSilverSatin.clone()
+        );
+        coreMesh.castShadow = true;
+        coreMesh.receiveShadow = true;
+        registerInteractive(coreMesh, 'ag0_core', 'AgNP (Esfera metálica de plata · ~17.5 nm)', stageIdx);
+        unit.add(coreMesh);
+
+        // 2. Corona fitoquímica de romero (elementos verdes y dorados organizados con enlaces cortos)
+        const coronaGroup = new THREE.Group();
+        const beadCount = detailLevel === 'high' ? 40 : (detailLevel === 'med' ? 24 : 14);
+        const rGreen = agRadius * 0.125;
+        const rGold = agRadius * 0.105;
+        const geoGreen = new THREE.SphereGeometry(rGreen, 12, 10);
+        const geoGold = new THREE.SphereGeometry(rGold, 12, 10);
+        const beadPositions = [];
+
+        for (let b = 0; b < beadCount; b++) {
+          const hash = Math.sin(b * 12.9898 + stageIdx * 31.7) * 43758.5453;
+          const rand = hash - Math.floor(hash);
+
+          const phi = Math.acos(1 - 2 * (b + 0.5) / beadCount) + (rand - 0.5) * 0.08;
+          const theta = Math.PI * (1 + Math.sqrt(5)) * b + (rand - 0.5) * 0.10;
+          const surfDist = agRadius + rGreen * 1.35 + (b % 3 === 0 ? rGreen * 0.45 : 0);
+
+          const bPos = new THREE.Vector3(
+            Math.sin(phi) * Math.cos(theta) * surfDist,
+            Math.cos(phi) * surfDist,
+            Math.sin(phi) * Math.sin(theta) * surfDist
+          );
+          beadPositions.push(bPos);
+
+          const isGold = (b % 3 === 1);
+          const bead = new THREE.Mesh(isGold ? geoGold : geoGreen, isGold ? matRosemaryGold : matRosemaryGreen);
+          bead.position.copy(bPos);
+          registerInteractive(bead, 'rosemary_corona', 'Corona fitoquímica de romero (–COOH y –OH)', stageIdx);
+          coronaGroup.add(bead);
+
+          // Enlace radial corto hacia la esfera de plata
+          const anchor = bPos.clone().normalize().multiplyScalar(agRadius - 0.005);
+          const rLen = bPos.distanceTo(anchor);
+          const rBond = new THREE.Mesh(
+            new THREE.CylinderGeometry(agRadius * 0.026, agRadius * 0.026, rLen, 5),
+            matShortBond
+          );
+          rBond.position.copy(bPos.clone().add(anchor).multiplyScalar(0.5));
+          rBond.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), bPos.clone().sub(anchor).normalize());
+          coronaGroup.add(rBond);
+        }
+
+        // Enlaces cortos laterales en modelos de detalle medio/alto
+        if (detailLevel !== 'low') {
+          const maxBondDist = agRadius * 0.52;
+          for (let i = 0; i < beadPositions.length; i++) {
+            for (let j = i + 1; j < beadPositions.length; j++) {
+              const d = beadPositions[i].distanceTo(beadPositions[j]);
+              if (d < maxBondDist) {
+                const lBond = new THREE.Mesh(
+                  new THREE.CylinderGeometry(agRadius * 0.02, agRadius * 0.02, d, 5),
+                  matShortBond
+                );
+                lBond.position.copy(beadPositions[i].clone().add(beadPositions[j]).multiplyScalar(0.5));
+                lBond.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), beadPositions[j].clone().sub(beadPositions[i]).normalize());
+                coronaGroup.add(lBond);
+              }
+            }
+          }
+        }
+        unit.add(coronaGroup);
+
+        // 3. Ligandos moleculares discretos de Ácido Fólico (esferas/anillos orgánicos finos, cero cubos)
+        const folateGroup = new THREE.Group();
+        const folCount = detailLevel === 'low' ? 6 : 10;
+        const stalkLen = agRadius * 0.36;
+        const stalkGeo = new THREE.CylinderGeometry(agRadius * 0.028, agRadius * 0.028, stalkLen, 6);
+        const ringGeo = new THREE.TorusGeometry(agRadius * 0.095, agRadius * 0.032, 8, 16);
+        const nodeGeo = new THREE.SphereGeometry(agRadius * 0.06, 10, 8);
+
+        for (let f = 0; f < folCount; f++) {
+          const phi = Math.acos(1 - 2 * (f + 0.5) / folCount);
+          const theta = Math.PI * (1 + Math.sqrt(5)) * (f + 3);
+          const dir = new THREE.Vector3(Math.sin(phi) * Math.cos(theta), Math.cos(phi), Math.sin(phi) * Math.sin(theta));
+
+          const chain = new THREE.Group();
+          const stalk = new THREE.Mesh(stalkGeo, matShortBond);
+          stalk.position.y = stalkLen * 0.5;
+          const midNode = new THREE.Mesh(nodeGeo, matRosemaryGreen);
+          midNode.position.y = stalkLen;
+          const headRing = new THREE.Mesh(ringGeo, matFolateLigand);
+          headRing.position.y = stalkLen + agRadius * 0.11;
+          registerInteractive(headRing, 'folate_np', 'Ligando molecular de Ácido Fólico (Diana: FR-α)', stageIdx);
+
+          chain.add(stalk, midNode, headRing);
+          chain.position.copy(dir.clone().multiplyScalar(agRadius + rGreen * 1.4));
+          chain.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+          folateGroup.add(chain);
+        }
+        folateGroup.visible = !!withFolate;
+        unit.add(folateGroup);
+
+        unit.userData = { coreMesh, coronaGroup, folateGroup };
+        return unit;
+      }
+
+      /**
+       * CONSTRUCTOR REUTILIZABLE EDITORIAL:
+       * Esfera Hidratada de Nanogel + Red Polimérica Interna + Nodos de Entrecruzamiento + Espacios Porosos
+       */
+      function createEditorialPorousNanogel(R, agCoords, stageIdx, detail = 'high') {
+        const container = new THREE.Group();
+
+        const innerVol = new THREE.Mesh(
+          new THREE.SphereGeometry(R * 0.96, 40, 30),
+          new THREE.MeshPhysicalMaterial({
+            color: 0x3898a6,
+            roughness: 0.25,
+            transparent: true,
+            opacity: 0.10,
+            depthWrite: false
+          })
+        );
+        container.add(innerVol);
+
+        const gelMatCfg = {
+          color: 0x5ec2cc,
+          roughness: 0.18,
+          metalness: 0.02,
+          clearcoat: 0.55,
+          clearcoatRoughness: 0.22,
+          transparent: true,
+          opacity: 0.22,
+          depthWrite: false
+        };
+
+        const sphereFull = new THREE.Mesh(new THREE.SphereGeometry(R, 56, 42), new THREE.MeshPhysicalMaterial(gelMatCfg));
+        const sphereCut = new THREE.Mesh(
+          new THREE.SphereGeometry(R, 56, 42, Math.PI * 1.02, Math.PI * 1.44, 0, Math.PI),
+          new THREE.MeshPhysicalMaterial(Object.assign({}, gelMatCfg, { side: THREE.DoubleSide }))
+        );
+        registerInteractive(sphereFull, 'nanocellulose', 'Nanogel hidratado (80–100 nm)', stageIdx);
+        registerInteractive(sphereCut, 'nanocellulose', 'Nanogel hidratado (Corte de porosidad interna)', stageIdx);
+        container.add(sphereFull, sphereCut);
+
+        // Nodos ordenados de entrecruzamiento
+        const nodes = [];
+        const shells = detail === 'high'
+          ? [{ count: 14, rad: R * 0.48 }, { count: 26, rad: R * 0.85 }]
+          : [{ count: 8, rad: R * 0.50 }, { count: 16, rad: R * 0.85 }];
+
+        shells.forEach((cfg, sIdx) => {
+          for (let i = 0; i < cfg.count; i++) {
+            const phi = Math.acos(1 - 2 * (i + 0.5) / cfg.count);
+            const theta = Math.PI * (1 + Math.sqrt(5)) * (i + sIdx * 7);
+            const pos = new THREE.Vector3(
+              Math.sin(phi) * Math.cos(theta) * cfg.rad,
+              Math.cos(phi) * cfg.rad,
+              Math.sin(phi) * Math.sin(theta) * cfg.rad
+            );
+            agCoords.forEach((agP) => {
+              const diff = pos.clone().sub(agP);
+              const clearance = R * 0.24;
+              if (diff.length() < clearance) {
+                pos.copy(agP).add(diff.normalize().multiplyScalar(clearance * 1.08));
+              }
+            });
+            nodes.push(pos);
+          }
+        });
+
+        const nodeGeo = new THREE.SphereGeometry(R * 0.024, 12, 10);
+        const nodeMat = new THREE.MeshStandardMaterial({ color: 0x4fb3bf, roughness: 0.35, metalness: 0.08 });
+        nodes.forEach((np) => {
+          const nm = new THREE.Mesh(nodeGeo, nodeMat);
+          nm.position.copy(np);
+          registerInteractive(nm, 'nanocellulose', 'Punto de entrecruzamiento polimérico', stageIdx);
+          container.add(nm);
+        });
+
+        // Filamentos curvos formando cavidades porosas
+        const filMat = new THREE.MeshStandardMaterial({
+          color: 0xa5e8ef,
+          roughness: 0.32,
+          metalness: 0.05,
+          transparent: true,
+          opacity: 0.68
+        });
+
+        const pairSet = new Set();
+        const connCount = new Array(nodes.length).fill(0);
+        for (let i = 0; i < nodes.length; i++) {
+          const dists = [];
+          for (let j = 0; j < nodes.length; j++) {
+            if (i === j) continue;
+            const d = nodes[i].distanceTo(nodes[j]);
+            if (d > R * 0.25 && d < R * 0.66) dists.push({ j, d });
+          }
+          dists.sort((a, b) => a.d - b.d);
+
+          for (let k = 0; k < dists.length && connCount[i] < 4; k++) {
+            const j = dists[k].j;
+            if (connCount[j] >= 4) continue;
+            const key = i < j ? `${i}-${j}` : `${j}-${i}`;
+            if (pairSet.has(key)) continue;
+
+            const mid = new THREE.Vector3().addVectors(nodes[i], nodes[j]).multiplyScalar(0.5);
+            let hitsAg = false;
+            for (let m = 0; m < agCoords.length; m++) {
+              if (mid.distanceTo(agCoords[m]) < R * 0.17) { hitsAg = true; break; }
+            }
+            if (hitsAg) continue;
+
+            pairSet.add(key);
+            connCount[i]++;
+            connCount[j]++;
+
+            const ctrl = mid.clone().add(mid.clone().normalize().multiplyScalar(R * 0.035));
+            const curve = new THREE.QuadraticBezierCurve3(nodes[i], ctrl, nodes[j]);
+            const fMesh = new THREE.Mesh(new THREE.TubeGeometry(curve, 10, R * 0.009, 6, false), filMat);
+            registerInteractive(fMesh, 'nanocellulose', 'Matriz polimérica (Filamento de nanocelulosa)', stageIdx);
+            container.add(fMesh);
+          }
+        }
+
+        container.userData = { sphereFull, sphereCut };
+        return container;
+      }
+
+      /**
+       * ========================================================================
+       * INICIALIZACIÓN DE ESCENA Y LAS 7 FASES EDITORIALES EN MOVIMIENTO
+       * ========================================================================
        */
       function initScene() {
         const container = document.getElementById('canvas-container');
@@ -799,8 +1082,7 @@
         scene = new THREE.Scene();
 
         const isMobile = window.innerWidth < 768;
-        // Perspectiva teleobjetivo científica limpia (objeto principal ocupa ~65% del área libre del visor)
-        camera = new THREE.PerspectiveCamera(isMobile ? 46 : 38, container.clientWidth / container.clientHeight, 0.1, 120);
+        camera = new THREE.PerspectiveCamera(isMobile ? 46 : 38, container.clientWidth / container.clientHeight, 0.1, 140);
 
         renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
         renderer.setSize(container.clientWidth, container.clientHeight);
@@ -813,16 +1095,12 @@
         container.appendChild(renderer.domElement);
 
         const studioEnv = createStudioEnvironment(renderer);
-        if (studioEnv) {
-          scene.environment = studioEnv;
-        }
+        if (studioEnv) scene.environment = studioEnv;
 
-        // Esquema de Iluminación Científica de Estudio (3 puntos suaves sin contrastes extremos ni bloom)
-        const hemiLight = new THREE.HemisphereLight(0xe2e8f0, 0x131e2e, 0.72);
-        scene.add(hemiLight);
+        // Iluminación Científica Editorial de Estudio (Sin bloom exagerado)
+        scene.add(new THREE.HemisphereLight(0xe2e8f0, 0x111b2b, 0.75));
 
-        // 1. Luz principal superior izquierda
-        const keyLight = new THREE.DirectionalLight(0xfffdf9, 1.28);
+        const keyLight = new THREE.DirectionalLight(0xfffdf9, 1.30);
         keyLight.position.set(-9, 12, 10);
         keyLight.castShadow = true;
         keyLight.shadow.mapSize.width = 1024;
@@ -830,35 +1108,65 @@
         keyLight.shadow.bias = -0.0005;
         scene.add(keyLight);
 
-        // 2. Luz de relleno frontal equilibrada
         const fillLight = new THREE.DirectionalLight(0xdbeafe, 0.58);
-        fillLight.position.set(3, 2, 13);
+        fillLight.position.set(4, 2, 13);
         scene.add(fillLight);
 
-        // 3. Luz secundaria de contorno
         const rimLight = new THREE.DirectionalLight(0xa5f3fc, 0.68);
         rimLight.position.set(10, -5, -11);
         scene.add(rimLight);
 
-        // Construir sistema molecular unificado
-        nanogelAssembly = new THREE.Group();
-        scene.add(nanogelAssembly);
+        // Materiales base editoriales compartidos
+        matSilverSatin = new THREE.MeshStandardMaterial({
+          color: 0xe2e8f0,
+          roughness: 0.27,
+          metalness: 0.78,
+          envMapIntensity: 1.35
+        });
+        matRosemaryGreen = new THREE.MeshStandardMaterial({
+          color: 0x489878,
+          roughness: 0.64,
+          metalness: 0.04
+        });
+        matRosemaryGold = new THREE.MeshStandardMaterial({
+          color: 0xcfa358,
+          roughness: 0.58,
+          metalness: 0.06
+        });
+        matShortBond = new THREE.MeshStandardMaterial({
+          color: 0x7c9c8e,
+          roughness: 0.68,
+          metalness: 0.02
+        });
+        matFolateLigand = new THREE.MeshStandardMaterial({
+          color: 0xeab308,
+          roughness: 0.45,
+          metalness: 0.10
+        });
 
-        buildHydratedNanogelAndMatrix();
-        buildSilverNanoparticlesWithCorona();
-        buildTumorCellContext();
+        for (let i = 0; i < 7; i++) {
+          const g = new THREE.Group();
+          g.visible = (i === 0);
+          scene.add(g);
+          stageGroups.push(g);
+        }
 
-        STAGES_DATA[2].focus.copy(focalAgNPPos);
+        buildStage1Nanogel(stageGroups[0]);
+        buildStage2Injection(stageGroups[1]);
+        buildStage3Ligands(stageGroups[2]);
+        buildStage4Endocytosis(stageGroups[3]);
+        buildStage5Endosome(stageGroups[4]);
+        buildStage6Mitochondria(stageGroups[5]);
+        buildStage7Apoptosis(stageGroups[6]);
 
         setupInteractions(container);
         initQRModal();
         syncStageUI(0, true);
 
-        // Soporte opcional de parámetros de URL (?stage=0..3&progress=0..100&paused=1)
         const params = new URLSearchParams(window.location.search);
         if (params.has('stage')) {
-          const stParam = THREE.MathUtils.clamp(parseInt(params.get('stage'), 10) || 0, 0, 3);
-          state.progress = params.has('progress') ? parseFloat(params.get('progress')) : (stParam * 25 + 12);
+          const stParam = THREE.MathUtils.clamp(parseInt(params.get('stage'), 10) || 0, 0, 6);
+          state.progress = params.has('progress') ? parseFloat(params.get('progress')) : (stParam * (100 / 7) + 6);
           document.getElementById('slider-progress').value = state.progress;
           syncStageUI(stParam, true);
         }
@@ -868,371 +1176,663 @@
         }
       }
 
-      /**
-       * 1. NANOGEL: Esfera hidratada semitransparente + Red polimérica porosa + Nodos de entrecruzamiento
-       */
-      function buildHydratedNanogelAndMatrix() {
-        const R = 3.55;
-
-        // Núcleo acuoso interior sutil para dar sensación de profundidad hidratada
-        innerCoreVolume = new THREE.Mesh(
-          new THREE.SphereGeometry(R * 0.96, 48, 36),
-          new THREE.MeshPhysicalMaterial({
-            color: 0x3898a6,
-            roughness: 0.25,
-            metalness: 0.0,
-            transparent: true,
-            opacity: 0.10,
-            depthWrite: false
-          })
-        );
-        nanogelAssembly.add(innerCoreVolume);
-
-        // Superficie esférica suave completa (cuando Corte está desactivado)
-        const gelMatBase = {
-          color: 0x5ec2cc,
-          roughness: 0.18,
-          metalness: 0.02,
-          clearcoat: 0.55,
-          clearcoatRoughness: 0.22,
-          transparent: true,
-          opacity: 0.22,
-          depthWrite: false
-        };
-
-        outerSphereFull = new THREE.Mesh(
-          new THREE.SphereGeometry(R, 64, 48),
-          new THREE.MeshPhysicalMaterial(gelMatBase)
-        );
-        registerInteractive(outerSphereFull, 'nanogel', 'Nanogel (Esfera polimérica hidratada)');
-        nanogelAssembly.add(outerSphereFull);
-
-        // Superficie con corte hemisférico limpio orientado hacia la cámara (+X, +Z) para observar los poros internos
-        outerSphereCut = new THREE.Mesh(
-          new THREE.SphereGeometry(R, 64, 48, Math.PI * 1.02, Math.PI * 1.44, 0, Math.PI),
-          new THREE.MeshPhysicalMaterial(Object.assign({}, gelMatBase, { side: THREE.DoubleSide }))
-        );
-        registerInteractive(outerSphereCut, 'nanogel', 'Nanogel (Vista con corte de inspección)');
-        nanogelAssembly.add(outerSphereCut);
-
-        // Coordenadas de los poros principales donde residirán las AgNPs (para que la red rodee los poros con orden)
+      /* ----------------------------------------------------------------------
+       * FASE 1: INMOVILIZACIÓN EN EL NANOGEL POROSO DE NANOCELULOSA
+       * ---------------------------------------------------------------------- */
+      function buildStage1Nanogel(root) {
         const agPositions = [
-          focalAgNPPos.clone(),                      // AgNP focal para el acercamiento en Etapa 3
-          new THREE.Vector3(-1.45, 1.15, 0.65),
-          new THREE.Vector3(1.55, -1.05, -0.75),
-          new THREE.Vector3(-0.85, -1.45, 1.20),
-          new THREE.Vector3(-1.30, 0.15, -1.65),
-          new THREE.Vector3(0.45, 1.75, -1.05),
-          new THREE.Vector3(1.85, 0.65, -0.95),
-          new THREE.Vector3(-0.20, -0.65, -1.85)
-        ];
-        nanogelAssembly.userData.agPositions = agPositions;
-
-        // Generar nodos ordenados de entrecruzamiento en dos capas concéntricas (evitando los centros de los poros AgNP)
-        const nodes = [];
-        const shellConfigs = [
-          { count: 16, rad: 1.75 },
-          { count: 28, rad: 3.05 }
+          new THREE.Vector3(0.0, 0.0, 0.0),
+          new THREE.Vector3(1.15, 0.75, 1.05),
+          new THREE.Vector3(-1.45, 1.05, 0.65),
+          new THREE.Vector3(1.50, -1.05, -0.75),
+          new THREE.Vector3(-0.95, -1.35, 1.15),
+          new THREE.Vector3(-1.25, 0.15, -1.55),
+          new THREE.Vector3(0.45, 1.65, -1.05),
+          new THREE.Vector3(1.75, 0.55, -0.95)
         ];
 
-        shellConfigs.forEach((cfg, sIdx) => {
-          for (let i = 0; i < cfg.count; i++) {
-            const phi = Math.acos(1 - 2 * (i + 0.5) / cfg.count);
-            const theta = Math.PI * (1 + Math.sqrt(5)) * (i + sIdx * 7);
-            const pos = new THREE.Vector3(
-              Math.sin(phi) * Math.cos(theta) * cfg.rad,
-              Math.cos(phi) * cfg.rad,
-              Math.sin(phi) * Math.sin(theta) * cfg.rad
-            );
+        const gel = createEditorialPorousNanogel(3.55, agPositions, 0, 'high');
+        root.add(gel);
+        s1.nanogelGroup = gel;
+        s1.sphereFull = gel.userData.sphereFull;
+        s1.sphereCut = gel.userData.sphereCut;
 
-            // Desplazar suavemente si cae demasiado cerca de una cavidad porosa de AgNP
-            agPositions.forEach((agP) => {
-              const diff = pos.clone().sub(agP);
-              if (diff.length() < 0.85) {
-                pos.copy(agP).add(diff.normalize().multiplyScalar(0.92));
-              }
-            });
-            nodes.push(pos);
-          }
+        agPositions.forEach((pos, idx) => {
+          const u = createEditorialAgNP(idx === 0 ? 0.48 : 0.38, idx < 2 ? 'high' : 'med', false, 0);
+          u.position.copy(pos);
+          gel.add(u);
+          s1.agUnits.push({ unit: u, basePos: pos.clone(), phase: idx });
         });
-
-        // Material para Puntos de Entrecruzamiento
-        const nodeGeo = new THREE.SphereGeometry(0.085, 16, 14);
-        const nodeMat = new THREE.MeshStandardMaterial({
-          color: 0x4fb3bf,
-          roughness: 0.35,
-          metalness: 0.08,
-          transparent: true,
-          opacity: 0.92
-        });
-
-        nodes.forEach((nPos) => {
-          const nMesh = new THREE.Mesh(nodeGeo, nodeMat);
-          nMesh.position.copy(nPos);
-          registerInteractive(nMesh, 'crosslinks', 'Punto de entrecruzamiento polimérico');
-          nanogelAssembly.add(nMesh);
-          crosslinkMeshes.push(nMesh);
-        });
-
-        // Conectar vecinos cercanos (grado controlado 3-4) mediante filamentos curvos suaves -> Red porosa limpia
-        const filamentMat = new THREE.MeshStandardMaterial({
-          color: 0xa5e8ef,
-          roughness: 0.32,
-          metalness: 0.05,
-          transparent: true,
-          opacity: 0.68
-        });
-
-        const pairSet = new Set();
-        const connectionCount = new Array(nodes.length).fill(0);
-
-        for (let i = 0; i < nodes.length; i++) {
-          const dists = [];
-          for (let j = 0; j < nodes.length; j++) {
-            if (i === j) continue;
-            const d = nodes[i].distanceTo(nodes[j]);
-            if (d > 0.95 && d < 2.25) {
-              dists.push({ j, d });
-            }
-          }
-          dists.sort((a, b) => a.d - b.d);
-
-          for (let k = 0; k < dists.length && connectionCount[i] < 4; k++) {
-            const j = dists[k].j;
-            if (connectionCount[j] >= 4) continue;
-            const key = i < j ? `${i}-${j}` : `${j}-${i}`;
-            if (pairSet.has(key)) continue;
-
-            // Evitar que un filamento atraviese directamente una AgNP
-            const mid = new THREE.Vector3().addVectors(nodes[i], nodes[j]).multiplyScalar(0.5);
-            let blockedByPore = false;
-            for (let m = 0; m < agPositions.length; m++) {
-              if (mid.distanceTo(agPositions[m]) < 0.62) {
-                blockedByPore = true;
-                break;
-              }
-            }
-            if (blockedByPore) continue;
-
-            pairSet.add(key);
-            connectionCount[i]++;
-            connectionCount[j]++;
-
-            // Curvatura orgánica leve hacia el exterior del poro
-            const normalOffset = mid.clone().normalize().multiplyScalar(0.12);
-            const ctrlMid = mid.clone().add(normalOffset);
-            const curve = new THREE.QuadraticBezierCurve3(nodes[i], ctrlMid, nodes[j]);
-            const tubeGeo = new THREE.TubeGeometry(curve, 14, 0.032, 8, false);
-            const fMesh = new THREE.Mesh(tubeGeo, filamentMat);
-            registerInteractive(fMesh, 'polymer_matrix', 'Matriz polimérica (Filamento de nanocelulosa)');
-            nanogelAssembly.add(fMesh);
-            filamentMeshes.push(fMesh);
-          }
-        }
       }
 
-      /**
-       * 2 & 3. NANOPARTÍCULAS DE PLATA (Esferas satinadas) + CORONA FITOQUÍMICA DE ROMERO
-       * (Pequeños elementos verdes y dorados mates/semimates con enlaces cortos, sin cubos ni órbitas)
-       */
-      function buildSilverNanoparticlesWithCorona() {
-        const agPositions = nanogelAssembly.userData.agPositions;
-        const agRadius = 0.42;
-
-        // Material de plata metálica satinada de estudio
-        const silverMat = new THREE.MeshStandardMaterial({
-          color: 0xe2e8f0,
-          roughness: 0.28,
-          metalness: 0.76,
-          envMapIntensity: 1.35
-        });
-
-        // Materiales mates/semimates naturales para la corona fitoquímica de romero
-        const rosemaryGreenMat = new THREE.MeshStandardMaterial({
-          color: 0x489878,
-          roughness: 0.64,
-          metalness: 0.04,
-          transparent: true,
-          opacity: 0.95
-        });
-
-        const rosemaryGoldMat = new THREE.MeshStandardMaterial({
-          color: 0xcfa358,
-          roughness: 0.60,
-          metalness: 0.06,
-          transparent: true,
-          opacity: 0.95
-        });
-
-        const shortBondMat = new THREE.MeshStandardMaterial({
-          color: 0x7c9c8e,
-          roughness: 0.68,
-          metalness: 0.02,
+      /* ----------------------------------------------------------------------
+       * FASE 2: INYECCIÓN PSEUDOPLÁSTICA Y GATILLO DE pH WARBURG
+       * ---------------------------------------------------------------------- */
+      function buildStage2Injection(root) {
+        // Tejido sano ordenado a la izquierda (pH 7.4, tonos azul pizarra editorial)
+        const healthyGeo = new THREE.SphereGeometry(0.68, 24, 20);
+        const healthyMat = new THREE.MeshPhysicalMaterial({
+          color: 0x3b7a9e,
+          roughness: 0.48,
+          clearcoat: 0.15,
           transparent: true,
           opacity: 0.85
         });
-
-        const agGeo = new THREE.SphereGeometry(agRadius, 48, 36);
-        const beadGeoGreen = new THREE.SphereGeometry(0.052, 14, 12);
-        const beadGeoGold = new THREE.SphereGeometry(0.044, 14, 12);
-
-        agPositions.forEach((pos, idx) => {
-          const unitGroup = new THREE.Group();
-          unitGroup.position.copy(pos);
-
-          // Esfera metálica de plata bien definida
-          const coreMesh = new THREE.Mesh(agGeo, silverMat.clone());
-          coreMesh.castShadow = true;
-          coreMesh.receiveShadow = true;
-          registerInteractive(coreMesh, 'agnp', 'AgNP (Nanopartícula esférica de plata)');
-          unitGroup.add(coreMesh);
-
-          // Capa molecular superficial: distribución Fibonacci con ligera variación orgánica (sin cubos ni órbitas)
-          const coronaGroup = new THREE.Group();
-          const beadCount = idx === 0 ? 46 : 30; // Mayor detalle en la AgNP focal para el macro de Etapa 3
-          const beadPositions = [];
-          const coronaBeads = [];
-          const coronaBonds = [];
-
-          for (let b = 0; b < beadCount; b++) {
-            // Semilla determinista suave para aspecto natural pero organizado
-            const hash = Math.sin(b * 12.9898 + idx * 78.233) * 43758.5453;
-            const rand = hash - Math.floor(hash);
-
-            const phi = Math.acos(1 - 2 * (b + 0.5) / beadCount) + (rand - 0.5) * 0.09;
-            const theta = Math.PI * (1 + Math.sqrt(5)) * b + (rand - 0.5) * 0.12;
-            const surfDist = agRadius + 0.068 + (b % 3 === 0 ? 0.026 : 0);
-
-            const bPos = new THREE.Vector3(
-              Math.sin(phi) * Math.cos(theta) * surfDist,
-              Math.cos(phi) * surfDist,
-              Math.sin(phi) * Math.sin(theta) * surfDist
-            );
-            beadPositions.push(bPos);
-
-            const isGold = (b % 3 === 1);
-            const bead = new THREE.Mesh(
-              isGold ? beadGeoGold : beadGeoGreen,
-              isGold ? rosemaryGoldMat : rosemaryGreenMat
-            );
-            bead.position.copy(bPos);
-            registerInteractive(bead, 'rosemary_corona', 'Corona fitoquímica de romero');
-            coronaGroup.add(bead);
-            coronaBeads.push(bead);
-
-            // Enlace radial corto y sutil hacia la superficie de la AgNP
-            const surfaceAnchor = bPos.clone().normalize().multiplyScalar(agRadius - 0.01);
-            const rLen = bPos.distanceTo(surfaceAnchor);
-            const rBond = new THREE.Mesh(
-              new THREE.CylinderGeometry(0.012, 0.012, rLen, 6),
-              shortBondMat
-            );
-            rBond.position.copy(bPos.clone().add(surfaceAnchor).multiplyScalar(0.5));
-            rBond.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), bPos.clone().sub(surfaceAnchor).normalize());
-            coronaGroup.add(rBond);
-            coronaBonds.push(rBond);
-          }
-
-          // Enlaces cortos laterales entre elementos vecinos de la corona para dar cohesión de recubrimiento molecular
-          for (let i = 0; i < beadPositions.length; i++) {
-            for (let j = i + 1; j < beadPositions.length; j++) {
-              const d = beadPositions[i].distanceTo(beadPositions[j]);
-              if (d < 0.21) {
-                const lBond = new THREE.Mesh(
-                  new THREE.CylinderGeometry(0.01, 0.01, d, 5),
-                  shortBondMat
-                );
-                lBond.position.copy(beadPositions[i].clone().add(beadPositions[j]).multiplyScalar(0.5));
-                lBond.quaternion.setFromUnitVectors(
-                  new THREE.Vector3(0, 1, 0),
-                  beadPositions[j].clone().sub(beadPositions[i]).normalize()
-                );
-                coronaGroup.add(lBond);
-                coronaBonds.push(lBond);
-              }
+        for (let ix = 0; ix < 3; ix++) {
+          for (let iy = 0; iy < 4; iy++) {
+            for (let iz = 0; iz < 2; iz++) {
+              const cell = new THREE.Mesh(healthyGeo, healthyMat);
+              cell.scale.set(1.0, 0.88, 0.92);
+              cell.position.set(-7.4 + ix * 1.45, -2.3 + iy * 1.48, -0.9 + iz * 1.45);
+              registerInteractive(cell, 'healthy_tissue', 'Tejido sano (pH 7.4 · Nanogel inactivo)', 1);
+              root.add(cell);
             }
           }
+        }
 
-          unitGroup.add(coronaGroup);
-          nanogelAssembly.add(unitGroup);
-
-          agnpUnits.push({
-            group: unitGroup,
-            coreMesh,
-            coronaGroup,
-            basePos: pos.clone(),
-            isFocal: idx === 0
-          });
+        // Masa tumoral orgánica a la derecha (Efecto Warburg pH 6.2–6.8)
+        const tumorBaseGeo = new THREE.SphereGeometry(0.86, 28, 22);
+        const tumorMat = new THREE.MeshPhysicalMaterial({
+          color: 0xa44c58,
+          roughness: 0.50,
+          clearcoat: 0.18,
+          transparent: true,
+          opacity: 0.86
         });
+
+        for (let i = 0; i < 28; i++) {
+          const angle = i * 2.399;
+          const rad = 1.85 + (i % 5) * 0.78;
+          const tx = 2.6 + Math.cos(angle) * rad * 1.08;
+          const ty = Math.sin(angle) * rad * 0.82;
+          const tz = Math.sin(i * 1.7) * 2.1;
+          if (Math.hypot(tx - 2.4, ty, tz) < 2.25 && tz > -0.6) continue;
+
+          const tCell = new THREE.Mesh(tumorBaseGeo, tumorMat);
+          tCell.position.set(tx, ty, tz);
+          tCell.scale.set(1 + (i % 3) * 0.14, 0.88 + (i % 2) * 0.18, 0.95);
+          registerInteractive(tCell, 'warburg_tumor', 'Célula tumoral · Efecto Warburg (pH 6.2–6.8)', 1);
+          root.add(tCell);
+        }
+
+        // Jeringa y cánula metálica satinada de estudio
+        const syringeGroup = new THREE.Group();
+        syringeGroup.position.set(2.4, 0.2, 0.2);
+        syringeGroup.rotation.z = -0.50;
+        root.add(syringeGroup);
+
+        const barrel = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.62, 0.62, 4.0, 28),
+          new THREE.MeshPhysicalMaterial({ color: 0xdbeafe, roughness: 0.12, transparent: true, opacity: 0.34, depthWrite: false })
+        );
+        barrel.position.y = 5.5;
+        registerInteractive(barrel, 'syringe_gel', 'Jeringa de administración localizada', 1);
+
+        s2.plunger = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.52, 0.52, 3.6, 24),
+          new THREE.MeshStandardMaterial({ color: 0x4fb3bf, roughness: 0.35, metalness: 0.3 })
+        );
+        s2.plunger.position.y = 6.6;
+
+        const needle = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.13, 0.10, 3.8, 24),
+          matSilverSatin
+        );
+        needle.position.y = 1.85;
+        registerInteractive(needle, 'syringe_gel', 'Cánula metálica · Flujo pseudoplástico', 1);
+        syringeGroup.add(barrel, s2.plunger, needle);
+
+        const dropGeo = new THREE.SphereGeometry(0.095, 12, 10);
+        const dropMat = new THREE.MeshPhysicalMaterial({ color: 0x5ec2cc, roughness: 0.2, transparent: true, opacity: 0.78 });
+        for (let i = 0; i < 10; i++) {
+          const drop = new THREE.Mesh(dropGeo, dropMat);
+          drop.scale.set(0.75, 2.1, 0.75);
+          syringeGroup.add(drop);
+          s2.streamDrops.push({ mesh: drop, offset: i / 10 });
+        }
+
+        // Depósito 3D del Nanogel re-gelificado in situ dentro del tumor
+        const depotAgCoords = [new THREE.Vector3(0.4, 0.3, 0.3), new THREE.Vector3(-0.4, -0.3, 0.2), new THREE.Vector3(0.2, -0.4, -0.4)];
+        s2.depotGel = createEditorialPorousNanogel(1.65, depotAgCoords, 1, 'low');
+        s2.depotGel.position.set(2.4, 0.0, 0.2);
+        root.add(s2.depotGel);
+
+        // AgNPs recubiertas liberándose gradualmente en Fase 1 hacia el entorno ácido
+        for (let i = 0; i < 12; i++) {
+          const u = createEditorialAgNP(0.20, 'low', false, 1);
+          const ang = (i / 12) * Math.PI * 2;
+          const target = new THREE.Vector3(
+            2.4 + Math.cos(ang) * (2.3 + (i % 3) * 0.55),
+            Math.sin(ang) * (1.9 + (i % 2) * 0.5),
+            Math.sin(i * 2.1) * 1.3
+          );
+          root.add(u);
+          s2.releasedUnits.push({ unit: u, start: new THREE.Vector3(2.4, 0, 0.2), target, delay: (i / 12) * 0.45 });
+        }
+
+        // Protones H+ discretos del microambiente ácido Warburg
+        const pGeo = new THREE.SphereGeometry(0.055, 10, 8);
+        const pMat = new THREE.MeshStandardMaterial({ color: 0xd9a14a, roughness: 0.5 });
+        for (let i = 0; i < 22; i++) {
+          const pm = new THREE.Mesh(pGeo, pMat);
+          pm.position.set(0.2 + Math.random() * 6.0, (Math.random() - 0.5) * 4.8, (Math.random() - 0.5) * 3.0);
+          root.add(pm);
+          s2.protons.push({ mesh: pm, baseY: pm.position.y, phase: i });
+        }
       }
 
-      /**
-       * 4. CÉLULA TUMORAL: Morfología orgánica editorial sobria para la Etapa 4 (Proximidad conceptual)
-       */
-      function buildTumorCellContext() {
-        tumorCellGroup = new THREE.Group();
-        // Posicionada a la derecha-abajo con separación extracelular limpia respecto al nanogel
-        tumorCellGroup.position.set(6.9, -1.25, -0.35);
-        tumorCellGroup.visible = false;
-        scene.add(tumorCellGroup);
-
-        const cellGeo = new THREE.SphereGeometry(4.0, 72, 56);
-        const posAttr = cellGeo.attributes.position;
-        for (let i = 0; i < posAttr.count; i++) {
-          const vx = posAttr.getX(i);
-          const vy = posAttr.getY(i);
-          const vz = posAttr.getZ(i);
-          // Relieve orgánico suave propio de membrana celular tumoral en ilustración biomédica
-          const undulation =
-            Math.sin(vx * 1.15) * Math.cos(vy * 1.15) * 0.18 +
-            Math.sin(vz * 2.1 + vx * 1.4) * 0.07;
-          const dir = new THREE.Vector3(vx, vy, vz).normalize();
-          posAttr.setXYZ(
-            i,
-            vx + dir.x * undulation,
-            vy + dir.y * undulation,
-            vz + dir.z * undulation
-          );
+      /* ----------------------------------------------------------------------
+       * FASE 3: DIFERENCIA ENTRE NO FUNCIONALIZADAS Y FUNCIONALIZADAS (+FOLATO)
+       * ---------------------------------------------------------------------- */
+      function buildStage3Ligands(root) {
+        // Superficie curva de célula tumoral inferior con receptores FR-α
+        const memGeo = new THREE.BoxGeometry(15.0, 0.9, 6.2, 36, 1, 14);
+        const mPos = memGeo.attributes.position;
+        for (let i = 0; i < mPos.count; i++) {
+          const x = mPos.getX(i);
+          mPos.setY(i, mPos.getY(i) + Math.cos(x * 0.35) * 0.20);
         }
-        cellGeo.computeVertexNormals();
+        memGeo.computeVertexNormals();
+        const memMesh = new THREE.Mesh(memGeo, new THREE.MeshPhysicalMaterial({
+          color: 0x8f4956,
+          roughness: 0.52,
+          clearcoat: 0.15,
+          transparent: true,
+          opacity: 0.88
+        }));
+        memMesh.position.y = -3.25;
+        registerInteractive(memMesh, 'warburg_tumor', 'Membrana celular tumoral con receptores FR-α', 2);
+        root.add(memMesh);
 
-        tumorMembraneMesh = new THREE.Mesh(
-          cellGeo,
-          new THREE.MeshPhysicalMaterial({
-            color: 0x9e5260,
-            roughness: 0.52,
-            metalness: 0.03,
-            clearcoat: 0.18,
-            clearcoatRoughness: 0.5,
-            transparent: true,
-            opacity: 0.88
-          })
+        const sepLine = new THREE.Mesh(
+          new THREE.CylinderGeometry(0.018, 0.018, 7.8, 8),
+          new THREE.MeshBasicMaterial({ color: 0x94a3b8, transparent: true, opacity: 0.22 })
         );
-        tumorMembraneMesh.receiveShadow = true;
-        registerInteractive(tumorMembraneMesh, 'tumor_cell', 'Célula tumoral (Proximidad terapéutica propuesta)');
-        tumorCellGroup.add(tumorMembraneMesh);
+        sepLine.position.set(0, 0.4, 0);
+        root.add(sepLine);
 
-        // Silueta interna tenue de núcleo celular para dar escala biológica
-        tumorNucleusMesh = new THREE.Mesh(
-          new THREE.SphereGeometry(2.1, 36, 28),
-          new THREE.MeshStandardMaterial({
-            color: 0x5c2834,
-            roughness: 0.7,
-            transparent: true,
-            opacity: 0.45
-          })
+        // Receptores FR-α modelados con acabado orgánico mate
+        const stemMat = new THREE.MeshStandardMaterial({ color: 0x5ec2cc, roughness: 0.45 });
+        const cupMat = new THREE.MeshStandardMaterial({ color: 0xd9a14a, roughness: 0.42 });
+        for (let i = 0; i < 8; i++) {
+          const rx = -5.2 + i * 1.50;
+          const rg = new THREE.Group();
+          const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.09, 0.62, 10), stemMat);
+          const cup = new THREE.Mesh(new THREE.TorusGeometry(0.22, 0.065, 12, 22, Math.PI * 1.25), cupMat);
+          cup.position.y = 0.44;
+          cup.rotation.z = Math.PI * 0.88;
+          registerInteractive(cup, 'fr_alpha', 'Receptor de Folato (FR-α)', 2);
+          rg.add(stem, cup);
+          rg.position.set(rx, -2.55 + Math.cos(rx * 0.35) * 0.20, i % 2 === 0 ? 0.32 : -0.32);
+          root.add(rg);
+        }
+
+        // Izquierda: AgNP Base (Solo plata satinada + corona discreta de romero)
+        s3.baseUnit = createEditorialAgNP(1.05, 'high', false, 2);
+        s3.baseUnit.position.set(-3.4, 1.9, 0);
+        registerInteractive(s3.baseUnit.userData.coreMesh, 'base_np', 'Versión Base No Funcionalizada (Ag⁰ + Corona Romero)', 2);
+        root.add(s3.baseUnit);
+
+        // Derecha: AgNP Funcionalizada (+Cadenas discretas de Ácido Fólico, sin cubos flotantes)
+        s3.folateUnit = createEditorialAgNP(1.05, 'high', true, 2);
+        s3.folateUnit.position.set(3.4, 1.9, 0);
+        registerInteractive(s3.folateUnit.userData.coreMesh, 'folate_np', 'Variante Selectiva Funcionalizada (+Ácido Fólico)', 2);
+        root.add(s3.folateUnit);
+
+        for (let i = 0; i < 2; i++) {
+          const ring = new THREE.Mesh(
+            new THREE.TorusGeometry(0.48 + i * 0.26, 0.025, 10, 32),
+            new THREE.MeshBasicMaterial({ color: 0xeab308, transparent: true, opacity: 0, side: THREE.DoubleSide })
+          );
+          ring.rotation.x = Math.PI / 2;
+          ring.position.set(3.4, -2.05, 0);
+          root.add(ring);
+          s3.dockingRings.push(ring);
+        }
+      }
+
+      /* ----------------------------------------------------------------------
+       * FASE 4: ENDOCITOSIS ACTIVA MEDIADA POR CLATRINA Y DINAMINA
+       * ---------------------------------------------------------------------- */
+      function buildStage4Endocytosis(root) {
+        const headGeo = new THREE.SphereGeometry(0.125, 12, 10);
+        const tailGeo = new THREE.CylinderGeometry(0.026, 0.026, 0.52, 6);
+        const headMatTop = new THREE.MeshStandardMaterial({ color: 0x5ec2cc, roughness: 0.35 });
+        const headMatBot = new THREE.MeshStandardMaterial({ color: 0x2f7d87, roughness: 0.40 });
+        const tailMat = new THREE.MeshStandardMaterial({ color: 0xcbb382, roughness: 0.65, transparent: true, opacity: 0.55 });
+
+        for (let ix = -13; ix <= 13; ix++) {
+          for (let iz = -4; iz <= 4; iz++) {
+            const x = ix * 0.54;
+            const z = iz * 0.54;
+            const hTop = new THREE.Mesh(headGeo, headMatTop);
+            const hBot = new THREE.Mesh(headGeo, headMatBot);
+            const tail = new THREE.Mesh(tailGeo, tailMat);
+            if (iz === 0 && ix % 3 === 0) registerInteractive(hTop, 'lipid_bilayer', 'Bicapa fosfolipídica (Impide difusión pasiva)', 3);
+            root.add(hTop, hBot, tail);
+            s4.headsTop.push({ mesh: hTop, baseX: x, baseZ: z });
+            s4.headsBot.push({ mesh: hBot, baseX: x, baseZ: z });
+            s4.tails.push({ mesh: tail, baseX: x, baseZ: z });
+          }
+        }
+
+        // Canasta poliédrica de Clatrina (~80–100 nm) con acabado biomolecular limpio
+        s4.clathrinGroup = new THREE.Group();
+        root.add(s4.clathrinGroup);
+        const cageGeo = new THREE.IcosahedronGeometry(1.95, 1);
+        s4.clathrinGroup.add(new THREE.LineSegments(
+          new THREE.EdgesGeometry(cageGeo),
+          new THREE.LineBasicMaterial({ color: 0x5ec2cc, transparent: true, opacity: 0.78 })
+        ));
+
+        const posAttr = cageGeo.attributes.position;
+        const nodeGeo = new THREE.SphereGeometry(0.10, 12, 10);
+        const nodeMat = new THREE.MeshStandardMaterial({ color: 0x4fb3bf, roughness: 0.35 });
+        const seen = new Set();
+        for (let i = 0; i < posAttr.count; i++) {
+          const key = `${posAttr.getX(i).toFixed(2)},${posAttr.getY(i).toFixed(2)},${posAttr.getZ(i).toFixed(2)}`;
+          if (seen.has(key)) continue;
+          seen.add(key);
+          const nMesh = new THREE.Mesh(nodeGeo, nodeMat);
+          nMesh.position.set(posAttr.getX(i), posAttr.getY(i), posAttr.getZ(i));
+          registerInteractive(nMesh, 'clathrin', 'Canasta poliédrica de Clatrina (CME)', 3);
+          s4.clathrinGroup.add(nMesh);
+        }
+
+        // Anillo contráctil de Dinamina
+        s4.dynaminRing = new THREE.Mesh(
+          new THREE.TorusGeometry(1.10, 0.12, 16, 36),
+          new THREE.MeshStandardMaterial({ color: 0xd9a14a, roughness: 0.38, transparent: true, opacity: 0 })
         );
-        tumorNucleusMesh.position.set(0.6, -0.3, -0.2);
-        tumorCellGroup.add(tumorNucleusMesh);
+        s4.dynaminRing.rotation.x = Math.PI / 2;
+        registerInteractive(s4.dynaminRing, 'clathrin', 'Anillo de Dinamina (Escisión vesicular)', 3);
+        root.add(s4.dynaminRing);
+
+        // AgNP Editorial siendo internalizada
+        s4.cargoUnit = createEditorialAgNP(0.82, 'high', false, 3);
+        root.add(s4.cargoUnit);
+      }
+
+      /* ----------------------------------------------------------------------
+       * FASE 5: ESCAPE ENDOSOMAL "CABALLO DE TROYA" (pH 4.5–5.5)
+       * ---------------------------------------------------------------------- */
+      function buildStage5Endosome(root) {
+        const endoMatBase = {
+          color: 0x4b89ac,
+          roughness: 0.22,
+          clearcoat: 0.45,
+          transparent: true,
+          opacity: 0.24,
+          depthWrite: false
+        };
+        s5.endoFull = new THREE.Mesh(new THREE.SphereGeometry(3.75, 48, 36), new THREE.MeshPhysicalMaterial(endoMatBase));
+        s5.endoCut = new THREE.Mesh(
+          new THREE.SphereGeometry(3.75, 48, 36, Math.PI * 1.02, Math.PI * 1.44, 0, Math.PI),
+          new THREE.MeshPhysicalMaterial(Object.assign({}, endoMatBase, { side: THREE.DoubleSide }))
+        );
+        registerInteractive(s5.endoFull, 'vatpase', 'Endosoma ácido (pH 4.5–5.5)', 4);
+        registerInteractive(s5.endoCut, 'vatpase', 'Membrana endosomal en peroxidación ácida', 4);
+        root.add(s5.endoFull, s5.endoCut);
+
+        // Bombas V-ATPasa transmembrana
+        const pumpGeo = new THREE.CylinderGeometry(0.28, 0.34, 0.88, 16);
+        const pumpMat = new THREE.MeshStandardMaterial({ color: 0x4fb3bf, roughness: 0.38 });
+        for (let i = 0; i < 6; i++) {
+          const a = (i / 6) * Math.PI * 2;
+          const pump = new THREE.Mesh(pumpGeo, pumpMat);
+          pump.position.set(Math.cos(a) * 3.75, Math.sin(a) * 3.75, 0);
+          pump.rotation.z = a + Math.PI / 2;
+          registerInteractive(pump, 'vatpase', 'Bomba de protones V-ATPasa', 4);
+          root.add(pump);
+          s5.pumps.push({ mesh: pump });
+        }
+
+        // Protones H+ ingresando al lumen
+        const pGeo = new THREE.SphereGeometry(0.07, 10, 8);
+        const pMat = new THREE.MeshStandardMaterial({ color: 0xeab308, roughness: 0.4 });
+        for (let i = 0; i < 20; i++) {
+          const a = (i / 20) * Math.PI * 2;
+          const pm = new THREE.Mesh(pGeo, pMat);
+          root.add(pm);
+          s5.protons.push({ mesh: pm, angle: a, speed: 0.75 + (i % 4) * 0.2, offset: i / 20 });
+        }
+
+        // Núcleo esférico satinado Ag0 central + cuentas de corona de romero que se desprenden al protonarse
+        s5.coreMesh = new THREE.Mesh(new THREE.SphereGeometry(1.05, 44, 32), matSilverSatin.clone());
+        registerInteractive(s5.coreMesh, 'ag0_core', 'Núcleo Ag⁰ en disolución oxidativa (4Ag⁰ + O₂ + 4H⁺)', 4);
+        root.add(s5.coreMesh);
+
+        const cGreenGeo = new THREE.SphereGeometry(0.12, 12, 10);
+        const cGoldGeo = new THREE.SphereGeometry(0.10, 12, 10);
+        for (let i = 0; i < 42; i++) {
+          const phi = Math.acos(1 - 2 * (i + 0.5) / 42);
+          const theta = Math.PI * (1 + Math.sqrt(5)) * i;
+          const dir = new THREE.Vector3(Math.sin(phi) * Math.cos(theta), Math.cos(phi), Math.sin(phi) * Math.sin(theta));
+          const isGold = i % 3 === 1;
+          const bead = new THREE.Mesh(
+            isGold ? cGoldGeo : cGreenGeo,
+            (isGold ? matRosemaryGold : matRosemaryGreen).clone()
+          );
+          bead.material.transparent = true;
+          registerInteractive(bead, 'rosemary_corona', 'Corona de romero protonada (–COO⁻ → –COOH)', 4);
+          root.add(bead);
+          s5.coronaBeads.push({ mesh: bead, dir, baseR: 1.22 });
+        }
+
+        // Iones de plata Ag+ esféricos satinados saliendo al citosol
+        const ionGeo = new THREE.SphereGeometry(0.125, 16, 12);
+        for (let i = 0; i < 28; i++) {
+          const ion = new THREE.Mesh(ionGeo, matSilverSatin);
+          registerInteractive(ion, 'ag', 'Ion Plata libre (Ag⁺) liberado al citosol', 4);
+          const phi = Math.acos(1 - 2 * ((i + 0.5) / 28));
+          const theta = Math.PI * (1 + Math.sqrt(5)) * (i + 5);
+          const dir = new THREE.Vector3(Math.sin(phi) * Math.cos(theta), Math.cos(phi), Math.sin(phi) * Math.sin(theta));
+          root.add(ion);
+          s5.agIons.push({ mesh: ion, dir, speed: 0.8 + (i % 5) * 0.12 });
+        }
+
+        // Especies ROS oxidando la pared del endosoma
+        const rosGeo = new THREE.SphereGeometry(0.095, 12, 10);
+        const rosMat = new THREE.MeshStandardMaterial({ color: 0xea580c, emissive: 0x9a3412, emissiveIntensity: 0.45, roughness: 0.35 });
+        for (let i = 0; i < 22; i++) {
+          const rm = new THREE.Mesh(rosGeo, rosMat);
+          registerInteractive(rm, 'ros', 'Peroxidación lipídica endosomal por ROS', 4);
+          const a = (i / 22) * Math.PI * 2;
+          const dir = new THREE.Vector3(Math.cos(a), Math.sin(a * 1.5) * 0.65, Math.sin(a)).normalize();
+          root.add(rm);
+          s5.rosParticles.push({ mesh: rm, dir, phase: i });
+        }
+      }
+
+      /* ----------------------------------------------------------------------
+       * FASE 6: MITOCONDRIA, BLOQUEO DE GSH Y ESTRÉS OXIDATIVO ROS
+       * ---------------------------------------------------------------------- */
+      function buildStage6Mitochondria(root) {
+        const mitoGroup = new THREE.Group();
+        root.add(mitoGroup);
+        s6.mitoGroup = mitoGroup;
+
+        const outerGeo = new THREE.SphereGeometry(1, 60, 44);
+        const pAttr = outerGeo.attributes.position;
+        for (let i = 0; i < pAttr.count; i++) {
+          let x = pAttr.getX(i) * 6.3;
+          let y = pAttr.getY(i) * 2.95 + Math.sin(x * 0.25) * 0.32;
+          let z = pAttr.getZ(i) * 2.95;
+          pAttr.setXYZ(i, x, y, z);
+        }
+        outerGeo.computeVertexNormals();
+
+        s6.outerMem = new THREE.Mesh(outerGeo, new THREE.MeshPhysicalMaterial({
+          color: 0x3b8a94,
+          roughness: 0.25,
+          clearcoat: 0.35,
+          transparent: true,
+          opacity: 0.25,
+          side: THREE.DoubleSide,
+          depthWrite: false
+        }));
+        registerInteractive(s6.outerMem, 'membrane', 'Membrana mitocondrial externa', 5);
+        mitoGroup.add(s6.outerMem);
+
+        const innerGeo = new THREE.SphereGeometry(1, 88, 56);
+        const iPos = innerGeo.attributes.position;
+        for (let i = 0; i < iPos.count; i++) {
+          let rx = iPos.getX(i) * 5.6;
+          let ry = iPos.getY(i) * 2.35;
+          let rz = iPos.getZ(i) * 2.35;
+          const angle = Math.atan2(rz, ry);
+          const cristaeFold = Math.max(0, Math.sin(rx * 2.35) * Math.cos(angle * 3.0)) * 0.90;
+          const radialScale = 1.0 - (cristaeFold * 0.36);
+          ry = ry * radialScale + Math.sin(rx * 0.25) * 0.30;
+          rz *= radialScale;
+          iPos.setXYZ(i, rx, ry, rz);
+        }
+        innerGeo.computeVertexNormals();
+        s6.innerOrigPos = new Float32Array(iPos.array);
+
+        s6.innerCristae = new THREE.Mesh(innerGeo, new THREE.MeshPhysicalMaterial({
+          color: 0x4fb3bf,
+          roughness: 0.32,
+          transparent: true,
+          opacity: 0.44,
+          side: THREE.DoubleSide,
+          depthWrite: false
+        }));
+        registerInteractive(s6.innerCristae, 'membrane', 'Crestas mitocondriales internas', 5);
+        mitoGroup.add(s6.innerCristae);
+
+        // Fosfolípidos de membrana
+        const lipGeo = new THREE.SphereGeometry(0.10, 10, 8);
+        for (let i = 0; i < 96; i++) {
+          const u = Math.random() * Math.PI * 2;
+          const v = Math.acos(2 * Math.random() - 1);
+          let x = Math.sin(v) * Math.cos(u) * 6.18;
+          let y = Math.sin(v) * Math.sin(u) * 2.85 + Math.sin(x * 0.25) * 0.32;
+          let z = Math.cos(v) * 2.85;
+          if (z > 0.7) z = -z;
+          const lm = new THREE.Mesh(lipGeo, new THREE.MeshStandardMaterial({ color: 0x5ec2cc, roughness: 0.38 }));
+          lm.position.set(x, y, z);
+          registerInteractive(lm, 'membrane', 'Fosfolípidos mitocondriales', 5);
+          mitoGroup.add(lm);
+          s6.lipids.push({ mesh: lm, basePos: new THREE.Vector3(x, y, z), phase: i });
+        }
+
+        // Doble hélice circular interna
+        s6.dnaGroup = new THREE.Group();
+        s6.dnaGroup.position.set(-1.15, 0.1, 0);
+        s6.dnaGroup.rotation.set(0.45, 0.2, -0.25);
+        mitoGroup.add(s6.dnaGroup);
+
+        const ptsA = [], ptsB = [];
+        for (let i = 0; i <= 96; i++) {
+          const t = (i / 96) * Math.PI * 2;
+          ptsA.push(new THREE.Vector3((1.28 + Math.cos(t * 10) * 0.18) * Math.cos(t), Math.sin(t * 10) * 0.18, (1.28 + Math.cos(t * 10) * 0.18) * Math.sin(t)));
+          ptsB.push(new THREE.Vector3((1.28 + Math.cos(t * 10 + Math.PI) * 0.18) * Math.cos(t), Math.sin(t * 10 + Math.PI) * 0.18, (1.28 + Math.cos(t * 10 + Math.PI) * 0.18) * Math.sin(t)));
+        }
+        const dnaMat = new THREE.MeshStandardMaterial({ color: 0xd9a14a, roughness: 0.40 });
+        s6.dnaA = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(ptsA, true), 88, 0.042, 7, true), dnaMat);
+        const dnaB = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(ptsB, true), 88, 0.042, 7, true), dnaMat.clone());
+        s6.dnaGroup.add(s6.dnaA, dnaB);
+
+        const rungGeo = new THREE.CylinderGeometry(0.018, 0.018, 0.35, 5);
+        const rungMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.45 });
+        for (let i = 0; i < 26; i++) {
+          const idx = Math.floor((i / 26) * 96);
+          const mid = new THREE.Vector3().addVectors(ptsA[idx], ptsB[idx]).multiplyScalar(0.5);
+          const rung = new THREE.Mesh(rungGeo, rungMat);
+          rung.position.copy(mid);
+          rung.lookAt(ptsB[idx]);
+          rung.rotateX(Math.PI / 2);
+          s6.dnaGroup.add(rung);
+          s6.dnaRungs.push({ mesh: rung, origPos: mid.clone() });
+        }
+
+        // Candados del Escudo GSH con acabado metálico-botánico editorial
+        const lockBodyGeo = new THREE.BoxGeometry(0.62, 0.52, 0.22);
+        const shackleGeo = new THREE.TorusGeometry(0.22, 0.058, 12, 22, Math.PI);
+        [
+          new THREE.Vector3(-4.6, 3.1, 1.2),
+          new THREE.Vector3(0.3, 3.5, 1.4),
+          new THREE.Vector3(4.8, 2.7, 1.0),
+          new THREE.Vector3(-4.0, -3.0, 1.1),
+          new THREE.Vector3(4.3, -2.9, 1.1)
+        ].forEach((lp, idx) => {
+          const lg = new THREE.Group();
+          const bMat = new THREE.MeshStandardMaterial({ color: 0x489878, roughness: 0.36, metalness: 0.35 });
+          const body = new THREE.Mesh(lockBodyGeo, bMat);
+          const shackle = new THREE.Mesh(shackleGeo, bMat.clone());
+          shackle.position.set(0, 0.26, 0);
+          registerInteractive(body, 'gsh', 'Escudo antioxidante GSH (Bloqueo tiol –SH por Ag⁺)', 5);
+          lg.add(body, shackle);
+          lg.position.copy(lp);
+          mitoGroup.add(lg);
+          s6.padlocks.push({ group: lg, bodyMat: bMat, shackle, basePos: lp.clone(), phase: idx });
+        });
+
+        // Moléculas GSH internas
+        const gshGeo = new THREE.SphereGeometry(0.16, 14, 12);
+        for (let i = 0; i < 20; i++) {
+          const bMat = new THREE.MeshStandardMaterial({ color: 0x489878, roughness: 0.42 });
+          const body = new THREE.Mesh(gshGeo, bMat);
+          registerInteractive(body, 'gsh', 'Glutatión reducido (GSH)', 5);
+          const px = (Math.random() - 0.5) * 7.2;
+          const py = (Math.random() - 0.5) * 2.3 + Math.sin(px * 0.25) * 0.30;
+          const pz = (Math.random() - 0.5) * 2.1;
+          body.position.set(px, py, pz);
+          mitoGroup.add(body);
+          s6.gshList.push({ mesh: body, bodyMat: bMat, basePos: new THREE.Vector3(px, py, pz), blocked: false });
+        }
+
+        // Iones de plata satinados Ag+ convergiendo sobre GSH
+        const agIonGeo = new THREE.SphereGeometry(0.14, 16, 12);
+        for (let i = 0; i < 24; i++) {
+          const m = new THREE.Mesh(agIonGeo, matSilverSatin);
+          registerInteractive(m, 'ag', 'Ion Plata (Ag⁺ · Secuestro de grupos tiol)', 5);
+          const ang = (i / 24) * Math.PI * 2;
+          const outerPos = new THREE.Vector3(Math.cos(ang) * 8.6, Math.sin(ang) * 4.8, (Math.random() - 0.5) * 4.0);
+          const targetGSH = i < s6.gshList.length ? s6.gshList[i] : null;
+          mitoGroup.add(m);
+          s6.agList.push({ mesh: m, outerPos, targetGSH, fallback: new THREE.Vector3((Math.random() - 0.5) * 6.0, (Math.random() - 0.5) * 2.0, 0) });
+        }
+
+        // Partículas ROS discretas (esferas cálidas semimate/emisivas controladas, sin cuadrados ni cubos)
+        const rosGeo = new THREE.SphereGeometry(0.105, 12, 10);
+        const rosMats = [
+          new THREE.MeshStandardMaterial({ color: 0xf59e0b, emissive: 0x92400e, emissiveIntensity: 0.45, roughness: 0.35 }),
+          new THREE.MeshStandardMaterial({ color: 0xea580c, emissive: 0x9a3412, emissiveIntensity: 0.45, roughness: 0.35 })
+        ];
+        for (let i = 0; i < 48; i++) {
+          const rm = new THREE.Mesh(rosGeo, rosMats[i % 2]);
+          registerInteractive(rm, 'ros', 'Especies Reactivas de Oxígeno (ROS)', 5);
+          mitoGroup.add(rm);
+          s6.rosList.push({
+            mesh: rm,
+            targetLipid: s6.lipids[i % s6.lipids.length],
+            driftR: 0.9 + (i % 5) * 0.35,
+            speed: 1.2 + (i % 4) * 0.35,
+            phase: i,
+            attackDNA: i % 6 === 0
+          });
+        }
+      }
+
+      /* ----------------------------------------------------------------------
+       * FASE 7: COLAPSO MITOCONDRIAL Y APOPTOSIS (CASPASA 9 → 3)
+       * ---------------------------------------------------------------------- */
+      function buildStage7Apoptosis(root) {
+        const cellGeo = new THREE.SphereGeometry(6.4, 56, 44);
+        s7.cellOrigPos = new Float32Array(cellGeo.attributes.position.array);
+        s7.cellMembrane = new THREE.Mesh(cellGeo, new THREE.MeshPhysicalMaterial({
+          color: 0x6b3a5c,
+          roughness: 0.38,
+          clearcoat: 0.25,
+          transparent: true,
+          opacity: 0.20,
+          side: THREE.DoubleSide,
+          depthWrite: false
+        }));
+        registerInteractive(s7.cellMembrane, 'apoptosome', 'Célula tumoral en apoptosis programada limpia', 6);
+        root.add(s7.cellMembrane);
+
+        // Mitocondria colapsada liberando Citocromo c
+        s7.mitoMini = new THREE.Group();
+        s7.mitoMini.position.set(-2.8, -1.3, 0);
+        s7.mitoMini.rotation.z = 0.20;
+        root.add(s7.mitoMini);
+
+        const mShell = new THREE.Mesh(
+          new THREE.SphereGeometry(1, 40, 30),
+          new THREE.MeshPhysicalMaterial({ color: 0x8a425a, roughness: 0.42, transparent: true, opacity: 0.72 })
+        );
+        mShell.scale.set(2.8, 1.4, 1.4);
+        registerInteractive(mShell, 'membrane', 'Mitocondria colapsada por estrés oxidativo', 6);
+        s7.mitoMini.add(mShell);
+
+        s7.releasePore = new THREE.Mesh(
+          new THREE.TorusGeometry(0.55, 0.11, 16, 32),
+          new THREE.MeshStandardMaterial({ color: 0xc084fc, roughness: 0.32, metalness: 0.2 })
+        );
+        s7.releasePore.position.set(1.2, 0.85, 0.35);
+        s7.releasePore.lookAt(3.4, 2.8, 1.0);
+        registerInteractive(s7.releasePore, 'cytc', 'Salida mitocondrial de Citocromo c', 6);
+        s7.mitoMini.add(s7.releasePore);
+
+        // Complejos moleculares editoriales de la cascada Caspasa 9 -> 3
+        const hubCoords = [new THREE.Vector3(1.5, 0.85, 0.35), new THREE.Vector3(3.4, -0.95, -0.5)];
+        const hubMat = new THREE.MeshStandardMaterial({ color: 0xc084fc, roughness: 0.35, metalness: 0.15 });
+        const armMat = new THREE.MeshStandardMaterial({ color: 0x9362b8, roughness: 0.45 });
+
+        hubCoords.forEach((pos, aIdx) => {
+          const star = new THREE.Group();
+          star.position.copy(pos);
+          const centerSphere = new THREE.Mesh(new THREE.SphereGeometry(0.38, 24, 18), hubMat);
+          registerInteractive(centerSphere, 'apoptosome', 'Complejo activo Caspasa 9 → Caspasa 3', 6);
+          star.add(centerSphere);
+
+          for (let k = 0; k < 6; k++) {
+            const ang = (k / 6) * Math.PI * 2;
+            const spoke = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.09, 0.95, 10), armMat);
+            spoke.position.set(Math.cos(ang) * 0.55, Math.sin(ang) * 0.55, 0);
+            spoke.rotation.z = ang - Math.PI / 2;
+            const subunit = new THREE.Mesh(new THREE.SphereGeometry(0.18, 16, 14), hubMat);
+            subunit.position.set(Math.cos(ang) * 1.05, Math.sin(ang) * 1.05, 0);
+            registerInteractive(subunit, 'apoptosome', 'Subunidad ejecutora Caspasa 3', 6);
+            star.add(spoke, subunit);
+          }
+          root.add(star);
+          s7.caspaseComplexes.push({ group: star, phase: aIdx });
+        });
+
+        // Flujo de moléculas esféricas de Citocromo c
+        const cytGeo = new THREE.SphereGeometry(0.13, 14, 12);
+        const cytMat = new THREE.MeshStandardMaterial({ color: 0xe9d5ff, roughness: 0.30, metalness: 0.15 });
+        for (let i = 0; i < 18; i++) {
+          const cm = new THREE.Mesh(cytGeo, cytMat);
+          registerInteractive(cm, 'cytc', 'Citocromo c en tránsito al citosol', 6);
+          root.add(cm);
+          s7.cytStream.push({
+            mesh: cm,
+            start: new THREE.Vector3(-1.6, -0.45, 0.35),
+            target: hubCoords[i % 2].clone().add(new THREE.Vector3((Math.random() - 0.5) * 0.9, (Math.random() - 0.5) * 0.9, 0)),
+            offset: i / 18
+          });
+        }
+
+        // Cuerpos apoptóticos esféricos suaves
+        const bodyMat = new THREE.MeshPhysicalMaterial({
+          color: 0x8b5cf6,
+          roughness: 0.32,
+          clearcoat: 0.3,
+          transparent: true,
+          opacity: 0.52
+        });
+        for (let i = 0; i < 10; i++) {
+          const ang = (i / 10) * Math.PI * 2;
+          const body = new THREE.Mesh(new THREE.SphereGeometry(0.52 + (i % 3) * 0.14, 24, 18), bodyMat);
+          registerInteractive(body, 'apoptosome', 'Cuerpo apoptótico sellado (Sin necrosis inflamatoria)', 6);
+          const dir = new THREE.Vector3(Math.cos(ang) * 4.8, Math.sin(ang) * 3.4, Math.sin(i * 1.9) * 1.8);
+          root.add(body);
+          s7.apoptoticBodies.push({ mesh: body, dir });
+        }
+      }
+
+      function triggerShockwave(colorHex = 0x5ec2cc) {
+        const ring = new THREE.Mesh(
+          new THREE.RingGeometry(0.45, 0.62, 48),
+          new THREE.MeshBasicMaterial({ color: colorHex, side: THREE.DoubleSide, transparent: true, opacity: 0.55, depthWrite: false })
+        );
+        ring.lookAt(camera.position);
+        scene.add(ring);
+        shockwaveRings.push({ mesh: ring, scale: 1, opacity: 0.55 });
       }
 
       /**
        * ========================================================================
-       * ACTUALIZACIÓN DE LAS 4 ETAPAS Y MATERIALES (Sin movimientos caóticos simultáneos)
+       * ACTUALIZACIÓN DE ANIMACIÓN EN LAS 7 FASES
        * ========================================================================
        */
       function updateSimulation(dt, elapsed) {
-        const stageSpan = 25; // 4 etapas: [0-25), [25-50), [50-75), [75-100]
+        const stageSpan = 100 / 7;
         const speedMult = SPEED_OPTIONS[state.speedIdx];
 
         if (state.isPlaying) {
@@ -1249,247 +1849,425 @@
           document.getElementById('slider-progress').value = state.progress;
         }
 
+        if (state.pulseBoost > 0) {
+          state.pulseBoost = Math.max(0, state.pulseBoost - dt * 18);
+        }
+
         const p = THREE.MathUtils.clamp(state.progress, 0, 100);
-        const computedStage = Math.min(3, Math.floor(p / stageSpan));
+        const computedStage = Math.min(6, Math.floor(p / stageSpan));
         const localT = THREE.MathUtils.clamp((p - computedStage * stageSpan) / stageSpan, 0, 1);
 
         if (computedStage !== state.currentStage) {
           syncStageUI(computedStage, false);
         }
 
-        document.getElementById('progress-percent').textContent = `${Math.round(p)}%`;
+        stageGroups.forEach((g, idx) => { g.visible = (idx === state.currentStage); });
+        const showFolateSingle = (state.ligandMode === 'folate' || state.ligandMode === 'compare');
 
-        // Control de Corte Hemisférico vs Esfera Completa
-        outerSphereFull.visible = !state.xrayMode;
-        outerSphereCut.visible = state.xrayMode;
-
-        // Opacidad base regulable por el usuario
-        const userGelOpacity = 0.08 + state.gelOpacitySetting * 0.34;
-
-        // ----------------------------------------------------------------------
-        // ETAPA 1: ESTRUCTURA (Nanogel y su red polimérica porosa)
-        // ----------------------------------------------------------------------
+        // FASE 1: NANOGEL POROSO EDITORIAL
         if (state.currentStage === 0) {
-          const reveal = THREE.MathUtils.smoothstep(localT, 0.0, 0.45);
-          const scaleIn = 0.92 + 0.08 * reveal;
-          nanogelAssembly.scale.setScalar(scaleIn);
-          nanogelAssembly.position.set(0, 0, 0);
-
-          outerSphereFull.material.opacity = userGelOpacity;
-          outerSphereCut.material.opacity = userGelOpacity + 0.04;
-          filamentMeshes.forEach((m) => { m.material.opacity = 0.78; });
-          crosslinkMeshes.forEach((m) => { m.material.opacity = 0.95; });
-
-          // Las AgNPs están presentes discretamente sin protagonismo aún
-          agnpUnits.forEach((u) => {
-            u.group.scale.setScalar(0.85);
-            u.coronaGroup.visible = false;
-            u.coreMesh.material.emissive.setHex(0x000000);
+          s1.sphereFull.visible = !state.xrayMode;
+          s1.sphereCut.visible = state.xrayMode;
+          s1.agUnits.forEach((item) => {
+            item.unit.position.y = item.basePos.y + Math.sin(elapsed * 1.1 + item.phase) * 0.045;
+            item.unit.userData.folateGroup.visible = showFolateSingle;
           });
-
-          tumorCellGroup.visible = false;
         }
 
-        // ----------------------------------------------------------------------
-        // ETAPA 2: FUNCIONALIZACIÓN (Se destacan las nanopartículas de plata AgNPs)
-        // ----------------------------------------------------------------------
+        // FASE 2: INYECCIÓN Y GATILLO WARBURG
         else if (state.currentStage === 1) {
-          const emph = THREE.MathUtils.smoothstep(localT, 0.0, 0.5);
-          nanogelAssembly.scale.setScalar(1.0);
-          nanogelAssembly.position.set(0, 0, 0);
+          const injectT = THREE.MathUtils.clamp(localT * 1.45, 0, 1);
+          s2.plunger.position.y = 6.6 - injectT * 1.75;
 
-          // Atenuar suavemente la red para dar claridad visual a las esferas plateadas
-          outerSphereFull.material.opacity = userGelOpacity * 0.75;
-          outerSphereCut.material.opacity = userGelOpacity * 0.8;
-          filamentMeshes.forEach((m) => { m.material.opacity = 0.38; });
-          crosslinkMeshes.forEach((m) => { m.material.opacity = 0.52; });
-
-          agnpUnits.forEach((u) => {
-            u.group.scale.setScalar(0.85 + 0.22 * emph);
-            u.coronaGroup.visible = false;
-            u.coreMesh.material.emissive.setHex(0x1e293b);
-            u.coreMesh.material.emissiveIntensity = 0.22 * emph;
+          s2.streamDrops.forEach((d) => {
+            const t = (elapsed * 1.4 * speedMult + d.offset) % 1;
+            d.mesh.position.y = 3.5 - t * 3.5;
+            d.mesh.visible = localT < 0.78;
           });
 
-          tumorCellGroup.visible = false;
+          const depotScale = 0.25 + THREE.MathUtils.smoothstep(localT, 0.05, 0.55) * 0.85;
+          s2.depotGel.scale.setScalar(depotScale);
+          s2.depotGel.userData.sphereFull.visible = !state.xrayMode;
+          s2.depotGel.userData.sphereCut.visible = state.xrayMode;
+
+          const relFactor = THREE.MathUtils.smoothstep(localT, 0.32, 0.98);
+          const visCount = Math.floor(s2.releasedUnits.length * state.agConcentration);
+          s2.releasedUnits.forEach((item, idx) => {
+            item.unit.visible = idx <= visCount && localT > 0.22;
+            const subT = THREE.MathUtils.clamp((relFactor - item.delay) / (1 - item.delay), 0, 1);
+            item.unit.position.lerpVectors(item.start, item.target, subT);
+            item.unit.userData.folateGroup.visible = showFolateSingle;
+          });
+
+          s2.protons.forEach((pr) => {
+            pr.mesh.position.y = pr.baseY + Math.sin(elapsed * 1.8 + pr.phase) * 0.25;
+          });
         }
 
-        // ----------------------------------------------------------------------
-        // ETAPA 3: CORONA FITOQUÍMICA (Acercamiento macro a una AgNP + recubrimiento de romero)
-        // ----------------------------------------------------------------------
+        // FASE 3: COMPARATIVA NO FUNCIONALIZADA VS FUNCIONALIZADA (+FOLATO)
         else if (state.currentStage === 2) {
-          const coatReveal = THREE.MathUtils.smoothstep(localT, 0.05, 0.55);
-          nanogelAssembly.scale.setScalar(1.0);
-          nanogelAssembly.position.set(0, 0, 0);
+          const showBase = state.ligandMode === 'base' || state.ligandMode === 'compare';
+          const showFol = state.ligandMode === 'folate' || state.ligandMode === 'compare';
 
-          outerSphereFull.material.opacity = userGelOpacity * 0.45;
-          outerSphereCut.material.opacity = userGelOpacity * 0.45;
-          filamentMeshes.forEach((m) => { m.material.opacity = 0.25; });
-          crosslinkMeshes.forEach((m) => { m.material.opacity = 0.35; });
+          s3.baseUnit.visible = showBase;
+          s3.folateUnit.visible = showFol;
 
-          agnpUnits.forEach((u) => {
-            u.group.scale.setScalar(1.05);
-            u.coronaGroup.visible = true;
-            u.coronaGroup.scale.setScalar(0.75 + 0.25 * coatReveal);
-            u.coreMesh.material.emissive.setHex(0x0f172a);
-            u.coreMesh.material.emissiveIntensity = 0.12;
+          const baseX = state.ligandMode === 'base' ? 0 : -3.4;
+          const folX = state.ligandMode === 'folate' ? 0 : 3.4;
+
+          const baseApp = THREE.MathUtils.smoothstep(localT, 0.1, 0.95) * 0.55;
+          const folApp = THREE.MathUtils.smoothstep(localT, 0.05, 0.58);
+
+          s3.baseUnit.position.set(baseX, 2.1 - baseApp * 2.85 + Math.sin(elapsed * 1.3) * 0.08, 0);
+          s3.baseUnit.rotation.y = elapsed * 0.22;
+
+          s3.folateUnit.position.set(folX, 2.1 - folApp * 3.10 + Math.sin(elapsed * 1.5) * 0.05 * (1 - folApp), 0);
+          s3.folateUnit.rotation.y = elapsed * 0.28 * (1 - folApp * 0.85);
+
+          s3.dockingRings.forEach((ring, i) => {
+            ring.position.x = folX;
+            if (showFol && folApp > 0.82) {
+              const wave = (elapsed * 1.1 + i * 0.5) % 1;
+              ring.scale.setScalar(0.7 + wave * 1.1);
+              ring.material.opacity = (1 - wave) * 0.55;
+            } else {
+              ring.material.opacity = 0;
+            }
           });
-
-          tumorCellGroup.visible = false;
         }
 
-        // ----------------------------------------------------------------------
-        // ETAPA 4: APLICACIÓN ONCOLÓGICA (Presentación del nanogel cerca de célula tumoral)
-        // ----------------------------------------------------------------------
+        // FASE 4: ENDOCITOSIS MEDIADA POR CLATRINA
         else if (state.currentStage === 3) {
-          const approach = THREE.MathUtils.smoothstep(localT, 0.0, 0.65);
-          nanogelAssembly.scale.setScalar(0.92);
-          // Aproximación serena hacia la proximidad extracelular sin penetrar ni destruir la célula
-          nanogelAssembly.position.set(-1.35 + approach * 1.15, 0.35 - approach * 0.15, 0);
+          const invag = THREE.MathUtils.smoothstep(localT, 0.05, 0.68);
+          const pinch = THREE.MathUtils.smoothstep(localT, 0.65, 0.96);
+          const pitDepth = invag * 3.25;
 
-          outerSphereFull.material.opacity = userGelOpacity;
-          outerSphereCut.material.opacity = userGelOpacity + 0.04;
-          filamentMeshes.forEach((m) => { m.material.opacity = 0.58; });
-          crosslinkMeshes.forEach((m) => { m.material.opacity = 0.78; });
-
-          agnpUnits.forEach((u) => {
-            u.group.scale.setScalar(1.0);
-            u.coronaGroup.visible = true;
-            u.coronaGroup.scale.setScalar(1.0);
-            u.coreMesh.material.emissive.setHex(0x0f172a);
-            u.coreMesh.material.emissiveIntensity = 0.1;
+          s4.headsTop.forEach((h, idx) => {
+            const r2 = h.baseX * h.baseX + h.baseZ * h.baseZ;
+            const well = Math.exp(-r2 / 5.0) * pitDepth * (1 - pinch * 0.82);
+            h.mesh.position.set(h.baseX, 1.25 - well + 0.26, h.baseZ);
+            s4.headsBot[idx].mesh.position.set(h.baseX, 1.25 - well - 0.26, h.baseZ);
+            s4.tails[idx].mesh.position.set(h.baseX, 1.25 - well, h.baseZ);
           });
 
-          tumorCellGroup.visible = true;
-          tumorMembraneMesh.material.opacity = 0.35 + 0.53 * approach;
+          const cargoY = 2.45 - invag * 3.30 - pinch * 1.75;
+          s4.cargoUnit.position.set(0, cargoY, 0);
+          s4.cargoUnit.rotation.y = elapsed * 0.30;
+          s4.cargoUnit.userData.folateGroup.visible = showFolateSingle;
+
+          s4.clathrinGroup.position.set(0, cargoY - 0.12, 0);
+          s4.clathrinGroup.rotation.y = elapsed * 0.20;
+          s4.clathrinGroup.scale.setScalar(0.55 + invag * 0.46);
+          s4.clathrinGroup.visible = localT > 0.08;
+
+          const dynActive = localT > 0.48 && localT < 0.88;
+          s4.dynaminRing.material.opacity = dynActive ? Math.sin(((localT - 0.48) / 0.4) * Math.PI) * 0.9 : 0;
+          s4.dynaminRing.position.set(0, 0.72, 0);
+          const neckScale = Math.max(0.24, 1.08 - THREE.MathUtils.smoothstep(localT, 0.5, 0.82) * 0.82);
+          s4.dynaminRing.scale.set(neckScale, neckScale, 1);
         }
 
-        // Rotación orbital lenta y pausada digna de visualización editorial (evitando mareo)
+        // FASE 5: ESCAPE ENDOSOMAL CABALLO DE TROYA
+        else if (state.currentStage === 4) {
+          const acidify = THREE.MathUtils.smoothstep(localT, 0.0, 0.38);
+          const detach = THREE.MathUtils.smoothstep(localT, 0.26, 0.68);
+          const burst = THREE.MathUtils.smoothstep(localT, 0.55, 0.98);
+
+          s5.endoFull.visible = !state.xrayMode;
+          s5.endoCut.visible = state.xrayMode;
+          const endoColor = new THREE.Color(0x4b89ac).lerp(new THREE.Color(0xb8583c), acidify);
+          s5.endoFull.material.color.copy(endoColor);
+          s5.endoCut.material.color.copy(endoColor);
+          s5.endoFull.scale.setScalar(1 + burst * 0.10);
+          s5.endoCut.scale.setScalar(1 + burst * 0.10);
+
+          s5.pumps.forEach((pObj) => { pObj.mesh.rotation.y = elapsed * 2.8 * speedMult; });
+          s5.protons.forEach((pr) => {
+            const cyc = (elapsed * pr.speed * speedMult + pr.offset) % 1;
+            const r = 3.55 * (1 - cyc);
+            pr.mesh.position.set(Math.cos(pr.angle) * r, Math.sin(pr.angle) * r, Math.sin(cyc * Math.PI) * 0.65);
+            pr.mesh.visible = localT < 0.75;
+          });
+
+          // Desprendimiento suave de los elementos de la corona de romero al protonarse
+          s5.coronaBeads.forEach((cb) => {
+            const dist = cb.baseR + detach * 1.65;
+            cb.mesh.position.copy(cb.dir.clone().multiplyScalar(dist));
+            cb.mesh.material.opacity = Math.max(0.15, 1.0 - burst * 0.75);
+          });
+
+          s5.coreMesh.scale.setScalar(Math.max(0.38, 1.0 - burst * 0.52));
+
+          const activeAg = Math.floor(s5.agIons.length * state.agConcentration);
+          s5.agIons.forEach((ion, idx) => {
+            ion.mesh.visible = idx <= activeAg && localT > 0.36;
+            ion.mesh.position.copy(ion.dir.clone().multiplyScalar(0.65 + burst * 5.8 * ion.speed));
+          });
+
+          s5.rosParticles.forEach((rs) => {
+            rs.mesh.visible = localT > 0.42;
+            const rDist = 1.35 + burst * 3.1 + Math.sin(elapsed * 5 + rs.phase) * 0.15;
+            rs.mesh.position.copy(rs.dir.clone().multiplyScalar(rDist));
+          });
+        }
+
+        // FASE 6: MITOCONDRIA, BLOQUEO GSH Y ESTRÉS ROS
+        else if (state.currentStage === 5) {
+          const boost = state.pulseBoost / 100;
+          const agInflux = THREE.MathUtils.clamp(localT * 1.65 + boost, 0, 1);
+          const rosStorm = THREE.MathUtils.clamp((localT - 0.25) * 1.45 + boost, 0, 1) * (0.4 + state.rosRate * 0.6);
+
+          const swelling = 1 + rosStorm * 0.10;
+          s6.outerMem.scale.set(swelling, swelling, swelling);
+          s6.outerMem.material.color.copy(new THREE.Color(0x3b8a94)).lerp(new THREE.Color(0xa8523b), rosStorm);
+          s6.outerMem.material.opacity = state.xrayMode ? 0.24 : 0.60;
+
+          const iPos = s6.innerCristae.geometry.attributes.position;
+          for (let i = 0; i < iPos.count; i++) {
+            const ox = s6.innerOrigPos[i * 3];
+            const oy = s6.innerOrigPos[i * 3 + 1];
+            const oz = s6.innerOrigPos[i * 3 + 2];
+            const flatten = 1 + rosStorm * 0.12;
+            const jitter = rosStorm * 0.025 * Math.sin(elapsed * 12 + i);
+            iPos.setXYZ(i, ox + jitter, oy * flatten + jitter, oz * flatten + jitter);
+          }
+          iPos.needsUpdate = true;
+          s6.innerCristae.material.color.copy(new THREE.Color(0x4fb3bf)).lerp(new THREE.Color(0xb84a60), rosStorm);
+          s6.innerCristae.material.opacity = state.xrayMode ? 0.44 : 0.18;
+
+          s6.lipids.forEach((lip, idx) => {
+            if (rosStorm > (idx / s6.lipids.length) * 0.88) {
+              lip.mesh.material.color.setHex(0xd98a3c);
+            } else {
+              lip.mesh.material.color.setHex(0x5ec2cc);
+            }
+          });
+
+          s6.dnaGroup.rotation.y = elapsed * 0.25;
+          s6.dnaA.material.color.setHex(rosStorm > 0.45 ? 0xc95b6b : 0xd9a14a);
+          s6.dnaRungs.forEach((r, idx) => {
+            r.mesh.position.copy(r.origPos).multiplyScalar(rosStorm > idx / s6.dnaRungs.length ? 1 + rosStorm * 0.35 : 1);
+          });
+
+          s6.padlocks.forEach((pl, idx) => {
+            pl.group.position.y = pl.basePos.y + Math.sin(elapsed * 1.2 + pl.phase) * 0.12;
+            const broken = agInflux > 0.35 + idx * 0.1;
+            pl.shackle.rotation.z = broken ? -0.62 : 0;
+            pl.shackle.position.set(broken ? 0.14 : 0, broken ? 0.38 : 0.26, 0);
+            pl.bodyMat.color.setHex(broken ? 0x64748b : 0x489878);
+          });
+
+          s6.gshList.forEach((g) => { g.blocked = false; });
+          const visAg = Math.floor(s6.agList.length * state.agConcentration);
+          s6.agList.forEach((ag, idx) => {
+            ag.mesh.visible = idx <= visAg;
+            if (!ag.mesh.visible) return;
+            const dst = ag.targetGSH ? ag.targetGSH.basePos.clone().add(new THREE.Vector3(0.18, 0.12, 0)) : ag.fallback;
+            ag.mesh.position.lerpVectors(ag.outerPos, dst, agInflux);
+            if (agInflux > 0.68 && ag.targetGSH) ag.targetGSH.blocked = true;
+          });
+
+          s6.gshList.forEach((g) => {
+            g.bodyMat.color.setHex(g.blocked ? 0x64748b : 0x489878);
+          });
+
+          const visROS = Math.floor(s6.rosList.length * THREE.MathUtils.clamp(0.12 + rosStorm * 0.88, 0.1, 1));
+          s6.rosList.forEach((ros, idx) => {
+            ros.mesh.visible = idx < visROS;
+            if (!ros.mesh.visible) return;
+            const tgt = ros.attackDNA ? s6.dnaGroup.position : ros.targetLipid.mesh.position;
+            const t = elapsed * ros.speed * speedMult + ros.phase;
+            const rad = ros.driftR * (1 - rosStorm * 0.68);
+            ros.mesh.position.set(
+              tgt.x + Math.sin(t) * rad,
+              tgt.y + Math.cos(t * 1.1) * rad * 0.65,
+              tgt.z + Math.cos(t * 0.85) * rad
+            );
+          });
+        }
+
+        // FASE 7: APOPTOSIS (CITOCROMO c Y CASPASA 9 -> 3)
+        else if (state.currentStage === 6) {
+          const apopT = THREE.MathUtils.smoothstep(localT, 0.05, 0.92);
+          s7.releasePore.rotation.z = elapsed * 1.4;
+
+          s7.cytStream.forEach((c) => {
+            const flow = (elapsed * 0.36 * speedMult + c.offset) % 1;
+            c.mesh.position.lerpVectors(c.start, c.target, flow);
+            c.mesh.position.y += Math.sin(flow * Math.PI) * 0.95;
+          });
+
+          s7.caspaseComplexes.forEach((ap, i) => {
+            ap.group.rotation.z = elapsed * (i === 0 ? 0.55 : -0.48) * speedMult;
+            ap.group.rotation.y = Math.sin(elapsed * 0.5 + i) * 0.25;
+            ap.group.scale.setScalar(0.5 + THREE.MathUtils.smoothstep(localT, 0.0, 0.45) * 0.58);
+          });
+
+          const cPos = s7.cellMembrane.geometry.attributes.position;
+          for (let i = 0; i < cPos.count; i++) {
+            const ox = s7.cellOrigPos[i * 3];
+            const oy = s7.cellOrigPos[i * 3 + 1];
+            const oz = s7.cellOrigPos[i * 3 + 2];
+            const shrink = 1 - apopT * 0.20;
+            const bleb = Math.sin(ox * 1.1 + elapsed * 1.6) * Math.cos(oy * 1.1) * 0.30 * apopT;
+            cPos.setXYZ(i, ox * shrink + bleb, oy * shrink + bleb, oz * shrink);
+          }
+          cPos.needsUpdate = true;
+
+          s7.apoptoticBodies.forEach((ab, idx) => {
+            const bodyAppear = THREE.MathUtils.smoothstep(localT, 0.42, 0.95);
+            ab.mesh.visible = localT > 0.38;
+            ab.mesh.scale.setScalar(0.25 + bodyAppear * 0.80);
+            ab.mesh.position.copy(ab.dir.clone().multiplyScalar(0.65 + bodyAppear * 0.35));
+            ab.mesh.position.y += Math.sin(elapsed * 1.2 + idx) * 0.10;
+          });
+        }
+
+        // Ondas suaves al activar Impulso
+        for (let i = shockwaveRings.length - 1; i >= 0; i--) {
+          const sw = shockwaveRings[i];
+          sw.scale += dt * 8.0;
+          sw.opacity -= dt * 1.2;
+          sw.mesh.scale.setScalar(sw.scale);
+          sw.mesh.material.opacity = Math.max(0, sw.opacity);
+          sw.mesh.lookAt(camera.position);
+          if (sw.opacity <= 0) {
+            scene.remove(sw.mesh);
+            sw.mesh.geometry.dispose();
+            sw.mesh.material.dispose();
+            shockwaveRings.splice(i, 1);
+          }
+        }
+
+        // Rotación serena de estudio
         if (state.autoRotate && !orbit.isDragging) {
-          const rotRate = state.currentStage === 2 ? 0.045 : 0.065;
-          orbit.targetTheta += dt * rotRate * speedMult;
+          orbit.targetTheta += dt * 0.085 * speedMult;
         }
-
         updateCameraPosition(false);
-        updateEditorialLabels();
+        updateLiveTelemetry(p, state.currentStage, localT);
       }
 
-      /**
-       * Proyecta los puntos 3D de interés a rótulos discretos exteriores con línea guía fina
-       */
-      function updateEditorialLabels() {
-        const overlay = document.getElementById('labels-overlay');
-        if (!state.labelsVisible) {
-          overlay.classList.add('hidden');
-          return;
+      function updateLiveTelemetry(masterP, stageIdx, localT) {
+        document.getElementById('progress-percent').textContent = `${Math.round(masterP)}%`;
+
+        let ph = 7.4, phLabel = '7.4 (Sano)', phPct = 100;
+        let agRel = 0;
+        let gshPct = 100;
+        let rosPct = 5, apopLabel = 'Inactiva';
+        let badgeText = 'ESTABLE pH 7.4';
+        let badgeClass = 'bg-[#0F766E]/35 text-[#99F6E4] border-[#2DD4BF]/25';
+
+        if (stageIdx === 0) {
+          ph = 7.4; phLabel = '7.4 (Gel)'; phPct = 100;
+          agRel = 0;
+        } else if (stageIdx === 1) {
+          ph = 7.4 - localT * 0.9;
+          phLabel = `${ph.toFixed(1)} (Tumor)`;
+          phPct = 76 - localT * 16;
+          agRel = Math.round(localT * 25);
+          badgeText = 'pH WARBURG';
+          badgeClass = 'bg-[#B45309]/35 text-[#FDE68A] border-[#F59E0B]/35';
+        } else if (stageIdx === 2) {
+          ph = 6.5; phLabel = '6.5 (Tumor)'; phPct = 62;
+          agRel = state.ligandMode === 'folate' ? 38 : 26;
+          badgeText = state.ligandMode === 'folate' ? 'SELECTIVA FR-α' : 'VERSIÓN BASE';
+        } else if (stageIdx === 3) {
+          ph = 6.4 - localT * 0.5;
+          phLabel = `${ph.toFixed(1)} (Vesícula)`;
+          phPct = 55;
+          agRel = 42;
+          badgeText = 'ENDOCITOSIS CME';
+        } else if (stageIdx === 4) {
+          ph = 5.8 - localT * 1.3;
+          phLabel = `${ph.toFixed(1)} (Endosoma)`;
+          phPct = 28;
+          agRel = Math.round(45 + localT * 55);
+          rosPct = Math.round(12 + localT * 38);
+          badgeText = 'CABALLO DE TROYA';
+          badgeClass = 'bg-[#B45309]/40 text-[#FDE68A] border-[#F59E0B]/45';
+        } else if (stageIdx === 5) {
+          ph = 6.6; phLabel = '6.6 (Mitocondria)'; phPct = 64;
+          agRel = 100;
+          gshPct = Math.max(0, Math.round(100 - localT * 96));
+          rosPct = Math.min(100, Math.round(42 + localT * 58));
+          apopLabel = 'Estrés ROS';
+          badgeText = 'BLOQUEO GSH / ROS';
+          badgeClass = 'bg-orange-900/50 text-orange-200 border-orange-500/40';
+        } else if (stageIdx === 6) {
+          ph = 6.7; phLabel = '6.7 (Citosol)'; phPct = 66;
+          agRel = 100;
+          gshPct = 0;
+          rosPct = 100;
+          apopLabel = localT > 0.45 ? 'Caspasa 9→3' : 'Citocromo c';
+          badgeText = 'APOPTOSIS ACTIVA';
+          badgeClass = 'bg-[#7C3F58]/50 text-fuchsia-200 border-fuchsia-400/40';
         }
-        overlay.classList.remove('hidden');
 
-        const rect = overlay.getBoundingClientRect();
-        const isMobile = window.innerWidth < 768;
+        document.getElementById('val-ph').textContent = phLabel;
+        document.getElementById('bar-ph').style.width = `${phPct}%`;
 
-        // Definir qué etiquetas mostrar limpiamente en cada etapa para no saturar
-        const visibilityMap = {
-          nanogel: state.currentStage === 0 || state.currentStage === 3,
-          matrix: state.currentStage === 0 || state.currentStage === 1,
-          agnp: state.currentStage === 1 || state.currentStage === 2,
-          corona: state.currentStage === 2 || state.currentStage === 3,
-          tumor: state.currentStage === 3
-        };
+        document.getElementById('val-ag-rel').textContent = `${agRel}%`;
+        document.getElementById('bar-ag-rel').style.width = `${Math.max(4, agRel)}%`;
 
-        Object.keys(labelAnchors).forEach((key) => {
-          const item = labelAnchors[key];
-          const el = document.getElementById(item.elId);
-          const line = document.getElementById(item.lineId);
-          const dot = document.getElementById(item.dotId);
+        document.getElementById('val-gsh').textContent = `${gshPct}%`;
+        document.getElementById('bar-gsh').style.width = `${gshPct}%`;
 
-          if (!visibilityMap[key]) {
-            el.classList.add('hidden');
-            line.setAttribute('visibility', 'hidden');
-            dot.setAttribute('visibility', 'hidden');
-            return;
-          }
+        document.getElementById('val-ros-apop').textContent = `${rosPct}% · ${apopLabel}`;
+        document.getElementById('bar-ros-apop').style.width = `${rosPct}%`;
 
-          // Calcular posición mundial actual según la posición del nanogel o célula
-          const worldPt = item.world.clone();
-          if (key !== 'tumor') {
-            worldPt.multiplyScalar(nanogelAssembly.scale.x).add(nanogelAssembly.position);
-          }
+        document.getElementById('mobile-val-ph').textContent = ph.toFixed(1);
+        document.getElementById('mobile-val-ros').textContent = `${rosPct}%`;
 
-          const projected = worldPt.clone().project(camera);
-          if (projected.z > 1 || projected.z < -1) {
-            el.classList.add('hidden');
-            line.setAttribute('visibility', 'hidden');
-            dot.setAttribute('visibility', 'hidden');
-            return;
-          }
-
-          const ax = (projected.x * 0.5 + 0.5) * rect.width;
-          const ay = (-projected.y * 0.5 + 0.5) * rect.height;
-
-          const scaleOff = isMobile ? 0.62 : 1.0;
-          const lx = THREE.MathUtils.clamp(ax + item.offset.x * scaleOff, 58, rect.width - 58);
-          const ly = THREE.MathUtils.clamp(ay + item.offset.y * scaleOff, 24, rect.height - 96);
-
-          el.classList.remove('hidden');
-          el.style.left = `${lx}px`;
-          el.style.top = `${ly}px`;
-
-          dot.setAttribute('visibility', 'visible');
-          dot.setAttribute('cx', ax);
-          dot.setAttribute('cy', ay);
-
-          line.setAttribute('visibility', 'visible');
-          line.setAttribute('x1', ax);
-          line.setAttribute('y1', ay);
-          line.setAttribute('x2', lx);
-          line.setAttribute('y2', ly);
-        });
+        const hBadge = document.getElementById('header-status-badge');
+        hBadge.textContent = badgeText;
+        hBadge.className = `text-[8px] md:text-[9px] font-mono-tech uppercase px-1.5 py-0.2 rounded border ${badgeClass}`;
       }
 
-      function syncStageUI(stageIdx, instantCam) {
+      function syncStageUI(stageIdx, moveCamInstant) {
         state.currentStage = stageIdx;
         const st = STAGES_DATA[stageIdx];
 
         document.getElementById('stage-badge').textContent = st.badge;
         document.getElementById('stage-title').textContent = st.title;
-        document.getElementById('header-status-badge').textContent = st.headerBadge;
 
-        selectComponent(st.defaultComp, false);
+        if (stageIdx === 2 && state.ligandMode === 'base') {
+          const cmpBtn = document.querySelector('.ligand-btn[data-ligand="compare"]');
+          if (cmpBtn) cmpBtn.click();
+        }
+
+        inspectMolecule(st.defaultMol, false);
 
         const isMobile = window.innerWidth < 768;
         orbit.targetTheta = st.cam.theta;
         orbit.targetPhi = st.cam.phi;
-        orbit.targetRadius = isMobile ? st.cam.radius * 1.24 : st.cam.radius;
+        orbit.targetRadius = isMobile ? st.cam.radius * 1.22 : st.cam.radius;
         orbit.targetFocus.copy(st.focus);
-
-        if (instantCam) updateCameraPosition(true);
+        if (moveCamInstant) updateCameraPosition(true);
 
         document.querySelectorAll('.stage-btn').forEach((btn, idx) => {
-          btn.classList.toggle('stage-card-active', idx === stageIdx);
+          const active = idx === stageIdx;
+          btn.classList.toggle('stage-card-active', active);
+          if (active && isMobile) {
+            btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+          }
         });
       }
 
-      function selectComponent(compKey, openSheetOnMobile = true) {
-        const info = COMPONENT_INFO[compKey];
+      function inspectMolecule(molType, openOnAction = true) {
+        const info = MOLECULE_INFO[molType];
         if (!info) return;
-        state.selectedComp = compKey;
-
+        state.selectedMol = molType;
         document.getElementById('inspector-tag').textContent = info.tag;
         document.getElementById('inspector-title').textContent = info.title;
-        document.getElementById('inspector-meta').textContent = info.meta;
+        document.getElementById('inspector-formula').textContent = info.formula;
         document.getElementById('inspector-desc').textContent = info.desc;
-        document.getElementById('inspector-note-label').textContent = info.noteLabel;
         document.getElementById('inspector-impact').textContent = info.impact;
 
-        document.querySelectorAll('.ident-row').forEach((row) => {
-          row.classList.toggle('ident-row-active', row.getAttribute('data-inspect') === compKey);
-        });
-        document.querySelectorAll('.editorial-callout').forEach((lbl) => {
-          lbl.classList.toggle('callout-selected', lbl.getAttribute('data-inspect') === compKey);
+        document.querySelectorAll('.ident-chip').forEach((chip) => {
+          chip.classList.toggle('ident-chip-active', chip.getAttribute('data-inspect') === molType);
         });
 
-        if (openSheetOnMobile) {
+        if (openOnAction) {
           if (window.innerWidth < 768) {
             openMobileSheet('right');
           } else if (state.rightDesktopMin) {
@@ -1499,9 +2277,9 @@
       }
 
       function updateCameraPosition(instant) {
-        orbit.phi = THREE.MathUtils.clamp(orbit.phi, 0.3, Math.PI - 0.3);
-        orbit.targetPhi = THREE.MathUtils.clamp(orbit.targetPhi, 0.3, Math.PI - 0.3);
-        orbit.targetRadius = THREE.MathUtils.clamp(orbit.targetRadius, 2.8, 26);
+        orbit.phi = THREE.MathUtils.clamp(orbit.phi, 0.28, Math.PI - 0.28);
+        orbit.targetPhi = THREE.MathUtils.clamp(orbit.targetPhi, 0.28, Math.PI - 0.28);
+        orbit.targetRadius = THREE.MathUtils.clamp(orbit.targetRadius, 6.0, 34);
 
         if (instant) {
           orbit.theta = orbit.targetTheta;
@@ -1509,7 +2287,7 @@
           orbit.radius = orbit.targetRadius;
           orbit.focus.copy(orbit.targetFocus);
         } else {
-          const smooth = 0.065; // Interpolación progresiva suave de cámara y zoom
+          const smooth = 0.075;
           orbit.theta += (orbit.targetTheta - orbit.theta) * smooth;
           orbit.phi += (orbit.targetPhi - orbit.phi) * smooth;
           orbit.radius += (orbit.targetRadius - orbit.radius) * smooth;
@@ -1572,7 +2350,7 @@
             text: targetUrl,
             width: 168,
             height: 168,
-            colorDark: "#0B121C",
+            colorDark: "#080D18",
             colorLight: "#FFFFFF",
             correctLevel: QRCode.CorrectLevel.M
           });
@@ -1605,10 +2383,10 @@
         const tooltipTitle = document.getElementById('hover-tooltip-title');
         let downPos = { x: 0, y: 0 };
 
-        function getVisibleIntersects() {
+        function getActiveStageIntersects() {
           raycaster.setFromCamera(mouse, camera);
           const candidates = interactiveObjects.filter((obj) => {
-            if (!obj.visible) return false;
+            if (obj.userData.stageIdx !== state.currentStage || !obj.visible) return false;
             let p = obj.parent;
             while (p) {
               if (!p.visible) return false;
@@ -1632,8 +2410,8 @@
           mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
 
           if (orbit.isDragging) {
-            orbit.targetTheta -= (e.clientX - orbit.prevX) * 0.006;
-            orbit.targetPhi -= (e.clientY - orbit.prevY) * 0.006;
+            orbit.targetTheta -= (e.clientX - orbit.prevX) * 0.0062;
+            orbit.targetPhi -= (e.clientY - orbit.prevY) * 0.0062;
             orbit.prevX = e.clientX;
             orbit.prevY = e.clientY;
             tooltip.classList.add('hidden');
@@ -1642,7 +2420,7 @@
 
           if (window.innerWidth < 768) return;
 
-          const hits = getVisibleIntersects();
+          const hits = getActiveStageIntersects();
           if (hits.length > 0 && hits[0].object.userData.label) {
             dom.style.cursor = 'pointer';
             tooltipTitle.textContent = hits[0].object.userData.label;
@@ -1662,16 +2440,16 @@
             const rect = dom.getBoundingClientRect();
             mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
             mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-            const hits = getVisibleIntersects();
-            if (hits.length > 0 && hits[0].object.userData.compKey) {
-              selectComponent(hits[0].object.userData.compKey, true);
+            const hits = getActiveStageIntersects();
+            if (hits.length > 0 && hits[0].object.userData.molType) {
+              inspectMolecule(hits[0].object.userData.molType, true);
             }
           }
         });
 
         dom.addEventListener('wheel', (e) => {
           e.preventDefault();
-          orbit.targetRadius += e.deltaY * 0.009;
+          orbit.targetRadius += e.deltaY * 0.011;
         }, { passive: false });
 
         dom.addEventListener('touchstart', (e) => {
@@ -1689,7 +2467,7 @@
               e.touches[0].clientX - e.touches[1].clientX,
               e.touches[0].clientY - e.touches[1].clientY
             );
-            orbit.targetRadius += (orbit.pinchDist - d) * 0.032;
+            orbit.targetRadius += (orbit.pinchDist - d) * 0.036;
             orbit.pinchDist = d;
           }
         }, { passive: true });
@@ -1701,7 +2479,6 @@
           renderer.setSize(container.clientWidth, container.clientHeight);
         });
 
-        // Minimizar y abrir hojas móviles
         document.getElementById('btn-min-left').addEventListener('click', () => {
           if (window.innerWidth < 768) openMobileSheet(null);
           else setDesktopLeftMin(true);
@@ -1717,7 +2494,7 @@
         document.getElementById('btn-mobile-telemetry').addEventListener('click', () => {
           openMobileSheet(state.mobileSheet === 'left' ? null : 'left');
         });
-        document.getElementById('btn-mobile-pill-ident').addEventListener('click', () => openMobileSheet('left'));
+        document.getElementById('btn-mobile-pill-telemetry').addEventListener('click', () => openMobileSheet('left'));
         document.getElementById('btn-mobile-inspect').addEventListener('click', () => openMobileSheet('right'));
 
         document.getElementById('btn-restore-left').addEventListener('click', () => setDesktopLeftMin(false));
@@ -1737,15 +2514,21 @@
           e.currentTarget.textContent = `${SPEED_OPTIONS[state.speedIdx].toFixed(1)}×`;
         });
 
-        // Transparencia del Nanogel
-        document.getElementById('slider-opacity').addEventListener('input', (e) => {
-          const v = parseInt(e.target.value, 10);
-          state.gelOpacitySetting = v / 100;
-          const lbl = v < 32 ? 'Alta' : v > 62 ? 'Sólida' : 'Media';
-          document.getElementById('label-gel-opacity').textContent = lbl;
+        // Selector Funcionalización
+        document.querySelectorAll('.ligand-btn').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const mode = btn.getAttribute('data-ligand');
+            state.ligandMode = mode;
+            document.querySelectorAll('.ligand-btn').forEach((b) => {
+              const active = b.getAttribute('data-ligand') === mode;
+              b.className = active
+                ? 'ligand-btn text-[10px] font-medium py-1 px-1 rounded-md transition text-center bg-[#0F766E]/40 text-[#99F6E4] border border-[#2DD4BF]/40'
+                : 'ligand-btn text-[10px] font-medium py-1 px-1 rounded-md transition text-center text-slate-400 hover:text-slate-200 border border-transparent';
+            });
+            inspectMolecule(mode === 'base' ? 'base_np' : 'folate_np', false);
+          });
         });
 
-        // Navegación entre las 4 Etapas
         const sliderProgress = document.getElementById('slider-progress');
         sliderProgress.addEventListener('input', (e) => {
           state.progress = parseFloat(e.target.value);
@@ -1754,10 +2537,11 @@
         });
 
         function jumpToStage(stIdx) {
-          const clamped = THREE.MathUtils.clamp(stIdx, 0, 3);
-          state.progress = clamped * 25 + 0.2;
+          const clamped = THREE.MathUtils.clamp(stIdx, 0, 6);
+          state.progress = clamped * (100 / 7) + 0.15;
           sliderProgress.value = state.progress;
           syncStageUI(clamped, false);
+          if (clamped >= 4) triggerShockwave(clamped === 6 ? 0xc084fc : 0xf59e0b);
         }
 
         document.querySelectorAll('.stage-btn').forEach((btn) => {
@@ -1775,8 +2559,20 @@
 
         document.getElementById('btn-loop-stage').addEventListener('click', (e) => {
           state.loopStage = !state.loopStage;
-          e.currentTarget.textContent = state.loopStage ? 'Fijar Etapa: ON' : 'Fijar Etapa: OFF';
+          e.currentTarget.textContent = state.loopStage ? 'Bucle: ON' : 'Bucle: OFF';
           e.currentTarget.classList.toggle('nav-btn-active', state.loopStage);
+        });
+
+        document.getElementById('slider-ag').addEventListener('input', (e) => {
+          const v = parseInt(e.target.value, 10);
+          state.agConcentration = v / 100;
+          document.getElementById('label-ag-conc').textContent = `${v}%`;
+        });
+
+        document.getElementById('slider-ros').addEventListener('input', (e) => {
+          const v = parseInt(e.target.value, 10);
+          state.rosRate = v / 100;
+          document.getElementById('label-ros-rate').textContent = `${v}%`;
         });
 
         document.getElementById('btn-xray').addEventListener('click', (e) => {
@@ -1784,29 +2580,30 @@
           e.currentTarget.classList.toggle('nav-btn-active', state.xrayMode);
         });
 
-        document.getElementById('btn-labels').addEventListener('click', (e) => {
-          state.labelsVisible = !state.labelsVisible;
-          e.currentTarget.classList.toggle('nav-btn-active', state.labelsVisible);
-        });
-
         document.getElementById('btn-autorotate').addEventListener('click', (e) => {
           state.autoRotate = !state.autoRotate;
           e.currentTarget.classList.toggle('nav-btn-active', state.autoRotate);
         });
 
+        document.getElementById('btn-pulse').addEventListener('click', () => {
+          state.pulseBoost = 25;
+          state.progress = Math.min(100, state.progress + 5.5);
+          sliderProgress.value = state.progress;
+          triggerShockwave(0xf59e0b);
+        });
+
         document.getElementById('btn-reset').addEventListener('click', () => {
           state.progress = 0;
+          state.pulseBoost = 0;
           state.isPlaying = true;
           sliderProgress.value = 0;
           syncStageUI(0, false);
           updatePlayPauseIcon();
         });
 
-        // Selección desde Tabla de Identificadores y Rótulos Editoriales
-        document.querySelectorAll('.inspect-legend, .editorial-callout').forEach((btn) => {
+        document.querySelectorAll('.inspect-legend').forEach((btn) => {
           btn.addEventListener('click', () => {
-            const key = btn.getAttribute('data-inspect');
-            selectComponent(key, true);
+            inspectMolecule(btn.getAttribute('data-inspect'), true);
           });
         });
 
@@ -1826,8 +2623,6 @@
             document.getElementById('btn-toggle-all-panels').click();
           } else if (e.key.toLowerCase() === 'x') {
             document.getElementById('btn-xray').click();
-          } else if (e.key.toLowerCase() === 'l') {
-            document.getElementById('btn-labels').click();
           } else if (e.key.toLowerCase() === 'r') {
             document.getElementById('btn-autorotate').click();
           }
