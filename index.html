@@ -253,14 +253,10 @@
   <div id="canvas-container"></div>
 
   <!-- MINI PÍLDORAS FLOTANTES EN MÓVIL -->
-  <div class="md:hidden fixed top-14 left-2.5 z-20 pointer-events-none">
-    <button id="btn-mobile-pill-telemetry" class="pres-panel px-2.5 py-1 rounded-lg pointer-events-auto flex items-center gap-1.5 text-[10px] font-mono-tech">
-      <span class="w-1.5 h-1.5 rounded-full bg-[#2DD4BF] animate-pulse"></span>
-      <span class="text-slate-400">pH</span>
-      <span id="mobile-val-ph" class="text-[#2DD4BF] font-bold">7.4</span>
-      <span class="text-slate-600">|</span>
-      <span class="text-slate-400">ROS</span>
-      <span id="mobile-val-ros" class="text-[#F59E0B] font-bold">5%</span>
+  <div class="md:hidden fixed top-14 left-2.5 z-20">
+    <button id="btn-mobile-pill-telemetry" class="pres-panel px-2.5 py-1 rounded-lg flex items-center gap-1.5 text-[10px] font-mono-tech text-slate-200 active:scale-95 transition">
+      <span class="w-1.5 h-1.5 rounded-full bg-[#2DD4BF]"></span>
+      <span>Controles</span>
     </button>
   </div>
 
@@ -282,7 +278,7 @@
   <!-- PESTAÑAS DE RESTAURACIÓN CUANDO SE MINIMIZAN LOS PANELES -->
   <button id="btn-restore-left" class="hidden fixed top-[4.1rem] left-3 z-30 pres-panel hover:border-[#2DD4BF]/60 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 items-center gap-1.5 transition">
     <span class="w-2 h-2 rounded-full bg-[#2DD4BF]"></span>
-    <span class="font-mono-tech text-[10px] uppercase tracking-wider">Telemetría</span>
+    <span class="font-mono-tech text-[10px] uppercase tracking-wider">Controles</span>
     <svg class="w-3.5 h-3.5 text-[#2DD4BF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
   </button>
 
@@ -293,17 +289,17 @@
   </button>
 
   <!-- =======================================================================
-       PANEL IZQUIERDO: TELEMETRÍA + SUPERFICIE + PARÁMETROS + TABLA IDENTIFICADORES
+       PANEL IZQUIERDO: FUNCIONALIZACIÓN + PARÁMETROS + TABLA IDENTIFICADORES
        (Sin scroll en Escritorio / Bottom Sheet en Móvil)
        ======================================================================= -->
-  <aside id="left-panel" class="adaptive-left-panel mobile-closed pres-panel rounded-2xl p-3 flex flex-col gap-2 pointer-events-auto">
+  <aside id="left-panel" class="adaptive-left-panel mobile-closed pres-panel rounded-2xl p-3 flex flex-col gap-2.5 pointer-events-auto">
     <div id="left-sheet-handle" class="md:hidden w-10 h-1 bg-slate-700 rounded-full mx-auto -mt-0.5 mb-0.5 cursor-pointer"></div>
 
     <!-- Cabecera -->
     <div class="flex items-center justify-between border-b border-slate-800/80 pb-1.5">
       <div class="flex items-center gap-1.5">
         <span class="w-2 h-2 rounded-full bg-[#2DD4BF]"></span>
-        <span class="text-[10px] font-mono-tech font-semibold uppercase tracking-wider text-slate-200">Estado Bioquímico</span>
+        <span class="text-[10px] font-mono-tech font-semibold uppercase tracking-wider text-slate-200">Controles e Identificadores</span>
       </div>
       <button id="btn-min-left" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800/80 transition" title="Minimizar panel ([)">
         <svg class="hidden md:block w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
@@ -311,51 +307,8 @@
       </button>
     </div>
 
-    <!-- Telemetría Minimalista -->
-    <div class="space-y-1.5">
-      <div>
-        <div class="flex justify-between text-[10px] mb-0.5">
-          <span class="text-slate-400">pH del Medio</span>
-          <span id="val-ph" class="font-mono-tech font-semibold text-[#2DD4BF]">7.4 (Sano)</span>
-        </div>
-        <div class="w-full h-1 bg-slate-800 rounded-full overflow-hidden">
-          <div id="bar-ph" class="h-full bg-gradient-to-r from-[#0F766E] to-[#2DD4BF] rounded-full transition-all duration-150" style="width: 100%"></div>
-        </div>
-      </div>
-
-      <div>
-        <div class="flex justify-between text-[10px] mb-0.5">
-          <span class="text-slate-400">Liberación Ag⁺</span>
-          <span id="val-ag-rel" class="font-mono-tech font-semibold text-slate-200">0%</span>
-        </div>
-        <div class="w-full h-1 bg-slate-800 rounded-full overflow-hidden">
-          <div id="bar-ag-rel" class="h-full bg-gradient-to-r from-slate-400 to-[#99F6E4] rounded-full transition-all duration-150" style="width: 4%"></div>
-        </div>
-      </div>
-
-      <div>
-        <div class="flex justify-between text-[10px] mb-0.5">
-          <span class="text-slate-400">Glutatión (GSH)</span>
-          <span id="val-gsh" class="font-mono-tech font-semibold text-[#2DD4BF]">100%</span>
-        </div>
-        <div class="w-full h-1 bg-slate-800 rounded-full overflow-hidden">
-          <div id="bar-gsh" class="h-full bg-[#0F766E] rounded-full transition-all duration-150" style="width: 100%"></div>
-        </div>
-      </div>
-
-      <div>
-        <div class="flex justify-between text-[10px] mb-0.5">
-          <span class="text-slate-400">ROS / Caspasa 9→3</span>
-          <span id="val-ros-apop" class="font-mono-tech font-semibold text-[#F59E0B]">5% · Inactiva</span>
-        </div>
-        <div class="w-full h-1 bg-slate-800 rounded-full overflow-hidden">
-          <div id="bar-ros-apop" class="h-full bg-gradient-to-r from-[#B45309] via-[#F59E0B] to-fuchsia-500 rounded-full transition-all duration-150" style="width: 5%"></div>
-        </div>
-      </div>
-    </div>
-
     <!-- Selector de Variante Superficial -->
-    <div class="pt-1.5 border-t border-slate-800/80">
+    <div>
       <div class="text-[9px] font-mono-tech uppercase tracking-wider text-slate-400 mb-1">Funcionalización</div>
       <div class="grid grid-cols-3 gap-1 bg-slate-900/90 p-0.5 rounded-lg border border-slate-800">
         <button data-ligand="base" class="ligand-btn text-[10px] font-medium py-1 px-1 rounded-md transition text-center bg-[#0F766E]/40 text-[#99F6E4] border border-[#2DD4BF]/40">
@@ -371,7 +324,7 @@
     </div>
 
     <!-- Sliders Cinéticos -->
-    <div class="pt-1.5 border-t border-slate-800/80 space-y-1.5">
+    <div class="pt-2 border-t border-slate-800/80 space-y-2">
       <div>
         <div class="flex justify-between text-[10px] mb-0.5">
           <span class="text-slate-300">Concentración Ag⁺</span>
@@ -390,8 +343,8 @@
     </div>
 
     <!-- Tabla de Identificadores Codificada por Color -->
-    <div class="pt-1.5 border-t border-slate-800/80">
-      <div class="text-[9px] font-mono-tech uppercase tracking-wider text-slate-400 mb-1">Tabla de Identificadores</div>
+    <div class="pt-2 border-t border-slate-800/80">
+      <div class="text-[9px] font-mono-tech uppercase tracking-wider text-slate-400 mb-1.5">Tabla de Identificadores</div>
       <div class="grid grid-cols-2 gap-1 text-[10px]">
         <button data-inspect="nanocellulose" class="ident-chip ident-chip-active inspect-legend flex items-center gap-1.5 px-1.5 py-1 rounded border border-transparent hover:bg-slate-800/80 text-slate-300 truncate transition">
           <span class="w-2 h-2 rounded-full bg-[#5EC2CC] shrink-0"></span><span class="truncate">Nanogel / Red</span>
@@ -408,8 +361,8 @@
         <button data-inspect="clathrin" class="ident-chip inspect-legend flex items-center gap-1.5 px-1.5 py-1 rounded border border-transparent hover:bg-slate-800/80 text-slate-300 truncate transition">
           <span class="w-2 h-2 rounded-full bg-[#2DD4BF] shrink-0"></span><span class="truncate">Clatrina (CME)</span>
         </button>
-        <button data-inspect="warburg_tumor" class="ident-chip inspect-legend flex items-center gap-1.5 px-1.5 py-1 rounded border border-transparent hover:bg-slate-800/80 text-slate-300 truncate transition">
-          <span class="w-2 h-2 rounded-full bg-[#B85D68] shrink-0"></span><span class="truncate">Célula Tumoral</span>
+        <button data-inspect="endosome_escape" class="ident-chip inspect-legend flex items-center gap-1.5 px-1.5 py-1 rounded border border-transparent hover:bg-slate-800/80 text-slate-300 truncate transition">
+          <span class="w-2 h-2 rounded-full bg-[#EA580C] shrink-0"></span><span class="truncate">Membrana Endos.</span>
         </button>
         <button data-inspect="gsh" class="ident-chip inspect-legend flex items-center gap-1.5 px-1.5 py-1 rounded border border-transparent hover:bg-slate-800/80 text-slate-300 truncate transition">
           <span class="w-2 h-2 rounded-full bg-[#34D399] shrink-0"></span><span class="truncate">Escudo GSH</span>
@@ -466,15 +419,15 @@
 
   <!-- BOTÓN RESTAURAR BARRA INFERIOR -->
   <button id="btn-restore-bottom" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-30 hidden pres-panel hover:border-[#2DD4BF]/60 rounded-full px-3.5 py-1 text-[10px] font-mono-tech text-[#99F6E4] items-center gap-1.5 shadow-xl transition">
-    <span>Mostrar Fases (1 – 7)</span>
+    <span>Mostrar Fases (1 – 8)</span>
     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
   </button>
 
   <!-- =======================================================================
-       BARRA INFERIOR MINIMALISTA: VELOCIDAD + PROGRESIÓN + LAS 7 FASES EN MOVIMIENTO
+       BARRA INFERIOR MINIMALISTA: VELOCIDAD + PROGRESIÓN + LAS 8 FASES EN MOVIMIENTO
        ======================================================================= -->
   <div id="bottom-panel" class="bottom-dock fixed bottom-7 md:bottom-8 left-2 right-2 md:left-3 md:right-3 z-20 flex justify-center pointer-events-none">
-    <div class="pres-panel rounded-xl md:rounded-2xl p-2 md:px-3.5 md:py-2.5 w-full max-w-4xl pointer-events-auto">
+    <div class="pres-panel rounded-xl md:rounded-2xl p-2 md:px-3.5 md:py-2.5 w-full max-w-5xl pointer-events-auto">
       
       <div class="flex items-center justify-between gap-2 mb-1.5">
         <div class="flex items-center gap-1.5 min-w-0">
@@ -501,7 +454,7 @@
           </button>
 
           <div class="flex items-center gap-1.5 min-w-0 ml-0.5">
-            <span id="stage-badge" class="text-[9px] md:text-[10px] font-mono-tech font-bold uppercase px-1.5 py-0.5 rounded bg-[#0F766E]/35 text-[#2DD4BF] shrink-0">1 / 7</span>
+            <span id="stage-badge" class="text-[9px] md:text-[10px] font-mono-tech font-bold uppercase px-1.5 py-0.5 rounded bg-[#0F766E]/35 text-[#2DD4BF] shrink-0">1 / 8</span>
             <h3 id="stage-title" class="text-[11px] md:text-xs font-semibold text-white truncate">Inmovilización en Nanocelulosa</h3>
           </div>
         </div>
@@ -518,8 +471,8 @@
         <input id="slider-progress" type="range" min="0" max="100" step="0.1" value="0" class="w-full block" />
       </div>
 
-      <!-- Las 7 Fases Completas del Tratamiento -->
-      <div class="flex md:grid md:grid-cols-7 gap-1 md:gap-1.5 overflow-x-auto no-scrollbar snap-x">
+      <!-- Las 8 Fases Completas del Tratamiento -->
+      <div class="flex md:grid md:grid-cols-8 gap-1 md:gap-1.5 overflow-x-auto no-scrollbar snap-x">
         <button data-stage="0" class="stage-btn stage-card-active snap-start shrink-0 w-[5.4rem] md:w-auto text-left px-2 py-1 md:py-1.5 rounded-lg border border-slate-800 bg-slate-900/60 hover:border-slate-600 transition">
           <div class="text-[8px] md:text-[9px] font-mono-tech text-[#2DD4BF] font-semibold truncate">01 · NANOGEL</div>
           <div class="text-[9px] md:text-[10px] text-slate-200 truncate">Red Porosa 3D</div>
@@ -542,16 +495,21 @@
 
         <button data-stage="4" class="stage-btn snap-start shrink-0 w-[5.4rem] md:w-auto text-left px-2 py-1 md:py-1.5 rounded-lg border border-slate-800 bg-slate-900/60 hover:border-slate-600 transition">
           <div class="text-[8px] md:text-[9px] font-mono-tech text-[#F59E0B] font-semibold truncate">05 · ENDOSOMA</div>
-          <div class="text-[9px] md:text-[10px] text-slate-300 truncate">Caballo Troya</div>
+          <div class="text-[9px] md:text-[10px] text-slate-300 truncate">Liberación Ag⁰</div>
         </button>
 
         <button data-stage="5" class="stage-btn snap-start shrink-0 w-[5.4rem] md:w-auto text-left px-2 py-1 md:py-1.5 rounded-lg border border-slate-800 bg-slate-900/60 hover:border-slate-600 transition">
-          <div class="text-[8px] md:text-[9px] font-mono-tech text-orange-400 font-semibold truncate">06 · MITOCONDRIA</div>
-          <div class="text-[9px] md:text-[10px] text-slate-300 truncate">GSH y ROS</div>
+          <div class="text-[8px] md:text-[9px] font-mono-tech text-orange-400 font-semibold truncate">06 · ESCAPE</div>
+          <div class="text-[9px] md:text-[10px] text-slate-300 truncate">Peroxidación</div>
         </button>
 
         <button data-stage="6" class="stage-btn snap-start shrink-0 w-[5.4rem] md:w-auto text-left px-2 py-1 md:py-1.5 rounded-lg border border-slate-800 bg-slate-900/60 hover:border-slate-600 transition">
-          <div class="text-[8px] md:text-[9px] font-mono-tech text-fuchsia-400 font-semibold truncate">07 · APOPTOSIS</div>
+          <div class="text-[8px] md:text-[9px] font-mono-tech text-amber-400 font-semibold truncate">07 · MITOCONDRIA</div>
+          <div class="text-[9px] md:text-[10px] text-slate-300 truncate">GSH y ROS</div>
+        </button>
+
+        <button data-stage="7" class="stage-btn snap-start shrink-0 w-[5.4rem] md:w-auto text-left px-2 py-1 md:py-1.5 rounded-lg border border-slate-800 bg-slate-900/60 hover:border-slate-600 transition">
+          <div class="text-[8px] md:text-[9px] font-mono-tech text-fuchsia-400 font-semibold truncate">08 · APOPTOSIS</div>
           <div class="text-[9px] md:text-[10px] text-slate-300 truncate">Caspasa 9→3</div>
         </button>
       </div>
@@ -668,11 +626,18 @@
           impact: "Conduce las AgNPs recubiertas hacia el interior celular dentro de vesículas endosomales."
         },
         vatpase: {
-          tag: "Barrera 3 · Caballo de Troya",
-          title: "Disolución Oxidativa Endosomal",
-          formula: "4Ag⁰ + O₂ + 4H⁺ → 4Ag⁺ + 2H₂O (pH 4.5)",
-          desc: "Las bombas V-ATPasa acidifican el endosoma, protonando la corona (–COO⁻ a –COOH) y exponiendo el núcleo Ag⁰.",
-          impact: "El nanomaterial no escapa intacto: genera iones Ag⁺ y ROS que oxidan y abren la membrana endosomal."
+          tag: "Barrera 3 · Cambio de pH",
+          title: "Acidificación Endosomal y Apertura",
+          formula: "Bombas V-ATPasa (pH 4.5–5.5) · –COO⁻ → –COOH",
+          desc: "El cambio de pH dentro del endosoma protona la corona vegetal de romero y libera el núcleo metálico de plata Ag⁰.",
+          impact: "Deja expuesto al núcleo de plata frente al medio ácido endosomal para iniciar su reacción oxidativa."
+        },
+        endosome_escape: {
+          tag: "Efecto Caballo de Troya",
+          title: "Peroxidación de Membrana y Escape Endosomal",
+          formula: "4Ag⁰ + O₂ + 4H⁺ → 4Ag⁺ + 2H₂O + ROS",
+          desc: "La disolución oxidativa del núcleo de plata genera especies ROS que peroxidan y fracturan los lípidos de la membrana endosómica.",
+          impact: "Abre brechas físicas en la pared del endosoma permitiendo el escape masivo de iones Ag⁺ hacia el citosol."
         },
         ag: {
           tag: "Especie Activa",
@@ -719,13 +684,14 @@
       };
 
       const STAGES_DATA = [
-        { badge: "1 / 7", title: "Inmovilización en Nanogel Poroso de Nanocelulosa", defaultMol: "nanocellulose", cam: { theta: 0.46, phi: 1.25, radius: 15.2 }, focus: new THREE.Vector3(0, -0.25, 0) },
-        { badge: "2 / 7", title: "Inyección Pseudoplástica y Gatillo de pH Warburg", defaultMol: "syringe_gel", cam: { theta: 0.18, phi: 1.26, radius: 19.2 }, focus: new THREE.Vector3(0.5, -0.2, 0) },
-        { badge: "3 / 7", title: "Comparativa: Versión Base vs. Funcionalizada (+Folato)", defaultMol: "folate_np", cam: { theta: 0.0, phi: 1.30, radius: 15.8 }, focus: new THREE.Vector3(0, -0.3, 0) },
-        { badge: "4 / 7", title: "Ingreso Activo: Endocitosis Mediada por Clatrina", defaultMol: "clathrin", cam: { theta: 0.28, phi: 1.18, radius: 16.5 }, focus: new THREE.Vector3(0, -0.3, 0) },
-        { badge: "5 / 7", title: "Escape Endosomal: Efecto Caballo de Troya (pH 4.5)", defaultMol: "vatpase", cam: { theta: -0.20, phi: 1.30, radius: 15.5 }, focus: new THREE.Vector3(0, -0.2, 0) },
-        { badge: "6 / 7", title: "Ataque a la Mitocondria: Bloqueo GSH y Estrés ROS", defaultMol: "gsh", cam: { theta: 0.34, phi: 1.24, radius: 17.6 }, focus: new THREE.Vector3(0, -0.25, 0) },
-        { badge: "7 / 7", title: "Colapso Mitocondrial y Apoptosis (Caspasa 9 → 3)", defaultMol: "apoptosome", cam: { theta: 0.36, phi: 1.20, radius: 18.8 }, focus: new THREE.Vector3(0.2, -0.2, 0) }
+        { badge: "1 / 8", title: "Inmovilización en Nanogel Poroso de Nanocelulosa", defaultMol: "nanocellulose", cam: { theta: 0.46, phi: 1.25, radius: 15.2 }, focus: new THREE.Vector3(0, -0.25, 0) },
+        { badge: "2 / 8", title: "Inyección Pseudoplástica y Gatillo de pH Warburg", defaultMol: "syringe_gel", cam: { theta: 0.18, phi: 1.26, radius: 19.2 }, focus: new THREE.Vector3(0.5, -0.2, 0) },
+        { badge: "3 / 8", title: "Comparativa: Versión Base vs. Funcionalizada (+Folato)", defaultMol: "folate_np", cam: { theta: 0.0, phi: 1.30, radius: 15.8 }, focus: new THREE.Vector3(0, -0.3, 0) },
+        { badge: "4 / 8", title: "Ingreso Activo: Endocitosis Mediada por Clatrina", defaultMol: "clathrin", cam: { theta: 0.28, phi: 1.18, radius: 16.5 }, focus: new THREE.Vector3(0, -0.3, 0) },
+        { badge: "5 / 8", title: "Endosoma: Cambio de pH y Liberación del Núcleo de Plata", defaultMol: "vatpase", cam: { theta: -0.18, phi: 1.28, radius: 15.2 }, focus: new THREE.Vector3(0, -0.2, 0) },
+        { badge: "6 / 8", title: "Escape Endosomal: Peroxidación de Membrana y Salida de Ag⁺", defaultMol: "endosome_escape", cam: { theta: 0.26, phi: 1.24, radius: 16.2 }, focus: new THREE.Vector3(0.3, -0.2, 0) },
+        { badge: "7 / 8", title: "Ataque a la Mitocondria: Bloqueo GSH y Estrés ROS", defaultMol: "gsh", cam: { theta: 0.34, phi: 1.24, radius: 17.6 }, focus: new THREE.Vector3(0, -0.25, 0) },
+        { badge: "8 / 8", title: "Colapso Mitocondrial y Apoptosis (Caspasa 9 → 3)", defaultMol: "apoptosome", cam: { theta: 0.36, phi: 1.20, radius: 18.8 }, focus: new THREE.Vector3(0.2, -0.2, 0) }
       ];
 
       const SPEED_OPTIONS = [0.5, 1.0, 1.5, 2.0];
@@ -758,12 +724,13 @@
       // Materiales compartidos estilo Scientific Editorial Studio
       let matSilverSatin, matRosemaryGreen, matRosemaryGold, matShortBond, matFolateLigand;
 
-      // Estructuras por Fase
+      // Estructuras por Fase (8 Fases)
       const s1 = { nanogelGroup: null, sphereFull: null, sphereCut: null, agUnits: [] };
       const s2 = { plunger: null, streamDrops: [], depotGel: null, releasedUnits: [], protons: [] };
       const s3 = { baseUnit: null, folateUnit: null, dockingRings: [] };
       const s4 = { headsTop: [], headsBot: [], tails: [], clathrinGroup: null, dynaminRing: null, cargoUnit: null };
-      const s5 = { endoFull: null, endoCut: null, pumps: [], protons: [], coreMesh: null, coronaBeads: [], agIons: [], rosParticles: [] };
+      const s5 = { endoFull: null, endoCut: null, pumps: [], protons: [], coreMesh: null, coronaBeads: [], coronaBonds: [] };
+      const s5b = { coreMesh: null, sectors: [], lipidHeads: [], rosWaves: [], agEscapeIons: [] };
       const s6 = { mitoGroup: null, outerMem: null, innerCristae: null, innerOrigPos: null, lipids: [], dnaGroup: null, dnaA: null, dnaRungs: [], padlocks: [], gshList: [], agList: [], rosList: [] };
       const s7 = { mitoMini: null, releasePore: null, cytStream: [], caspaseComplexes: [], cellMembrane: null, cellOrigPos: null, apoptoticBodies: [] };
 
@@ -1144,7 +1111,7 @@
           metalness: 0.10
         });
 
-        for (let i = 0; i < 7; i++) {
+        for (let i = 0; i < 8; i++) {
           const g = new THREE.Group();
           g.visible = (i === 0);
           scene.add(g);
@@ -1155,9 +1122,10 @@
         buildStage2Injection(stageGroups[1]);
         buildStage3Ligands(stageGroups[2]);
         buildStage4Endocytosis(stageGroups[3]);
-        buildStage5Endosome(stageGroups[4]);
-        buildStage6Mitochondria(stageGroups[5]);
-        buildStage7Apoptosis(stageGroups[6]);
+        buildStage5EndosomeAcidification(stageGroups[4]);
+        buildStage6EndosomalEscape(stageGroups[5]);
+        buildStage7Mitochondria(stageGroups[6]);
+        buildStage8Apoptosis(stageGroups[7]);
 
         setupInteractions(container);
         initQRModal();
@@ -1165,8 +1133,8 @@
 
         const params = new URLSearchParams(window.location.search);
         if (params.has('stage')) {
-          const stParam = THREE.MathUtils.clamp(parseInt(params.get('stage'), 10) || 0, 0, 6);
-          state.progress = params.has('progress') ? parseFloat(params.get('progress')) : (stParam * (100 / 7) + 6);
+          const stParam = THREE.MathUtils.clamp(parseInt(params.get('stage'), 10) || 0, 0, 7);
+          state.progress = params.has('progress') ? parseFloat(params.get('progress')) : (stParam * (100 / 8) + 6);
           document.getElementById('slider-progress').value = state.progress;
           syncStageUI(stParam, true);
         }
@@ -1454,58 +1422,60 @@
       }
 
       /* ----------------------------------------------------------------------
-       * FASE 5: ESCAPE ENDOSOMAL "CABALLO DE TROYA" (pH 4.5–5.5)
+       * FASE 5: ENDOSOMA — CAMBIO DE pH Y LIBERACIÓN DEL NÚCLEO DE PLATA (Ag⁰)
        * ---------------------------------------------------------------------- */
-      function buildStage5Endosome(root) {
+      function buildStage5EndosomeAcidification(root) {
         const endoMatBase = {
-          color: 0x4b89ac,
-          roughness: 0.22,
+          color: 0x3b82a6,
+          roughness: 0.20,
           clearcoat: 0.45,
           transparent: true,
-          opacity: 0.24,
+          opacity: 0.26,
           depthWrite: false
         };
-        s5.endoFull = new THREE.Mesh(new THREE.SphereGeometry(3.75, 48, 36), new THREE.MeshPhysicalMaterial(endoMatBase));
+        s5.endoFull = new THREE.Mesh(new THREE.SphereGeometry(3.80, 52, 38), new THREE.MeshPhysicalMaterial(endoMatBase));
         s5.endoCut = new THREE.Mesh(
-          new THREE.SphereGeometry(3.75, 48, 36, Math.PI * 1.02, Math.PI * 1.44, 0, Math.PI),
+          new THREE.SphereGeometry(3.80, 52, 38, Math.PI * 1.02, Math.PI * 1.44, 0, Math.PI),
           new THREE.MeshPhysicalMaterial(Object.assign({}, endoMatBase, { side: THREE.DoubleSide }))
         );
-        registerInteractive(s5.endoFull, 'vatpase', 'Endosoma ácido (pH 4.5–5.5)', 4);
-        registerInteractive(s5.endoCut, 'vatpase', 'Membrana endosomal en peroxidación ácida', 4);
+        registerInteractive(s5.endoFull, 'vatpase', 'Endosoma intacto durante cambio de pH (7.4 → 4.5)', 4);
+        registerInteractive(s5.endoCut, 'vatpase', 'Lumen endosomal en acidificación activa', 4);
         root.add(s5.endoFull, s5.endoCut);
 
-        // Bombas V-ATPasa transmembrana
+        // 6 Bombas V-ATPasa transmembrana
         const pumpGeo = new THREE.CylinderGeometry(0.28, 0.34, 0.88, 16);
         const pumpMat = new THREE.MeshStandardMaterial({ color: 0x4fb3bf, roughness: 0.38 });
         for (let i = 0; i < 6; i++) {
           const a = (i / 6) * Math.PI * 2;
           const pump = new THREE.Mesh(pumpGeo, pumpMat);
-          pump.position.set(Math.cos(a) * 3.75, Math.sin(a) * 3.75, 0);
+          pump.position.set(Math.cos(a) * 3.80, Math.sin(a) * 3.80, 0);
           pump.rotation.z = a + Math.PI / 2;
-          registerInteractive(pump, 'vatpase', 'Bomba de protones V-ATPasa', 4);
+          registerInteractive(pump, 'vatpase', 'Bomba V-ATPasa (Transporte activo de protones H⁺)', 4);
           root.add(pump);
           s5.pumps.push({ mesh: pump });
         }
 
-        // Protones H+ ingresando al lumen
-        const pGeo = new THREE.SphereGeometry(0.07, 10, 8);
+        // Protones H+ cambiando el pH del endosoma
+        const pGeo = new THREE.SphereGeometry(0.075, 12, 10);
         const pMat = new THREE.MeshStandardMaterial({ color: 0xeab308, roughness: 0.4 });
-        for (let i = 0; i < 20; i++) {
-          const a = (i / 20) * Math.PI * 2;
+        for (let i = 0; i < 26; i++) {
+          const a = (i / 26) * Math.PI * 2;
           const pm = new THREE.Mesh(pGeo, pMat);
+          registerInteractive(pm, 'vatpase', 'Protones H⁺ (Cambio de pH endosomal)', 4);
           root.add(pm);
-          s5.protons.push({ mesh: pm, angle: a, speed: 0.75 + (i % 4) * 0.2, offset: i / 20 });
+          s5.protons.push({ mesh: pm, angle: a, speed: 0.72 + (i % 4) * 0.18, offset: i / 26 });
         }
 
-        // Núcleo esférico satinado Ag0 central + cuentas de corona de romero que se desprenden al protonarse
-        s5.coreMesh = new THREE.Mesh(new THREE.SphereGeometry(1.05, 44, 32), matSilverSatin.clone());
-        registerInteractive(s5.coreMesh, 'ag0_core', 'Núcleo Ag⁰ en disolución oxidativa (4Ag⁰ + O₂ + 4H⁺)', 4);
+        // Núcleo esférico satinado de Plata (Ag0) que queda liberado en el centro
+        s5.coreMesh = new THREE.Mesh(new THREE.SphereGeometry(1.15, 48, 36), matSilverSatin.clone());
+        registerInteractive(s5.coreMesh, 'ag0_core', 'Núcleo metálico de plata (Ag⁰) liberado de su coraza', 4);
         root.add(s5.coreMesh);
 
-        const cGreenGeo = new THREE.SphereGeometry(0.12, 12, 10);
-        const cGoldGeo = new THREE.SphereGeometry(0.10, 12, 10);
-        for (let i = 0; i < 42; i++) {
-          const phi = Math.acos(1 - 2 * (i + 0.5) / 42);
+        // Corona fitoquímica de romero que se protona (–COO- -> –COOH) y se abre liberando al núcleo Ag0
+        const cGreenGeo = new THREE.SphereGeometry(0.13, 12, 10);
+        const cGoldGeo = new THREE.SphereGeometry(0.11, 12, 10);
+        for (let i = 0; i < 48; i++) {
+          const phi = Math.acos(1 - 2 * (i + 0.5) / 48);
           const theta = Math.PI * (1 + Math.sqrt(5)) * i;
           const dir = new THREE.Vector3(Math.sin(phi) * Math.cos(theta), Math.cos(phi), Math.sin(phi) * Math.sin(theta));
           const isGold = i % 3 === 1;
@@ -1514,40 +1484,119 @@
             (isGold ? matRosemaryGold : matRosemaryGreen).clone()
           );
           bead.material.transparent = true;
-          registerInteractive(bead, 'rosemary_corona', 'Corona de romero protonada (–COO⁻ → –COOH)', 4);
+          registerInteractive(bead, 'rosemary_corona', 'Corona de romero abriéndose por cambio de pH', 4);
           root.add(bead);
-          s5.coronaBeads.push({ mesh: bead, dir, baseR: 1.22 });
-        }
+          s5.coronaBeads.push({ mesh: bead, dir, baseR: 1.32, hemi: dir.x >= 0 ? 1 : -1 });
 
-        // Iones de plata Ag+ esféricos satinados saliendo al citosol
-        const ionGeo = new THREE.SphereGeometry(0.125, 16, 12);
-        for (let i = 0; i < 28; i++) {
-          const ion = new THREE.Mesh(ionGeo, matSilverSatin);
-          registerInteractive(ion, 'ag', 'Ion Plata libre (Ag⁺) liberado al citosol', 4);
-          const phi = Math.acos(1 - 2 * ((i + 0.5) / 28));
-          const theta = Math.PI * (1 + Math.sqrt(5)) * (i + 5);
-          const dir = new THREE.Vector3(Math.sin(phi) * Math.cos(theta), Math.cos(phi), Math.sin(phi) * Math.sin(theta));
-          root.add(ion);
-          s5.agIons.push({ mesh: ion, dir, speed: 0.8 + (i % 5) * 0.12 });
-        }
-
-        // Especies ROS oxidando la pared del endosoma
-        const rosGeo = new THREE.SphereGeometry(0.095, 12, 10);
-        const rosMat = new THREE.MeshStandardMaterial({ color: 0xea580c, emissive: 0x9a3412, emissiveIntensity: 0.45, roughness: 0.35 });
-        for (let i = 0; i < 22; i++) {
-          const rm = new THREE.Mesh(rosGeo, rosMat);
-          registerInteractive(rm, 'ros', 'Peroxidación lipídica endosomal por ROS', 4);
-          const a = (i / 22) * Math.PI * 2;
-          const dir = new THREE.Vector3(Math.cos(a), Math.sin(a * 1.5) * 0.65, Math.sin(a)).normalize();
-          root.add(rm);
-          s5.rosParticles.push({ mesh: rm, dir, phase: i });
+          const rBond = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.022, 0.022, 0.20, 5),
+            matShortBond.clone()
+          );
+          rBond.material.transparent = true;
+          rBond.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+          root.add(rBond);
+          s5.coronaBonds.push({ mesh: rBond, dir, baseR: 1.22 });
         }
       }
 
       /* ----------------------------------------------------------------------
-       * FASE 6: MITOCONDRIA, BLOQUEO DE GSH Y ESTRÉS OXIDATIVO ROS
+       * FASE 6 (NUEVA): ESCAPE ENDOSOMAL — DISOLUCIÓN Ag⁰ Y PEROXIDACIÓN DE MEMBRANA
        * ---------------------------------------------------------------------- */
-      function buildStage6Mitochondria(root) {
+      function buildStage6EndosomalEscape(root) {
+        const R = 3.70;
+
+        // Núcleo de plata desnudo disolviéndose oxidativamente en el centro
+        s5b.coreMesh = new THREE.Mesh(new THREE.SphereGeometry(1.12, 48, 36), matSilverSatin.clone());
+        registerInteractive(s5b.coreMesh, 'ag0_core', 'Núcleo Ag⁰ en disolución oxidativa (4Ag⁰ + O₂ + 4H⁺ → 4Ag⁺)', 5);
+        root.add(s5b.coreMesh);
+
+        // Membrana endosómica construida en 12 sectores curvos para mostrar peroxidación y ruptura real
+        for (let lat = 0; lat < 2; lat++) {
+          for (let lon = 0; lon < 6; lon++) {
+            const phiStart = (lon / 6) * Math.PI * 2;
+            const phiLen = (Math.PI * 2) / 6 - 0.05;
+            const thetaStart = lat === 0 ? 0.08 : Math.PI * 0.50;
+            const thetaLen = Math.PI * 0.42;
+
+            const midPhi = phiStart + phiLen * 0.5;
+            const midTheta = thetaStart + thetaLen * 0.5;
+            const normalDir = new THREE.Vector3(
+              -Math.cos(midPhi) * Math.sin(midTheta),
+              Math.cos(midTheta),
+              Math.sin(midPhi) * Math.sin(midTheta)
+            ).normalize();
+
+            // Los sectores orientados hacia (+X, ±Y) se rompen y abren brechas de escape
+            const isBreachSector = normalDir.x > 0.15;
+
+            const secMat = new THREE.MeshPhysicalMaterial({
+              color: 0x4b89ac,
+              roughness: 0.28,
+              clearcoat: 0.3,
+              transparent: true,
+              opacity: 0.36,
+              side: THREE.DoubleSide,
+              depthWrite: false
+            });
+            const secMesh = new THREE.Mesh(
+              new THREE.SphereGeometry(R, 18, 14, phiStart, phiLen, thetaStart, thetaLen),
+              secMat
+            );
+            registerInteractive(secMesh, 'endosome_escape', 'Membrana endosómica peroxidada por especies ROS', 5);
+            root.add(secMesh);
+            s5b.sectors.push({ mesh: secMesh, mat: secMat, dir: normalDir, isBreach: isBreachSector, idx: lat * 6 + lon });
+          }
+        }
+
+        // 150 Cabezas fosfolipídicas discretas de la membrana endosómica que sufren peroxidación lipídica
+        const lipGeo = new THREE.SphereGeometry(0.105, 10, 8);
+        for (let i = 0; i < 150; i++) {
+          const phi = Math.acos(1 - 2 * (i + 0.5) / 150);
+          const theta = Math.PI * (1 + Math.sqrt(5)) * i;
+          const dir = new THREE.Vector3(Math.sin(phi) * Math.cos(theta), Math.cos(phi), Math.sin(phi) * Math.sin(theta));
+          // Dejar ventana frontal limpia si Corte está activo
+          if (dir.z > 0.65 && dir.x < 0.1) continue;
+
+          const lMat = new THREE.MeshStandardMaterial({ color: 0x5ec2cc, roughness: 0.38, transparent: true, opacity: 0.92 });
+          const lm = new THREE.Mesh(lipGeo, lMat);
+          const basePos = dir.clone().multiplyScalar(R);
+          lm.position.copy(basePos);
+          registerInteractive(lm, 'endosome_escape', 'Fosfolípido endosomal oxidado (Peroxidación lipídica)', 5);
+          root.add(lm);
+          s5b.lipidHeads.push({ mesh: lm, mat: lMat, basePos, dir, isBreach: dir.x > 0.18, phase: i });
+        }
+
+        // Olas de especies ROS golpeando y oxidando la membrana endosómica
+        const rosGeo = new THREE.SphereGeometry(0.105, 12, 10);
+        const rosMat = new THREE.MeshStandardMaterial({ color: 0xea580c, emissive: 0x9a3412, emissiveIntensity: 0.5, roughness: 0.35 });
+        for (let i = 0; i < 34; i++) {
+          const rm = new THREE.Mesh(rosGeo, rosMat);
+          registerInteractive(rm, 'ros', 'Especies ROS peroxidando la membrana endosómica', 5);
+          const phi = Math.acos(1 - 2 * ((i + 0.5) / 34));
+          const theta = Math.PI * (1 + Math.sqrt(5)) * (i + 2);
+          const dir = new THREE.Vector3(Math.sin(phi) * Math.cos(theta), Math.cos(phi), Math.sin(phi) * Math.sin(theta));
+          root.add(rm);
+          s5b.rosWaves.push({ mesh: rm, dir, speed: 0.65 + (i % 4) * 0.18, offset: (i % 7) / 7 });
+        }
+
+        // Corriente de Iones de Plata (Ag+) escapando por las brechas peroxidadas hacia el citosol
+        const ionGeo = new THREE.SphereGeometry(0.135, 16, 12);
+        for (let i = 0; i < 36; i++) {
+          const ion = new THREE.Mesh(ionGeo, matSilverSatin);
+          registerInteractive(ion, 'ag', 'Escape endosomal de iones Ag⁺ hacia el citosol', 5);
+          // Dirigidos preferentemente hacia el hemisferio derecho (+X) donde se abren las brechas
+          const spreadY = ((i % 6) - 2.5) * 0.28;
+          const spreadZ = (Math.sin(i * 1.9)) * 0.55;
+          const escapeDir = new THREE.Vector3(0.85 + (i % 3) * 0.15, spreadY, spreadZ).normalize();
+          root.add(ion);
+          s5b.agEscapeIons.push({ mesh: ion, dir: escapeDir, delay: (i / 36) * 0.52, speed: 0.85 + (i % 4) * 0.14 });
+        }
+      }
+
+      /* ----------------------------------------------------------------------
+       * FASE 7: MITOCONDRIA, BLOQUEO DE GSH Y ESTRÉS OXIDATIVO ROS
+       * ---------------------------------------------------------------------- */
+      function buildStage7Mitochondria(root) {
         const mitoGroup = new THREE.Group();
         root.add(mitoGroup);
         s6.mitoGroup = mitoGroup;
@@ -1571,7 +1620,7 @@
           side: THREE.DoubleSide,
           depthWrite: false
         }));
-        registerInteractive(s6.outerMem, 'membrane', 'Membrana mitocondrial externa', 5);
+        registerInteractive(s6.outerMem, 'membrane', 'Membrana mitocondrial externa', 6);
         mitoGroup.add(s6.outerMem);
 
         const innerGeo = new THREE.SphereGeometry(1, 88, 56);
@@ -1598,7 +1647,7 @@
           side: THREE.DoubleSide,
           depthWrite: false
         }));
-        registerInteractive(s6.innerCristae, 'membrane', 'Crestas mitocondriales internas', 5);
+        registerInteractive(s6.innerCristae, 'membrane', 'Crestas mitocondriales internas', 6);
         mitoGroup.add(s6.innerCristae);
 
         // Fosfolípidos de membrana
@@ -1612,7 +1661,7 @@
           if (z > 0.7) z = -z;
           const lm = new THREE.Mesh(lipGeo, new THREE.MeshStandardMaterial({ color: 0x5ec2cc, roughness: 0.38 }));
           lm.position.set(x, y, z);
-          registerInteractive(lm, 'membrane', 'Fosfolípidos mitocondriales', 5);
+          registerInteractive(lm, 'membrane', 'Fosfolípidos mitocondriales', 6);
           mitoGroup.add(lm);
           s6.lipids.push({ mesh: lm, basePos: new THREE.Vector3(x, y, z), phase: i });
         }
@@ -1662,7 +1711,7 @@
           const body = new THREE.Mesh(lockBodyGeo, bMat);
           const shackle = new THREE.Mesh(shackleGeo, bMat.clone());
           shackle.position.set(0, 0.26, 0);
-          registerInteractive(body, 'gsh', 'Escudo antioxidante GSH (Bloqueo tiol –SH por Ag⁺)', 5);
+          registerInteractive(body, 'gsh', 'Escudo antioxidante GSH (Bloqueo tiol –SH por Ag⁺)', 6);
           lg.add(body, shackle);
           lg.position.copy(lp);
           mitoGroup.add(lg);
@@ -1674,7 +1723,7 @@
         for (let i = 0; i < 20; i++) {
           const bMat = new THREE.MeshStandardMaterial({ color: 0x489878, roughness: 0.42 });
           const body = new THREE.Mesh(gshGeo, bMat);
-          registerInteractive(body, 'gsh', 'Glutatión reducido (GSH)', 5);
+          registerInteractive(body, 'gsh', 'Glutatión reducido (GSH)', 6);
           const px = (Math.random() - 0.5) * 7.2;
           const py = (Math.random() - 0.5) * 2.3 + Math.sin(px * 0.25) * 0.30;
           const pz = (Math.random() - 0.5) * 2.1;
@@ -1687,7 +1736,7 @@
         const agIonGeo = new THREE.SphereGeometry(0.14, 16, 12);
         for (let i = 0; i < 24; i++) {
           const m = new THREE.Mesh(agIonGeo, matSilverSatin);
-          registerInteractive(m, 'ag', 'Ion Plata (Ag⁺ · Secuestro de grupos tiol)', 5);
+          registerInteractive(m, 'ag', 'Ion Plata (Ag⁺ · Secuestro de grupos tiol)', 6);
           const ang = (i / 24) * Math.PI * 2;
           const outerPos = new THREE.Vector3(Math.cos(ang) * 8.6, Math.sin(ang) * 4.8, (Math.random() - 0.5) * 4.0);
           const targetGSH = i < s6.gshList.length ? s6.gshList[i] : null;
@@ -1703,7 +1752,7 @@
         ];
         for (let i = 0; i < 48; i++) {
           const rm = new THREE.Mesh(rosGeo, rosMats[i % 2]);
-          registerInteractive(rm, 'ros', 'Especies Reactivas de Oxígeno (ROS)', 5);
+          registerInteractive(rm, 'ros', 'Especies Reactivas de Oxígeno (ROS)', 6);
           mitoGroup.add(rm);
           s6.rosList.push({
             mesh: rm,
@@ -1717,9 +1766,9 @@
       }
 
       /* ----------------------------------------------------------------------
-       * FASE 7: COLAPSO MITOCONDRIAL Y APOPTOSIS (CASPASA 9 → 3)
+       * FASE 8: COLAPSO MITOCONDRIAL Y APOPTOSIS (CASPASA 9 → 3)
        * ---------------------------------------------------------------------- */
-      function buildStage7Apoptosis(root) {
+      function buildStage8Apoptosis(root) {
         const cellGeo = new THREE.SphereGeometry(6.4, 56, 44);
         s7.cellOrigPos = new Float32Array(cellGeo.attributes.position.array);
         s7.cellMembrane = new THREE.Mesh(cellGeo, new THREE.MeshPhysicalMaterial({
@@ -1731,7 +1780,7 @@
           side: THREE.DoubleSide,
           depthWrite: false
         }));
-        registerInteractive(s7.cellMembrane, 'apoptosome', 'Célula tumoral en apoptosis programada limpia', 6);
+        registerInteractive(s7.cellMembrane, 'apoptosome', 'Célula tumoral en apoptosis programada limpia', 7);
         root.add(s7.cellMembrane);
 
         // Mitocondria colapsada liberando Citocromo c
@@ -1745,7 +1794,7 @@
           new THREE.MeshPhysicalMaterial({ color: 0x8a425a, roughness: 0.42, transparent: true, opacity: 0.72 })
         );
         mShell.scale.set(2.8, 1.4, 1.4);
-        registerInteractive(mShell, 'membrane', 'Mitocondria colapsada por estrés oxidativo', 6);
+        registerInteractive(mShell, 'membrane', 'Mitocondria colapsada por estrés oxidativo', 7);
         s7.mitoMini.add(mShell);
 
         s7.releasePore = new THREE.Mesh(
@@ -1754,7 +1803,7 @@
         );
         s7.releasePore.position.set(1.2, 0.85, 0.35);
         s7.releasePore.lookAt(3.4, 2.8, 1.0);
-        registerInteractive(s7.releasePore, 'cytc', 'Salida mitocondrial de Citocromo c', 6);
+        registerInteractive(s7.releasePore, 'cytc', 'Salida mitocondrial de Citocromo c', 7);
         s7.mitoMini.add(s7.releasePore);
 
         // Complejos moleculares editoriales de la cascada Caspasa 9 -> 3
@@ -1766,7 +1815,7 @@
           const star = new THREE.Group();
           star.position.copy(pos);
           const centerSphere = new THREE.Mesh(new THREE.SphereGeometry(0.38, 24, 18), hubMat);
-          registerInteractive(centerSphere, 'apoptosome', 'Complejo activo Caspasa 9 → Caspasa 3', 6);
+          registerInteractive(centerSphere, 'apoptosome', 'Complejo activo Caspasa 9 → Caspasa 3', 7);
           star.add(centerSphere);
 
           for (let k = 0; k < 6; k++) {
@@ -1776,7 +1825,7 @@
             spoke.rotation.z = ang - Math.PI / 2;
             const subunit = new THREE.Mesh(new THREE.SphereGeometry(0.18, 16, 14), hubMat);
             subunit.position.set(Math.cos(ang) * 1.05, Math.sin(ang) * 1.05, 0);
-            registerInteractive(subunit, 'apoptosome', 'Subunidad ejecutora Caspasa 3', 6);
+            registerInteractive(subunit, 'apoptosome', 'Subunidad ejecutora Caspasa 3', 7);
             star.add(spoke, subunit);
           }
           root.add(star);
@@ -1788,7 +1837,7 @@
         const cytMat = new THREE.MeshStandardMaterial({ color: 0xe9d5ff, roughness: 0.30, metalness: 0.15 });
         for (let i = 0; i < 18; i++) {
           const cm = new THREE.Mesh(cytGeo, cytMat);
-          registerInteractive(cm, 'cytc', 'Citocromo c en tránsito al citosol', 6);
+          registerInteractive(cm, 'cytc', 'Citocromo c en tránsito al citosol', 7);
           root.add(cm);
           s7.cytStream.push({
             mesh: cm,
@@ -1809,7 +1858,7 @@
         for (let i = 0; i < 10; i++) {
           const ang = (i / 10) * Math.PI * 2;
           const body = new THREE.Mesh(new THREE.SphereGeometry(0.52 + (i % 3) * 0.14, 24, 18), bodyMat);
-          registerInteractive(body, 'apoptosome', 'Cuerpo apoptótico sellado (Sin necrosis inflamatoria)', 6);
+          registerInteractive(body, 'apoptosome', 'Cuerpo apoptótico sellado (Sin necrosis inflamatoria)', 7);
           const dir = new THREE.Vector3(Math.cos(ang) * 4.8, Math.sin(ang) * 3.4, Math.sin(i * 1.9) * 1.8);
           root.add(body);
           s7.apoptoticBodies.push({ mesh: body, dir });
@@ -1832,7 +1881,7 @@
        * ========================================================================
        */
       function updateSimulation(dt, elapsed) {
-        const stageSpan = 100 / 7;
+        const stageSpan = 100 / 8;
         const speedMult = SPEED_OPTIONS[state.speedIdx];
 
         if (state.isPlaying) {
@@ -1854,7 +1903,7 @@
         }
 
         const p = THREE.MathUtils.clamp(state.progress, 0, 100);
-        const computedStage = Math.min(6, Math.floor(p / stageSpan));
+        const computedStage = Math.min(7, Math.floor(p / stageSpan));
         const localT = THREE.MathUtils.clamp((p - computedStage * stageSpan) / stageSpan, 0, 1);
 
         if (computedStage !== state.currentStage) {
@@ -1967,52 +2016,115 @@
           s4.dynaminRing.scale.set(neckScale, neckScale, 1);
         }
 
-        // FASE 5: ESCAPE ENDOSOMAL CABALLO DE TROYA
+        // FASE 5: ENDOSOMA — CAMBIO DE pH Y LIBERACIÓN DEL NÚCLEO DE PLATA (Ag⁰)
         else if (state.currentStage === 4) {
-          const acidify = THREE.MathUtils.smoothstep(localT, 0.0, 0.38);
-          const detach = THREE.MathUtils.smoothstep(localT, 0.26, 0.68);
-          const burst = THREE.MathUtils.smoothstep(localT, 0.55, 0.98);
+          const acidify = THREE.MathUtils.smoothstep(localT, 0.0, 0.55);
+          const uncoat = THREE.MathUtils.smoothstep(localT, 0.30, 0.92);
 
           s5.endoFull.visible = !state.xrayMode;
           s5.endoCut.visible = state.xrayMode;
-          const endoColor = new THREE.Color(0x4b89ac).lerp(new THREE.Color(0xb8583c), acidify);
+
+          // Transición cromática del endosoma conforme cambia el pH (Azul fisiológico -> Ámbar ácido pH 4.5)
+          const endoColor = new THREE.Color(0x3b82a6).lerp(new THREE.Color(0xc2593f), acidify);
           s5.endoFull.material.color.copy(endoColor);
           s5.endoCut.material.color.copy(endoColor);
-          s5.endoFull.scale.setScalar(1 + burst * 0.10);
-          s5.endoCut.scale.setScalar(1 + burst * 0.10);
 
           s5.pumps.forEach((pObj) => { pObj.mesh.rotation.y = elapsed * 2.8 * speedMult; });
           s5.protons.forEach((pr) => {
             const cyc = (elapsed * pr.speed * speedMult + pr.offset) % 1;
-            const r = 3.55 * (1 - cyc);
-            pr.mesh.position.set(Math.cos(pr.angle) * r, Math.sin(pr.angle) * r, Math.sin(cyc * Math.PI) * 0.65);
-            pr.mesh.visible = localT < 0.75;
+            const r = 3.65 * (1 - cyc * 0.72);
+            pr.mesh.position.set(Math.cos(pr.angle) * r, Math.sin(pr.angle) * r, Math.sin(cyc * Math.PI) * 0.75);
           });
 
-          // Desprendimiento suave de los elementos de la corona de romero al protonarse
+          // La corona fitoquímica se abre en dos frentes y se desprende, liberando el núcleo de plata Ag⁰
           s5.coronaBeads.forEach((cb) => {
-            const dist = cb.baseR + detach * 1.65;
+            const dist = cb.baseR + uncoat * 1.45;
+            const lateralShift = cb.hemi * uncoat * 0.55;
             cb.mesh.position.copy(cb.dir.clone().multiplyScalar(dist));
-            cb.mesh.material.opacity = Math.max(0.15, 1.0 - burst * 0.75);
+            cb.mesh.position.x += lateralShift;
+            cb.mesh.material.opacity = Math.max(0.22, 1.0 - uncoat * 0.65);
           });
 
-          s5.coreMesh.scale.setScalar(Math.max(0.38, 1.0 - burst * 0.52));
-
-          const activeAg = Math.floor(s5.agIons.length * state.agConcentration);
-          s5.agIons.forEach((ion, idx) => {
-            ion.mesh.visible = idx <= activeAg && localT > 0.36;
-            ion.mesh.position.copy(ion.dir.clone().multiplyScalar(0.65 + burst * 5.8 * ion.speed));
+          s5.coronaBonds.forEach((bd) => {
+            const dist = bd.baseR + uncoat * 1.25;
+            bd.mesh.position.copy(bd.dir.clone().multiplyScalar(dist));
+            bd.mesh.material.opacity = Math.max(0.0, 0.85 - uncoat * 1.2);
+            bd.mesh.visible = uncoat < 0.72;
           });
 
-          s5.rosParticles.forEach((rs) => {
-            rs.mesh.visible = localT > 0.42;
-            const rDist = 1.35 + burst * 3.1 + Math.sin(elapsed * 5 + rs.phase) * 0.15;
-            rs.mesh.position.copy(rs.dir.clone().multiplyScalar(rDist));
+          s5.coreMesh.scale.setScalar(1.0);
+        }
+
+        // FASE 6: ESCAPE ENDOSOMAL — DISOLUCIÓN Ag⁰, PEROXIDACIÓN DE MEMBRANA Y ESCAPE DE Ag⁺
+        else if (state.currentStage === 5) {
+          const peroxidize = THREE.MathUtils.smoothstep(localT, 0.05, 0.55) * (0.45 + state.rosRate * 0.55);
+          const rupture = THREE.MathUtils.smoothstep(localT, 0.36, 0.95);
+
+          // Disolución progresiva del núcleo de plata expuesto
+          s5b.coreMesh.scale.setScalar(Math.max(0.32, 1.0 - rupture * 0.62));
+
+          // Peroxidación lipídica y fractura/apertura de los sectores de la membrana endosómica
+          const intactMemColor = new THREE.Color(0x8e5645);
+          const oxidizedMemColor = new THREE.Color(0xdc2626);
+          s5b.sectors.forEach((sec) => {
+            if (state.xrayMode && sec.dir.z > 0.55 && !sec.isBreach) {
+              sec.mesh.visible = false;
+              return;
+            }
+            sec.mesh.visible = true;
+            sec.mat.color.copy(intactMemColor).lerp(oxidizedMemColor, peroxidize);
+
+            if (sec.isBreach) {
+              const drift = rupture * 1.75;
+              sec.mesh.position.copy(sec.dir.clone().multiplyScalar(drift));
+              sec.mesh.rotation.z = rupture * (sec.idx % 2 === 0 ? 0.35 : -0.35);
+              sec.mat.opacity = Math.max(0.08, 0.38 - rupture * 0.28);
+            } else {
+              sec.mesh.position.set(0, 0, 0);
+              sec.mesh.rotation.set(0, 0, 0);
+              sec.mat.opacity = 0.32;
+            }
+          });
+
+          // Fosfolípidos de la membrana endosómica oxidándose y abriendo brechas
+          s5b.lipidHeads.forEach((lh, idx) => {
+            const isOx = peroxidize > (idx / s5b.lipidHeads.length) * 0.85;
+            lh.mat.color.setHex(isOx ? 0xea580c : 0x5ec2cc);
+            if (lh.isBreach) {
+              const pushOut = rupture * 1.85;
+              const jitter = Math.sin(elapsed * 14 + lh.phase) * 0.05 * peroxidize;
+              lh.mesh.position.copy(lh.basePos).add(lh.dir.clone().multiplyScalar(pushOut)).addScalar(jitter);
+              lh.mat.opacity = Math.max(0.18, 0.92 - rupture * 0.65);
+            } else {
+              const jitter = isOx ? Math.sin(elapsed * 10 + lh.phase) * 0.03 * peroxidize : 0;
+              lh.mesh.position.copy(lh.basePos).addScalar(jitter);
+              lh.mat.opacity = 0.88;
+            }
+          });
+
+          // Especies ROS golpeando la membrana endosómica
+          const activeROS = Math.floor(s5b.rosWaves.length * (0.35 + state.rosRate * 0.65));
+          s5b.rosWaves.forEach((rw, idx) => {
+            rw.mesh.visible = idx <= activeROS;
+            if (!rw.mesh.visible) return;
+            const cyc = (elapsed * rw.speed * speedMult + rw.offset) % 1;
+            const rad = 1.05 + cyc * 2.65;
+            rw.mesh.position.copy(rw.dir.clone().multiplyScalar(rad));
+          });
+
+          // Escape masivo de iones Ag+ a través de la membrana endosómica peroxidada hacia el citosol
+          const activeAg = Math.floor(s5b.agEscapeIons.length * state.agConcentration);
+          s5b.agEscapeIons.forEach((ion, idx) => {
+            ion.mesh.visible = idx <= activeAg && localT > 0.22;
+            if (!ion.mesh.visible) return;
+            const subT = THREE.MathUtils.clamp((rupture - ion.delay * 0.65) / (1 - ion.delay * 0.65), 0, 1);
+            const dist = 0.75 + subT * 6.8 * ion.speed;
+            ion.mesh.position.copy(ion.dir.clone().multiplyScalar(dist));
           });
         }
 
-        // FASE 6: MITOCONDRIA, BLOQUEO GSH Y ESTRÉS ROS
-        else if (state.currentStage === 5) {
+        // FASE 7: MITOCONDRIA, BLOQUEO GSH Y ESTRÉS ROS
+        else if (state.currentStage === 6) {
           const boost = state.pulseBoost / 100;
           const agInflux = THREE.MathUtils.clamp(localT * 1.65 + boost, 0, 1);
           const rosStorm = THREE.MathUtils.clamp((localT - 0.25) * 1.45 + boost, 0, 1) * (0.4 + state.rosRate * 0.6);
@@ -2086,8 +2198,8 @@
           });
         }
 
-        // FASE 7: APOPTOSIS (CITOCROMO c Y CASPASA 9 -> 3)
-        else if (state.currentStage === 6) {
+        // FASE 8: APOPTOSIS (CITOCROMO c Y CASPASA 9 -> 3)
+        else if (state.currentStage === 7) {
           const apopT = THREE.MathUtils.smoothstep(localT, 0.05, 0.92);
           s7.releasePore.rotation.z = elapsed * 1.4;
 
@@ -2147,76 +2259,32 @@
         updateLiveTelemetry(p, state.currentStage, localT);
       }
 
-      function updateLiveTelemetry(masterP, stageIdx, localT) {
+      function updateLiveTelemetry(masterP, stageIdx) {
         document.getElementById('progress-percent').textContent = `${Math.round(masterP)}%`;
 
-        let ph = 7.4, phLabel = '7.4 (Sano)', phPct = 100;
-        let agRel = 0;
-        let gshPct = 100;
-        let rosPct = 5, apopLabel = 'Inactiva';
         let badgeText = 'ESTABLE pH 7.4';
         let badgeClass = 'bg-[#0F766E]/35 text-[#99F6E4] border-[#2DD4BF]/25';
 
-        if (stageIdx === 0) {
-          ph = 7.4; phLabel = '7.4 (Gel)'; phPct = 100;
-          agRel = 0;
-        } else if (stageIdx === 1) {
-          ph = 7.4 - localT * 0.9;
-          phLabel = `${ph.toFixed(1)} (Tumor)`;
-          phPct = 76 - localT * 16;
-          agRel = Math.round(localT * 25);
+        if (stageIdx === 1) {
           badgeText = 'pH WARBURG';
           badgeClass = 'bg-[#B45309]/35 text-[#FDE68A] border-[#F59E0B]/35';
         } else if (stageIdx === 2) {
-          ph = 6.5; phLabel = '6.5 (Tumor)'; phPct = 62;
-          agRel = state.ligandMode === 'folate' ? 38 : 26;
           badgeText = state.ligandMode === 'folate' ? 'SELECTIVA FR-α' : 'VERSIÓN BASE';
         } else if (stageIdx === 3) {
-          ph = 6.4 - localT * 0.5;
-          phLabel = `${ph.toFixed(1)} (Vesícula)`;
-          phPct = 55;
-          agRel = 42;
           badgeText = 'ENDOCITOSIS CME';
         } else if (stageIdx === 4) {
-          ph = 5.8 - localT * 1.3;
-          phLabel = `${ph.toFixed(1)} (Endosoma)`;
-          phPct = 28;
-          agRel = Math.round(45 + localT * 55);
-          rosPct = Math.round(12 + localT * 38);
-          badgeText = 'CABALLO DE TROYA';
+          badgeText = 'CAMBIO DE pH (4.5)';
           badgeClass = 'bg-[#B45309]/40 text-[#FDE68A] border-[#F59E0B]/45';
         } else if (stageIdx === 5) {
-          ph = 6.6; phLabel = '6.6 (Mitocondria)'; phPct = 64;
-          agRel = 100;
-          gshPct = Math.max(0, Math.round(100 - localT * 96));
-          rosPct = Math.min(100, Math.round(42 + localT * 58));
-          apopLabel = 'Estrés ROS';
+          badgeText = 'ESCAPE ENDOSOMAL';
+          badgeClass = 'bg-orange-900/50 text-orange-200 border-orange-500/45';
+        } else if (stageIdx === 6) {
           badgeText = 'BLOQUEO GSH / ROS';
           badgeClass = 'bg-orange-900/50 text-orange-200 border-orange-500/40';
-        } else if (stageIdx === 6) {
-          ph = 6.7; phLabel = '6.7 (Citosol)'; phPct = 66;
-          agRel = 100;
-          gshPct = 0;
-          rosPct = 100;
-          apopLabel = localT > 0.45 ? 'Caspasa 9→3' : 'Citocromo c';
+        } else if (stageIdx === 7) {
           badgeText = 'APOPTOSIS ACTIVA';
           badgeClass = 'bg-[#7C3F58]/50 text-fuchsia-200 border-fuchsia-400/40';
         }
-
-        document.getElementById('val-ph').textContent = phLabel;
-        document.getElementById('bar-ph').style.width = `${phPct}%`;
-
-        document.getElementById('val-ag-rel').textContent = `${agRel}%`;
-        document.getElementById('bar-ag-rel').style.width = `${Math.max(4, agRel)}%`;
-
-        document.getElementById('val-gsh').textContent = `${gshPct}%`;
-        document.getElementById('bar-gsh').style.width = `${gshPct}%`;
-
-        document.getElementById('val-ros-apop').textContent = `${rosPct}% · ${apopLabel}`;
-        document.getElementById('bar-ros-apop').style.width = `${rosPct}%`;
-
-        document.getElementById('mobile-val-ph').textContent = ph.toFixed(1);
-        document.getElementById('mobile-val-ros').textContent = `${rosPct}%`;
 
         const hBadge = document.getElementById('header-status-badge');
         hBadge.textContent = badgeText;
@@ -2537,11 +2605,11 @@
         });
 
         function jumpToStage(stIdx) {
-          const clamped = THREE.MathUtils.clamp(stIdx, 0, 6);
-          state.progress = clamped * (100 / 7) + 0.15;
+          const clamped = THREE.MathUtils.clamp(stIdx, 0, 7);
+          state.progress = clamped * (100 / 8) + 0.15;
           sliderProgress.value = state.progress;
           syncStageUI(clamped, false);
-          if (clamped >= 4) triggerShockwave(clamped === 6 ? 0xc084fc : 0xf59e0b);
+          if (clamped >= 5) triggerShockwave(clamped === 7 ? 0xc084fc : 0xf59e0b);
         }
 
         document.querySelectorAll('.stage-btn').forEach((btn) => {
