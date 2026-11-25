@@ -1,0 +1,1857 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Nanogel Funcionalizado con AgNPs y Corona de Romero · Visualización Científica 3D</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      overscroll-behavior: none;
+      background-color: #0B121C;
+      font-family: 'Inter', system-ui, sans-serif;
+      color: #F1F5F9;
+    }
+    .font-mono-tech {
+      font-family: 'JetBrains Mono', monospace;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Visor Principal con Iluminación de Fondo Estudio Editorial */
+    #canvas-container {
+      position: fixed;
+      top: 3rem;
+      left: 0;
+      right: 0;
+      bottom: 1.5rem;
+      z-index: 1;
+      cursor: grab;
+      touch-action: none;
+      background: radial-gradient(ellipse at 50% 45%, #182638 0%, #0E1724 58%, #090F18 100%);
+    }
+    @media (min-width: 768px) {
+      #canvas-container {
+        top: 3.5rem;
+        bottom: 1.75rem;
+      }
+    }
+    #canvas-container:active {
+      cursor: grabbing;
+    }
+
+    /* Marco sutil de figura editorial científica */
+    #editorial-frame {
+      position: fixed;
+      top: 3.5rem;
+      left: 0;
+      right: 0;
+      bottom: 1.75rem;
+      pointer-events: none;
+      z-index: 5;
+      border: 1px solid rgba(203, 213, 225, 0.06);
+    }
+
+    /* Superficies Editoriales Sobrias */
+    .editorial-panel {
+      background: rgba(13, 20, 32, 0.86);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(203, 213, 225, 0.13);
+      box-shadow: 0 10px 28px rgba(0, 0, 0, 0.42);
+    }
+    .editorial-divider {
+      height: 2px;
+      width: 22px;
+      background: #4FB3BF;
+      border-radius: 999px;
+    }
+
+    /* Controles deslizantes limpios */
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      background: rgba(51, 65, 85, 0.85);
+      height: 4px;
+      border-radius: 999px;
+      outline: none;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 13px;
+      height: 13px;
+      border-radius: 50%;
+      background: #5EC2CC;
+      border: 2px solid #0B121C;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+    input[type="range"]::-webkit-slider-thumb:hover {
+      transform: scale(1.18);
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    /* Etiquetas Editoriales 3D -> 2D con línea guía discreta */
+    #labels-overlay {
+      position: fixed;
+      top: 3rem;
+      left: 0;
+      right: 0;
+      bottom: 1.5rem;
+      z-index: 12;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    @media (min-width: 768px) {
+      #labels-overlay {
+        top: 3.5rem;
+        bottom: 1.75rem;
+      }
+    }
+    .editorial-callout {
+      position: absolute;
+      transform: translate(-50%, -50%);
+      pointer-events: auto;
+      cursor: pointer;
+      padding: 3px 8px;
+      border-radius: 6px;
+      background: rgba(13, 20, 32, 0.82);
+      border: 1px solid rgba(203, 213, 225, 0.22);
+      color: #E2E8F0;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.01em;
+      white-space: nowrap;
+      backdrop-filter: blur(8px);
+      transition: opacity 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
+    }
+    .editorial-callout:hover,
+    .editorial-callout.callout-selected {
+      border-color: rgba(94, 194, 204, 0.75);
+      background: rgba(20, 32, 48, 0.94);
+      color: #FFFFFF;
+    }
+
+    /* Paneles Responsivos:
+       - Móvil (<768px): Hojas inferiores deslizables (con scroll interno)
+       - Escritorio (>=768px): Paneles laterales fijos SIN scroll y minimizables */
+    @media (max-width: 767px) {
+      .adaptive-left-panel,
+      .adaptive-right-panel {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 50;
+        max-height: 75vh;
+        overflow-y: auto;
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      .adaptive-left-panel.mobile-closed,
+      .adaptive-right-panel.mobile-closed {
+        transform: translateY(105%);
+        pointer-events: none;
+      }
+    }
+
+    @media (min-width: 768px) {
+      .adaptive-left-panel {
+        position: fixed;
+        top: 4.25rem;
+        left: 0.85rem;
+        width: 16.75rem;
+        z-index: 20;
+        overflow: hidden !important;
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease;
+      }
+      .adaptive-left-panel.desktop-minimized {
+        transform: translateX(calc(-100% - 1.25rem));
+        opacity: 0;
+        pointer-events: none !important;
+      }
+      .adaptive-right-panel {
+        position: fixed;
+        top: 4.25rem;
+        right: 0.85rem;
+        width: 16.75rem;
+        z-index: 20;
+        overflow: hidden !important;
+        transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease;
+      }
+      .adaptive-right-panel.desktop-minimized {
+        transform: translateX(calc(100% + 1.25rem));
+        opacity: 0;
+        pointer-events: none !important;
+      }
+    }
+
+    .bottom-dock {
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s ease;
+    }
+    .bottom-dock.minimized {
+      transform: translateY(calc(100% + 1.5rem));
+      opacity: 0;
+      pointer-events: none !important;
+    }
+
+    .stage-card-active {
+      background: rgba(79, 179, 191, 0.18) !important;
+      border-color: rgba(94, 194, 204, 0.65) !important;
+    }
+    .nav-btn-active {
+      background: rgba(79, 179, 191, 0.2);
+      color: #BAE6FD;
+      border-color: rgba(94, 194, 204, 0.45);
+    }
+    .ident-row-active {
+      background: rgba(79, 179, 191, 0.15);
+      border-color: rgba(94, 194, 204, 0.45);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- BARRA SUPERIOR EDITORIAL -->
+  <header class="fixed top-0 left-0 right-0 h-12 md:h-14 z-40 bg-[#0B121C]/95 backdrop-blur-xl border-b border-slate-800/80 px-2.5 md:px-4 flex items-center justify-between gap-2">
+    <div class="flex items-center gap-2.5 min-w-0">
+      <div class="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-[#4FB3BF]/15 border border-[#5EC2CC]/35 flex items-center justify-center shrink-0">
+        <svg class="w-4 h-4 text-[#5EC2CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="8" stroke-width="1.6"/>
+          <circle cx="12" cy="12" r="3" stroke-width="1.6"/>
+        </svg>
+      </div>
+      <div class="min-w-0">
+        <div class="flex items-center gap-2">
+          <span class="hidden sm:inline text-[9px] font-mono-tech uppercase tracking-widest text-[#5EC2CC]">FIG. 1 · MODELO CONCEPTUAL</span>
+          <span id="header-status-badge" class="text-[8px] md:text-[9px] font-mono-tech uppercase px-1.5 py-0.2 rounded bg-slate-800/90 text-slate-300 border border-slate-700/80">
+            ETAPA 1 · ESTRUCTURA
+          </span>
+        </div>
+        <h1 class="text-[11px] md:text-sm font-semibold text-slate-100 truncate leading-tight">
+          Nanogel Funcionalizado con AgNPs y Corona Fitoquímica (<span class="italic font-normal text-slate-300">Rosmarinus officinalis</span>)
+        </h1>
+      </div>
+    </div>
+
+    <!-- Herramientas de Visualización -->
+    <div class="flex items-center gap-1 md:gap-1.5 shrink-0">
+      <button id="btn-xray" class="nav-btn-active p-1.5 md:px-2.5 md:py-1.5 rounded-lg border border-slate-700/70 text-[11px] font-medium flex items-center gap-1.5 transition" title="Alternar Corte Hemisférico del Nanogel (X)">
+        <svg class="w-4 h-4 md:w-3.5 md:h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+        <span class="hidden lg:inline">Corte</span>
+      </button>
+
+      <button id="btn-labels" class="nav-btn-active p-1.5 md:px-2.5 md:py-1.5 rounded-lg border border-slate-700/70 text-[11px] font-medium flex items-center gap-1.5 transition" title="Mostrar / Ocultar Rótulos Editoriales (L)">
+        <svg class="w-4 h-4 md:w-3.5 md:h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+        <span class="hidden lg:inline">Rótulos</span>
+      </button>
+
+      <button id="btn-autorotate" class="nav-btn-active p-1.5 md:px-2.5 md:py-1.5 rounded-lg border border-slate-700/70 text-[11px] font-medium flex items-center gap-1.5 transition" title="Rotación Suave de Estudio (R)">
+        <svg class="w-4 h-4 md:w-3.5 md:h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+        <span class="hidden xl:inline">Rotar</span>
+      </button>
+
+      <button id="btn-reset" class="hidden sm:flex p-1.5 md:px-2.5 md:py-1.5 rounded-lg border border-slate-700/70 text-slate-300 hover:text-white text-[11px] font-medium items-center gap-1 transition" title="Reiniciar vista y animación">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
+      </button>
+
+      <!-- Botón Móvil: Abrir Tabla de Identificadores y Controles -->
+      <button id="btn-mobile-telemetry" class="md:hidden p-1.5 rounded-lg bg-[#4FB3BF]/20 border border-[#5EC2CC]/40 text-[#BAE6FD] flex items-center justify-center transition" title="Abrir Tabla de Identificadores">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h10"/></svg>
+      </button>
+
+      <!-- Botón Escritorio: QR Móvil -->
+      <button id="btn-open-qr" class="hidden md:flex px-2.5 py-1.5 rounded-lg border border-[#5EC2CC]/35 bg-[#4FB3BF]/15 hover:bg-[#4FB3BF]/30 text-[#BAE6FD] text-[11px] font-medium items-center gap-1.5 transition" title="Código QR para dispositivos móviles">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+        <span>QR Móvil</span>
+      </button>
+
+      <!-- Botón Escritorio: Minimizar Paneles -->
+      <button id="btn-toggle-all-panels" class="hidden md:flex px-2.5 py-1.5 rounded-lg border border-slate-700/70 text-slate-300 hover:text-white text-[11px] font-medium items-center gap-1.5 transition" title="Minimizar / Mostrar Paneles Laterales (H)">
+        <svg class="w-3.5 h-3.5 text-[#5EC2CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 6h16M4 12h16M4 18h7"/></svg>
+        <span class="hidden lg:inline">Paneles</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- VISOR 3D WEBGL -->
+  <div id="canvas-container"></div>
+  <div id="editorial-frame" class="hidden md:block"></div>
+
+  <!-- CAPA DE RÓTULOS CIENTÍFICOS DISCRETOS (SVG Líneas Guía + Etiquetas) -->
+  <div id="labels-overlay">
+    <svg id="callout-svg" class="w-full h-full">
+      <line id="line-nanogel" stroke="rgba(186,230,253,0.42)" stroke-width="1" />
+      <circle id="dot-nanogel" r="2.5" fill="#5EC2CC" />
+      <line id="line-matrix" stroke="rgba(186,230,253,0.42)" stroke-width="1" />
+      <circle id="dot-matrix" r="2.5" fill="#99F6E4" />
+      <line id="line-agnp" stroke="rgba(226,232,240,0.5)" stroke-width="1" />
+      <circle id="dot-agnp" r="2.5" fill="#E2E8F0" />
+      <line id="line-corona" stroke="rgba(134,239,172,0.5)" stroke-width="1" />
+      <circle id="dot-corona" r="2.5" fill="#52A788" />
+      <line id="line-tumor" stroke="rgba(253,164,175,0.48)" stroke-width="1" />
+      <circle id="dot-tumor" r="2.5" fill="#B86B77" />
+    </svg>
+
+    <button id="lbl-nanogel" data-inspect="nanogel" class="editorial-callout">Nanogel</button>
+    <button id="lbl-matrix" data-inspect="polymer_matrix" class="editorial-callout">Matriz polimérica</button>
+    <button id="lbl-agnp" data-inspect="agnp" class="editorial-callout">AgNP</button>
+    <button id="lbl-corona" data-inspect="rosemary_corona" class="editorial-callout">Corona fitoquímica de romero</button>
+    <button id="lbl-tumor" data-inspect="tumor_cell" class="editorial-callout hidden">Célula tumoral</button>
+  </div>
+
+  <!-- ACCESOS RÁPIDOS FLOTANTES SOLO EN MÓVIL -->
+  <div class="md:hidden fixed top-14 left-2.5 z-20">
+    <button id="btn-mobile-pill-ident" class="editorial-panel px-2.5 py-1 rounded-lg flex items-center gap-1.5 text-[10px] font-mono-tech text-slate-200">
+      <span class="w-2 h-2 rounded-full bg-[#5EC2CC]"></span>
+      <span>Identificadores</span>
+    </button>
+  </div>
+
+  <div class="md:hidden fixed top-14 right-2.5 z-20">
+    <button id="btn-mobile-inspect" class="editorial-panel px-2.5 py-1 rounded-lg text-[10px] font-mono-tech text-slate-200 flex items-center gap-1">
+      <svg class="w-3 h-3 text-[#5EC2CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+      <span>Ficha</span>
+    </button>
+  </div>
+
+  <div id="mobile-backdrop" class="md:hidden fixed inset-0 bg-black/55 z-40 hidden backdrop-blur-[2px]"></div>
+
+  <!-- TOOLTIP DISCRETO -->
+  <div id="hover-tooltip" class="fixed z-30 pointer-events-none hidden px-2.5 py-1 rounded-md editorial-panel text-[11px] shadow-lg transform -translate-x-1/2 -translate-y-full -mt-2">
+    <span id="hover-tooltip-title" class="font-medium text-white block"></span>
+  </div>
+
+  <!-- PESTAÑAS DE RESTAURACIÓN EN ESCRITORIO -->
+  <button id="btn-restore-left" class="hidden fixed top-[4.25rem] left-3 z-30 editorial-panel hover:border-[#5EC2CC]/60 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 items-center gap-1.5 transition">
+    <span class="w-2 h-2 rounded-full bg-[#5EC2CC]"></span>
+    <span class="font-mono-tech text-[10px] uppercase tracking-wider">Identificadores</span>
+    <svg class="w-3.5 h-3.5 text-[#5EC2CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+  </button>
+
+  <button id="btn-restore-right" class="hidden fixed top-[4.25rem] right-3 z-30 editorial-panel hover:border-[#5EC2CC]/60 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 items-center gap-1.5 transition">
+    <svg class="w-3.5 h-3.5 text-[#5EC2CC]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+    <span class="font-mono-tech text-[10px] uppercase tracking-wider">Información</span>
+  </button>
+
+  <!-- =======================================================================
+       PANEL IZQUIERDO: TABLA DE IDENTIFICADORES + AJUSTES DE VISTA EDITORIAL
+       (Sin scroll en Escritorio / Hoja deslizable en Móvil)
+       ======================================================================= -->
+  <aside id="left-panel" class="adaptive-left-panel mobile-closed editorial-panel rounded-2xl p-3.5 flex flex-col gap-2.5 pointer-events-auto">
+    <div id="left-sheet-handle" class="md:hidden w-10 h-1 bg-slate-700 rounded-full mx-auto -mt-1 mb-0.5 cursor-pointer"></div>
+
+    <div class="flex items-center justify-between border-b border-slate-800/90 pb-2">
+      <div class="flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-[#5EC2CC]"></span>
+        <span class="text-[10px] font-mono-tech font-semibold uppercase tracking-wider text-slate-200">Tabla de Identificadores</span>
+      </div>
+      <button id="btn-min-left" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800/80 transition" title="Minimizar panel ([)">
+        <svg class="hidden md:block w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        <svg class="md:hidden w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <!-- Tabla Codificada de Componentes del Modelo -->
+    <div class="flex flex-col gap-1 text-[11px]">
+      <button data-inspect="nanogel" class="ident-row ident-row-active inspect-legend flex items-center justify-between px-2 py-1.5 rounded-lg border border-transparent hover:bg-slate-800/70 transition text-left">
+        <span class="flex items-center gap-2 min-w-0">
+          <span class="w-2.5 h-2.5 rounded-full bg-[#4FB3BF] ring-2 ring-[#4FB3BF]/30 shrink-0"></span>
+          <span class="text-slate-100 font-medium truncate">Nanogel</span>
+        </span>
+        <span class="text-[9px] font-mono-tech text-slate-400 shrink-0">Esfera hidratada</span>
+      </button>
+
+      <button data-inspect="polymer_matrix" class="ident-row inspect-legend flex items-center justify-between px-2 py-1.5 rounded-lg border border-transparent hover:bg-slate-800/70 transition text-left">
+        <span class="flex items-center gap-2 min-w-0">
+          <span class="w-2.5 h-2.5 rounded-full bg-[#99F6E4] shrink-0"></span>
+          <span class="text-slate-200 truncate">Matriz polimérica</span>
+        </span>
+        <span class="text-[9px] font-mono-tech text-slate-400 shrink-0">Red / Poros</span>
+      </button>
+
+      <button data-inspect="crosslinks" class="ident-row inspect-legend flex items-center justify-between px-2 py-1.5 rounded-lg border border-transparent hover:bg-slate-800/70 transition text-left">
+        <span class="flex items-center gap-2 min-w-0">
+          <span class="w-2.5 h-2.5 rounded-full bg-[#2DD4BF] shrink-0"></span>
+          <span class="text-slate-200 truncate">Entrecruzamientos</span>
+        </span>
+        <span class="text-[9px] font-mono-tech text-slate-400 shrink-0">Nodos red 3D</span>
+      </button>
+
+      <button data-inspect="agnp" class="ident-row inspect-legend flex items-center justify-between px-2 py-1.5 rounded-lg border border-transparent hover:bg-slate-800/70 transition text-left">
+        <span class="flex items-center gap-2 min-w-0">
+          <span class="w-2.5 h-2.5 rounded-full bg-[#CBD5E1] ring-1 ring-white/40 shrink-0"></span>
+          <span class="text-slate-200 truncate">AgNP (Plata)</span>
+        </span>
+        <span class="text-[9px] font-mono-tech text-slate-400 shrink-0">Núcleo metálico</span>
+      </button>
+
+      <button data-inspect="rosemary_corona" class="ident-row inspect-legend flex items-center justify-between px-2 py-1.5 rounded-lg border border-transparent hover:bg-slate-800/70 transition text-left">
+        <span class="flex items-center gap-2 min-w-0">
+          <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background: linear-gradient(135deg, #4E9F7E 55%, #CFA358 45%);"></span>
+          <span class="text-slate-200 truncate">Corona de romero</span>
+        </span>
+        <span class="text-[9px] font-mono-tech text-slate-400 shrink-0">Capa fitoquímica</span>
+      </button>
+
+      <button data-inspect="tumor_cell" class="ident-row inspect-legend flex items-center justify-between px-2 py-1.5 rounded-lg border border-transparent hover:bg-slate-800/70 transition text-left">
+        <span class="flex items-center gap-2 min-w-0">
+          <span class="w-2.5 h-2.5 rounded-full bg-[#A85D69] shrink-0"></span>
+          <span class="text-slate-200 truncate">Célula tumoral</span>
+        </span>
+        <span class="text-[9px] font-mono-tech text-slate-400 shrink-0">Entorno diana</span>
+      </button>
+    </div>
+
+    <!-- Controles Ópticos de Inspección -->
+    <div class="pt-2 border-t border-slate-800/90 space-y-2">
+      <div>
+        <div class="flex justify-between text-[10px] mb-1">
+          <span class="text-slate-300">Transparencia del Nanogel</span>
+          <span id="label-gel-opacity" class="font-mono-tech text-[#5EC2CC]">Media</span>
+        </div>
+        <input id="slider-opacity" type="range" min="10" max="85" value="45" class="w-full block" />
+      </div>
+
+      <div class="text-[9px] text-slate-400 leading-snug bg-slate-900/70 rounded-lg px-2.5 py-1.5 border border-slate-800/80">
+        <span class="font-mono-tech uppercase text-[#5EC2CC]">Nota editorial:</span> Representación conceptual multiescala. Las interacciones terapéuticas corresponden a mecanismos propuestos.
+      </div>
+    </div>
+  </aside>
+
+  <!-- =======================================================================
+       PANEL DERECHO: INFORMACIÓN DEL COMPONENTE SELECCIONADO
+       ======================================================================= -->
+  <aside id="right-panel" class="adaptive-right-panel mobile-closed editorial-panel rounded-2xl p-3.5 flex flex-col gap-2 pointer-events-auto">
+    <div id="right-sheet-handle" class="md:hidden w-10 h-1 bg-slate-700 rounded-full mx-auto -mt-1 mb-0.5 cursor-pointer"></div>
+
+    <div class="flex items-start justify-between gap-2">
+      <span id="inspector-tag" class="text-[9px] font-mono-tech uppercase tracking-wider px-2 py-0.5 rounded bg-[#4FB3BF]/15 text-[#BAE6FD] border border-[#5EC2CC]/30">
+        Matriz Hidratada
+      </span>
+      <button id="btn-min-right" class="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800/80 transition shrink-0" title="Minimizar panel (])">
+        <svg class="hidden md:block w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        <svg class="md:hidden w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <div class="editorial-divider"></div>
+
+    <h2 id="inspector-title" class="text-xs md:text-sm font-bold text-white leading-snug">
+      Nanogel Polimérico
+    </h2>
+
+    <div id="inspector-meta" class="text-[10px] font-mono-tech text-[#BAE6FD] bg-[#080D15]/90 px-2.5 py-1 rounded-md border border-slate-800">
+      Red tridimensional hidratada (~80–100 nm)
+    </div>
+
+    <p id="inspector-desc" class="text-[11px] text-slate-300 leading-relaxed">
+      Esfera polimérica semitransparente con volumen definido, cavidades porosas interconectadas y retención acuosa.
+    </p>
+
+    <div class="bg-[#090F18]/90 rounded-lg p-2.5 border border-slate-800/90">
+      <div id="inspector-note-label" class="text-[9px] font-mono-tech uppercase tracking-wider text-[#CFA358] font-semibold mb-0.5">
+        Papel Estructural
+      </div>
+      <p id="inspector-impact" class="text-[11px] text-slate-200 leading-snug">
+        Aloja y estabiliza espacialmente las nanopartículas de plata funcionalizadas dentro de su arquitectura porosa.
+      </p>
+    </div>
+  </aside>
+
+  <!-- BOTÓN RESTAURAR SECUENCIA INFERIOR -->
+  <button id="btn-restore-bottom" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-30 hidden editorial-panel hover:border-[#5EC2CC]/60 rounded-full px-3.5 py-1 text-[10px] font-mono-tech text-[#BAE6FD] items-center gap-1.5 shadow-xl transition">
+    <span>Mostrar Secuencia (4 Etapas)</span>
+    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"/></svg>
+  </button>
+
+  <!-- =======================================================================
+       BARRA INFERIOR: SECUENCIA EDITORIAL EN 4 ETAPAS + PAUSA / VELOCIDAD
+       ======================================================================= -->
+  <div id="bottom-panel" class="bottom-dock fixed bottom-7 md:bottom-8 left-2 right-2 md:left-3 md:right-3 z-20 flex justify-center pointer-events-none">
+    <div class="editorial-panel rounded-xl md:rounded-2xl p-2 md:px-3.5 md:py-2.5 w-full max-w-3xl pointer-events-auto">
+      
+      <div class="flex items-center justify-between gap-2 mb-1.5">
+        <div class="flex items-center gap-1.5 min-w-0">
+          <button id="btn-prev-stage" class="hidden sm:flex w-7 h-7 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 items-center justify-center transition shrink-0" title="Etapa anterior (←)">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+          </button>
+
+          <button id="btn-play-pause" class="w-7 h-7 md:w-8 md:h-8 rounded-lg bg-[#4FB3BF]/25 hover:bg-[#4FB3BF]/40 border border-[#5EC2CC]/50 flex items-center justify-center text-[#BAE6FD] transition shrink-0" title="Reproducir / Pausar (Espacio)">
+            <svg id="icon-play" class="w-3.5 h-3.5 hidden" fill="currentColor" viewBox="0 0 20 20"><path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z"/></svg>
+            <svg id="icon-pause" class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M5.75 3a.75.75 0 00-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 00.75-.75V3.75A.75.75 0 007.25 3h-1.5zM12.75 3a.75.75 0 00-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 00.75-.75V3.75a.75.75 0 00-.75-.75h-1.5z"/></svg>
+          </button>
+
+          <button id="btn-next-stage" class="hidden sm:flex w-7 h-7 rounded-lg bg-slate-800/80 hover:bg-slate-700 text-slate-300 items-center justify-center transition shrink-0" title="Siguiente etapa (→)">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          </button>
+
+          <!-- Selector de Velocidad -->
+          <button id="btn-speed" class="px-2 h-7 rounded-lg text-[10px] font-mono-tech font-semibold border border-slate-700/80 bg-slate-900/70 text-[#5EC2CC] hover:border-[#5EC2CC]/50 transition shrink-0" title="Ajustar velocidad de reproducción">
+            1.0×
+          </button>
+
+          <button id="btn-loop-stage" class="hidden md:inline-flex items-center px-2 h-7 rounded-lg text-[10px] font-mono-tech border border-slate-700/80 text-slate-400 hover:text-white transition shrink-0" title="Mantener en la etapa actual">
+            Fijar Etapa: OFF
+          </button>
+
+          <div class="flex items-center gap-1.5 min-w-0 ml-1">
+            <span id="stage-badge" class="text-[9px] md:text-[10px] font-mono-tech font-semibold uppercase px-1.5 py-0.5 rounded bg-[#4FB3BF]/20 text-[#BAE6FD] shrink-0">1 / 4</span>
+            <h3 id="stage-title" class="text-[11px] md:text-xs font-semibold text-white truncate">Estructura: Nanogel y Red Polimérica</h3>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 shrink-0">
+          <span id="progress-percent" class="text-[10px] md:text-xs font-mono-tech font-semibold text-[#5EC2CC]">0%</span>
+          <button id="btn-min-bottom" class="hidden sm:block text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800/80 transition" title="Minimizar controles inferiores">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="mb-1.5 px-0.5">
+        <input id="slider-progress" type="range" min="0" max="100" step="0.1" value="0" class="w-full block" />
+      </div>
+
+      <!-- Las 4 Etapas Editoriales -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-1 md:gap-1.5">
+        <button data-stage="0" class="stage-btn stage-card-active text-left px-2.5 py-1.5 rounded-lg border border-slate-800 bg-slate-900/60 hover:border-slate-600 transition">
+          <div class="text-[8px] md:text-[9px] font-mono-tech text-[#5EC2CC] font-semibold truncate">01 · ESTRUCTURA</div>
+          <div class="text-[9px] md:text-[10px] text-slate-200 truncate">Red polimérica porosa</div>
+        </button>
+
+        <button data-stage="1" class="stage-btn text-left px-2.5 py-1.5 rounded-lg border border-slate-800 bg-slate-900/60 hover:border-slate-600 transition">
+          <div class="text-[8px] md:text-[9px] font-mono-tech text-slate-200 font-semibold truncate">02 · FUNCIONALIZACIÓN</div>
+          <div class="text-[9px] md:text-[10px] text-slate-300 truncate">Nanopartículas AgNPs</div>
+        </button>
+
+        <button data-stage="2" class="stage-btn text-left px-2.5 py-1.5 rounded-lg border border-slate-800 bg-slate-900/60 hover:border-slate-600 transition">
+          <div class="text-[8px] md:text-[9px] font-mono-tech text-[#68B693] font-semibold truncate">03 · CORONA FITOQUÍMICA</div>
+          <div class="text-[9px] md:text-[10px] text-slate-300 truncate">Recubrimiento de romero</div>
+        </button>
+
+        <button data-stage="3" class="stage-btn text-left px-2.5 py-1.5 rounded-lg border border-slate-800 bg-slate-900/60 hover:border-slate-600 transition">
+          <div class="text-[8px] md:text-[9px] font-mono-tech text-[#D48C96] font-semibold truncate">04 · APLICACIÓN ONCOLÓGICA</div>
+          <div class="text-[9px] md:text-[10px] text-slate-300 truncate">Proximidad tumoral (propuesta)</div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL QR PARA DISPOSITIVOS MÓVILES -->
+  <div id="qr-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 backdrop-blur-sm p-4">
+    <div class="editorial-panel rounded-2xl p-5 max-w-xs w-full text-center relative">
+      <button id="btn-close-qr" class="absolute top-3 right-3 text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+      <div class="editorial-divider mx-auto mb-2.5"></div>
+      <h3 class="text-sm font-bold text-white">Acceso Móvil Interactivo</h3>
+      <p class="text-[11px] text-slate-400 mt-1 mb-3.5">Escanea para explorar el modelo 3D desde tu dispositivo.</p>
+      <div id="qrcode-box" class="bg-white p-3 rounded-xl inline-block mx-auto shadow-lg"></div>
+      <div class="mt-3 flex items-center gap-1.5 bg-[#080D15] border border-slate-800 rounded-lg px-2.5 py-1.5">
+        <span id="qr-url-label" class="text-[10px] font-mono-tech text-[#BAE6FD] truncate flex-1 text-left">https://thalosroy.github.io/nanogel-plata-verde-3d/</span>
+        <button id="btn-copy-url" class="text-[10px] font-mono-tech px-2 py-0.5 rounded bg-[#4FB3BF]/30 text-white hover:bg-[#4FB3BF]/50 transition shrink-0">Copiar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PIE DE FIGURA CIENTÍFICA -->
+  <footer class="fixed bottom-0 left-0 right-0 h-6 md:h-7 z-30 bg-[#090F18]/95 border-t border-slate-800/80 px-3 md:px-4 flex items-center justify-between text-[9px] md:text-[10px] font-mono-tech text-slate-400">
+    <span class="truncate">SCIENTIFIC EDITORIAL RENDER · NANOGEL AgNPs–ROMERO</span>
+    <span class="hidden sm:inline text-slate-400">MODELO CONCEPTUAL MULTIESCALA</span>
+    <span class="sm:hidden text-[#5EC2CC]">3D INTERACTIVO</span>
+  </footer>
+
+  <script>
+    (function () {
+      const PUBLIC_SHARE_URL = "https://thalosroy.github.io/nanogel-plata-verde-3d/";
+
+      /**
+       * ========================================================================
+       * BASE DE DATOS EDITORIAL DE COMPONENTES (Rigor Científico / Sin Extrapolación)
+       * ========================================================================
+       */
+      const COMPONENT_INFO = {
+        nanogel: {
+          tag: "Vehículo Coloidal",
+          title: "Nanogel Polimérico Hidratado",
+          meta: "Esfera tridimensional (~80–100 nm)",
+          desc: "Volumen polimérico semitransparente de superficie continua que conserva agua e integridad estructural en medio fisiológico.",
+          noteLabel: "Función en el Diseño",
+          impact: "Actúa como soporte tridimensional para alojar y estabilizar las nanopartículas metálicas funcionalizadas."
+        },
+        polymer_matrix: {
+          tag: "Arquitectura Interna",
+          title: "Matriz Polimérica y Cavidades Porosas",
+          meta: "Red de filamentos de nanocelulosa",
+          desc: "Entramado interno organizado de cadenas poliméricas que delimita espacios porosos interconectados dentro del nanogel.",
+          noteLabel: "Propiedad Física",
+          impact: "Proporciona retención espacial de la carga nanoparticulada y permeabilidad controlada al medio acuoso."
+        },
+        crosslinks: {
+          tag: "Estabilidad Estructural",
+          title: "Puntos de Entrecruzamiento",
+          meta: "Interacciones físicas / Puentes de hidrógeno",
+          desc: "Nodos de unión entre filamentos poliméricos que consolidan la geometría esférica de la red sin requerir agentes tóxicos.",
+          noteLabel: "Comportamiento Mecánico",
+          impact: "Mantiene la cohesión tridimensional del nanogel evitando su disolución prematura."
+        },
+        agnp: {
+          tag: "Fase Inorgánica",
+          title: "Nanopartículas de Plata (AgNPs)",
+          meta: "Esferas metálicas (~12–22 nm · óptimo ~17.5 nm)",
+          desc: "Núcleos esféricos de plata elemental con acabado metálico satinado, distribuidos en los poros de la matriz polimérica.",
+          noteLabel: "Mecanismo Propuesto",
+          impact: "Reservorio inorgánico propuesto para respuesta dependiente de pH en microambientes ácidos."
+        },
+        rosemary_corona: {
+          tag: "Recubrimiento Orgánico",
+          title: "Corona Fitoquímica de Romero",
+          meta: "Extracto de Rosmarinus officinalis (–COOH / –OH)",
+          desc: "Capa molecular discreta de metabolitos vegetales adherida a la superficie de cada AgNP mediante enlaces cortos.",
+          noteLabel: "Estabilización y Hipótesis pH",
+          impact: "Previene la agregación entre núcleos metálicos; se propone su protonación como modulador superficial frente a cambios de pH."
+        },
+        tumor_cell: {
+          tag: "Contexto Biológico",
+          title: "Célula Tumoral ( aproximación conceptual )",
+          meta: "Microambiente tumoral ácido propuesto (pH ~6.2–6.8)",
+          desc: "Representación morfológica de una célula tumoral empleada como referencia espacial de escala y posicionamiento local.",
+          noteLabel: "Alcance Conceptual",
+          impact: "Ilustra la proximidad terapéutica propuesta del nanogel; los procesos de captura e interacción intracelular constituyen hipótesis de estudio."
+        }
+      };
+
+      const STAGES_DATA = [
+        {
+          badge: "1 / 4",
+          headerBadge: "ETAPA 1 · ESTRUCTURA",
+          title: "Estructura: Nanogel Hidratado y Red Polimérica",
+          defaultComp: "nanogel",
+          cam: { theta: 0.46, phi: 1.26, radius: 15.6 },
+          focus: new THREE.Vector3(0, -0.35, 0)
+        },
+        {
+          badge: "2 / 4",
+          headerBadge: "ETAPA 2 · FUNCIONALIZACIÓN",
+          title: "Funcionalización: Distribución de Nanopartículas de Plata",
+          defaultComp: "agnp",
+          cam: { theta: 0.68, phi: 1.22, radius: 14.4 },
+          focus: new THREE.Vector3(0, -0.30, 0)
+        },
+        {
+          badge: "3 / 4",
+          headerBadge: "ETAPA 3 · CORONA FITOQUÍMICA",
+          title: "Corona Fitoquímica: Recubrimiento Molecular de Romero",
+          defaultComp: "rosemary_corona",
+          cam: { theta: 0.48, phi: 1.28, radius: 4.55 },
+          focus: new THREE.Vector3(0, 0, 0) // Se ajusta dinámicamente a la AgNP focal
+        },
+        {
+          badge: "4 / 4",
+          headerBadge: "ETAPA 4 · APLICACIÓN ONCOLÓGICA",
+          title: "Aplicación Oncológica: Posicionamiento junto a Célula Tumoral",
+          defaultComp: "tumor_cell",
+          cam: { theta: 0.22, phi: 1.26, radius: 21.2 },
+          focus: new THREE.Vector3(2.4, -0.55, 0)
+        }
+      ];
+
+      const SPEED_OPTIONS = [0.5, 1.0, 1.5, 2.0];
+
+      const state = {
+        progress: 0,
+        isPlaying: true,
+        loopStage: false,
+        baseSpeed: 2.6,
+        speedIdx: 1,
+        xrayMode: true,
+        labelsVisible: true,
+        autoRotate: true,
+        gelOpacitySetting: 0.45,
+        currentStage: 0,
+        selectedComp: 'nanogel',
+        leftDesktopMin: false,
+        rightDesktopMin: false,
+        bottomMin: false,
+        mobileSheet: null
+      };
+
+      // Variables de escena Three.js
+      let scene, camera, renderer, clock;
+      let nanogelAssembly;
+      let outerSphereFull, outerSphereCut, innerCoreVolume;
+      let filamentMeshes = [], crosslinkMeshes = [];
+      let agnpUnits = []; // { group, coreMesh, coronaGroup, coronaBeads, coronaBonds, basePos }
+      let focalAgNPPos = new THREE.Vector3(0.85, 0.55, 1.15);
+      let tumorCellGroup, tumorMembraneMesh, tumorNucleusMesh;
+      let interactiveObjects = [];
+
+      // Puntos de anclaje 3D para los rótulos editoriales
+      const labelAnchors = {
+        nanogel: { world: new THREE.Vector3(-3.35, 2.15, 0.2), offset: { x: -72, y: -34 }, lineId: 'line-nanogel', dotId: 'dot-nanogel', elId: 'lbl-nanogel' },
+        matrix: { world: new THREE.Vector3(-1.75, -1.85, 1.1), offset: { x: -82, y: 36 }, lineId: 'line-matrix', dotId: 'dot-matrix', elId: 'lbl-matrix' },
+        agnp: { world: new THREE.Vector3(0.85, 0.55, 1.15), offset: { x: 86, y: -42 }, lineId: 'line-agnp', dotId: 'dot-agnp', elId: 'lbl-agnp' },
+        corona: { world: new THREE.Vector3(1.22, 0.28, 1.42), offset: { x: 108, y: 34 }, lineId: 'line-corona', dotId: 'dot-corona', elId: 'lbl-corona' },
+        tumor: { world: new THREE.Vector3(5.2, -1.1, 0.6), offset: { x: 64, y: -44 }, lineId: 'line-tumor', dotId: 'dot-tumor', elId: 'lbl-tumor' }
+      };
+
+      const orbit = {
+        theta: 0.42,
+        phi: 1.28,
+        radius: 11.2,
+        targetTheta: 0.42,
+        targetPhi: 1.28,
+        targetRadius: 11.2,
+        focus: new THREE.Vector3(0, 0, 0),
+        targetFocus: new THREE.Vector3(0, 0, 0),
+        isDragging: false,
+        prevX: 0,
+        prevY: 0,
+        pinchDist: 0
+      };
+
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2(-999, -999);
+
+      function registerInteractive(mesh, compKey, label) {
+        mesh.userData = Object.assign(mesh.userData || {}, { compKey, label });
+        interactiveObjects.push(mesh);
+      }
+
+      /**
+       * Genera un mapa de entorno de estudio fotográfico suave (PMREM) sin dependencias externas
+       * para lograr reflejos plateados satinados realistas y volumen en el hidrogel.
+       */
+      function createStudioEnvironment(webglRenderer) {
+        try {
+          const pmrem = new THREE.PMREMGenerator(webglRenderer);
+          pmrem.compileEquirectangularShader();
+
+          const envScene = new THREE.Scene();
+          envScene.background = new THREE.Color(0x0f1724);
+
+          // Softbox principal superior izquierda
+          const softboxKey = new THREE.Mesh(
+            new THREE.PlaneGeometry(18, 12),
+            new THREE.MeshBasicMaterial({ color: 0xf8fafc, side: THREE.DoubleSide })
+          );
+          softboxKey.position.set(-10, 12, 10);
+          softboxKey.lookAt(0, 0, 0);
+          envScene.add(softboxKey);
+
+          // Panel de relleno frontal suave frío
+          const softboxFill = new THREE.Mesh(
+            new THREE.PlaneGeometry(16, 10),
+            new THREE.MeshBasicMaterial({ color: 0x99d5df, side: THREE.DoubleSide })
+          );
+          softboxFill.position.set(8, 2, 12);
+          softboxFill.lookAt(0, 0, 0);
+          envScene.add(softboxFill);
+
+          // Contorno superior sutil
+          const softboxRim = new THREE.Mesh(
+            new THREE.PlaneGeometry(20, 8),
+            new THREE.MeshBasicMaterial({ color: 0xcbd5e1, side: THREE.DoubleSide })
+          );
+          softboxRim.position.set(0, -12, -10);
+          softboxRim.lookAt(0, 0, 0);
+          envScene.add(softboxRim);
+
+          const envRT = pmrem.fromScene(envScene, 0.045);
+          pmrem.dispose();
+          return envRT.texture;
+        } catch (err) {
+          return null;
+        }
+      }
+
+      /**
+       * Inicialización de la Escena Científica Editorial
+       */
+      function initScene() {
+        const container = document.getElementById('canvas-container');
+        clock = new THREE.Clock();
+
+        scene = new THREE.Scene();
+
+        const isMobile = window.innerWidth < 768;
+        // Perspectiva teleobjetivo científica limpia (objeto principal ocupa ~65% del área libre del visor)
+        camera = new THREE.PerspectiveCamera(isMobile ? 46 : 38, container.clientWidth / container.clientHeight, 0.1, 120);
+
+        renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
+        renderer.setSize(container.clientWidth, container.clientHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.outputEncoding = THREE.sRGBEncoding;
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.06;
+        renderer.shadowMap.enabled = true;
+        renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+        container.appendChild(renderer.domElement);
+
+        const studioEnv = createStudioEnvironment(renderer);
+        if (studioEnv) {
+          scene.environment = studioEnv;
+        }
+
+        // Esquema de Iluminación Científica de Estudio (3 puntos suaves sin contrastes extremos ni bloom)
+        const hemiLight = new THREE.HemisphereLight(0xe2e8f0, 0x131e2e, 0.72);
+        scene.add(hemiLight);
+
+        // 1. Luz principal superior izquierda
+        const keyLight = new THREE.DirectionalLight(0xfffdf9, 1.28);
+        keyLight.position.set(-9, 12, 10);
+        keyLight.castShadow = true;
+        keyLight.shadow.mapSize.width = 1024;
+        keyLight.shadow.mapSize.height = 1024;
+        keyLight.shadow.bias = -0.0005;
+        scene.add(keyLight);
+
+        // 2. Luz de relleno frontal equilibrada
+        const fillLight = new THREE.DirectionalLight(0xdbeafe, 0.58);
+        fillLight.position.set(3, 2, 13);
+        scene.add(fillLight);
+
+        // 3. Luz secundaria de contorno
+        const rimLight = new THREE.DirectionalLight(0xa5f3fc, 0.68);
+        rimLight.position.set(10, -5, -11);
+        scene.add(rimLight);
+
+        // Construir sistema molecular unificado
+        nanogelAssembly = new THREE.Group();
+        scene.add(nanogelAssembly);
+
+        buildHydratedNanogelAndMatrix();
+        buildSilverNanoparticlesWithCorona();
+        buildTumorCellContext();
+
+        STAGES_DATA[2].focus.copy(focalAgNPPos);
+
+        setupInteractions(container);
+        initQRModal();
+        syncStageUI(0, true);
+
+        // Soporte opcional de parámetros de URL (?stage=0..3&progress=0..100&paused=1)
+        const params = new URLSearchParams(window.location.search);
+        if (params.has('stage')) {
+          const stParam = THREE.MathUtils.clamp(parseInt(params.get('stage'), 10) || 0, 0, 3);
+          state.progress = params.has('progress') ? parseFloat(params.get('progress')) : (stParam * 25 + 12);
+          document.getElementById('slider-progress').value = state.progress;
+          syncStageUI(stParam, true);
+        }
+        if (params.get('paused') === '1') {
+          state.isPlaying = false;
+          updatePlayPauseIcon();
+        }
+      }
+
+      /**
+       * 1. NANOGEL: Esfera hidratada semitransparente + Red polimérica porosa + Nodos de entrecruzamiento
+       */
+      function buildHydratedNanogelAndMatrix() {
+        const R = 3.55;
+
+        // Núcleo acuoso interior sutil para dar sensación de profundidad hidratada
+        innerCoreVolume = new THREE.Mesh(
+          new THREE.SphereGeometry(R * 0.96, 48, 36),
+          new THREE.MeshPhysicalMaterial({
+            color: 0x3898a6,
+            roughness: 0.25,
+            metalness: 0.0,
+            transparent: true,
+            opacity: 0.10,
+            depthWrite: false
+          })
+        );
+        nanogelAssembly.add(innerCoreVolume);
+
+        // Superficie esférica suave completa (cuando Corte está desactivado)
+        const gelMatBase = {
+          color: 0x5ec2cc,
+          roughness: 0.18,
+          metalness: 0.02,
+          clearcoat: 0.55,
+          clearcoatRoughness: 0.22,
+          transparent: true,
+          opacity: 0.22,
+          depthWrite: false
+        };
+
+        outerSphereFull = new THREE.Mesh(
+          new THREE.SphereGeometry(R, 64, 48),
+          new THREE.MeshPhysicalMaterial(gelMatBase)
+        );
+        registerInteractive(outerSphereFull, 'nanogel', 'Nanogel (Esfera polimérica hidratada)');
+        nanogelAssembly.add(outerSphereFull);
+
+        // Superficie con corte hemisférico limpio orientado hacia la cámara (+X, +Z) para observar los poros internos
+        outerSphereCut = new THREE.Mesh(
+          new THREE.SphereGeometry(R, 64, 48, Math.PI * 1.02, Math.PI * 1.44, 0, Math.PI),
+          new THREE.MeshPhysicalMaterial(Object.assign({}, gelMatBase, { side: THREE.DoubleSide }))
+        );
+        registerInteractive(outerSphereCut, 'nanogel', 'Nanogel (Vista con corte de inspección)');
+        nanogelAssembly.add(outerSphereCut);
+
+        // Coordenadas de los poros principales donde residirán las AgNPs (para que la red rodee los poros con orden)
+        const agPositions = [
+          focalAgNPPos.clone(),                      // AgNP focal para el acercamiento en Etapa 3
+          new THREE.Vector3(-1.45, 1.15, 0.65),
+          new THREE.Vector3(1.55, -1.05, -0.75),
+          new THREE.Vector3(-0.85, -1.45, 1.20),
+          new THREE.Vector3(-1.30, 0.15, -1.65),
+          new THREE.Vector3(0.45, 1.75, -1.05),
+          new THREE.Vector3(1.85, 0.65, -0.95),
+          new THREE.Vector3(-0.20, -0.65, -1.85)
+        ];
+        nanogelAssembly.userData.agPositions = agPositions;
+
+        // Generar nodos ordenados de entrecruzamiento en dos capas concéntricas (evitando los centros de los poros AgNP)
+        const nodes = [];
+        const shellConfigs = [
+          { count: 16, rad: 1.75 },
+          { count: 28, rad: 3.05 }
+        ];
+
+        shellConfigs.forEach((cfg, sIdx) => {
+          for (let i = 0; i < cfg.count; i++) {
+            const phi = Math.acos(1 - 2 * (i + 0.5) / cfg.count);
+            const theta = Math.PI * (1 + Math.sqrt(5)) * (i + sIdx * 7);
+            const pos = new THREE.Vector3(
+              Math.sin(phi) * Math.cos(theta) * cfg.rad,
+              Math.cos(phi) * cfg.rad,
+              Math.sin(phi) * Math.sin(theta) * cfg.rad
+            );
+
+            // Desplazar suavemente si cae demasiado cerca de una cavidad porosa de AgNP
+            agPositions.forEach((agP) => {
+              const diff = pos.clone().sub(agP);
+              if (diff.length() < 0.85) {
+                pos.copy(agP).add(diff.normalize().multiplyScalar(0.92));
+              }
+            });
+            nodes.push(pos);
+          }
+        });
+
+        // Material para Puntos de Entrecruzamiento
+        const nodeGeo = new THREE.SphereGeometry(0.085, 16, 14);
+        const nodeMat = new THREE.MeshStandardMaterial({
+          color: 0x4fb3bf,
+          roughness: 0.35,
+          metalness: 0.08,
+          transparent: true,
+          opacity: 0.92
+        });
+
+        nodes.forEach((nPos) => {
+          const nMesh = new THREE.Mesh(nodeGeo, nodeMat);
+          nMesh.position.copy(nPos);
+          registerInteractive(nMesh, 'crosslinks', 'Punto de entrecruzamiento polimérico');
+          nanogelAssembly.add(nMesh);
+          crosslinkMeshes.push(nMesh);
+        });
+
+        // Conectar vecinos cercanos (grado controlado 3-4) mediante filamentos curvos suaves -> Red porosa limpia
+        const filamentMat = new THREE.MeshStandardMaterial({
+          color: 0xa5e8ef,
+          roughness: 0.32,
+          metalness: 0.05,
+          transparent: true,
+          opacity: 0.68
+        });
+
+        const pairSet = new Set();
+        const connectionCount = new Array(nodes.length).fill(0);
+
+        for (let i = 0; i < nodes.length; i++) {
+          const dists = [];
+          for (let j = 0; j < nodes.length; j++) {
+            if (i === j) continue;
+            const d = nodes[i].distanceTo(nodes[j]);
+            if (d > 0.95 && d < 2.25) {
+              dists.push({ j, d });
+            }
+          }
+          dists.sort((a, b) => a.d - b.d);
+
+          for (let k = 0; k < dists.length && connectionCount[i] < 4; k++) {
+            const j = dists[k].j;
+            if (connectionCount[j] >= 4) continue;
+            const key = i < j ? `${i}-${j}` : `${j}-${i}`;
+            if (pairSet.has(key)) continue;
+
+            // Evitar que un filamento atraviese directamente una AgNP
+            const mid = new THREE.Vector3().addVectors(nodes[i], nodes[j]).multiplyScalar(0.5);
+            let blockedByPore = false;
+            for (let m = 0; m < agPositions.length; m++) {
+              if (mid.distanceTo(agPositions[m]) < 0.62) {
+                blockedByPore = true;
+                break;
+              }
+            }
+            if (blockedByPore) continue;
+
+            pairSet.add(key);
+            connectionCount[i]++;
+            connectionCount[j]++;
+
+            // Curvatura orgánica leve hacia el exterior del poro
+            const normalOffset = mid.clone().normalize().multiplyScalar(0.12);
+            const ctrlMid = mid.clone().add(normalOffset);
+            const curve = new THREE.QuadraticBezierCurve3(nodes[i], ctrlMid, nodes[j]);
+            const tubeGeo = new THREE.TubeGeometry(curve, 14, 0.032, 8, false);
+            const fMesh = new THREE.Mesh(tubeGeo, filamentMat);
+            registerInteractive(fMesh, 'polymer_matrix', 'Matriz polimérica (Filamento de nanocelulosa)');
+            nanogelAssembly.add(fMesh);
+            filamentMeshes.push(fMesh);
+          }
+        }
+      }
+
+      /**
+       * 2 & 3. NANOPARTÍCULAS DE PLATA (Esferas satinadas) + CORONA FITOQUÍMICA DE ROMERO
+       * (Pequeños elementos verdes y dorados mates/semimates con enlaces cortos, sin cubos ni órbitas)
+       */
+      function buildSilverNanoparticlesWithCorona() {
+        const agPositions = nanogelAssembly.userData.agPositions;
+        const agRadius = 0.42;
+
+        // Material de plata metálica satinada de estudio
+        const silverMat = new THREE.MeshStandardMaterial({
+          color: 0xe2e8f0,
+          roughness: 0.28,
+          metalness: 0.76,
+          envMapIntensity: 1.35
+        });
+
+        // Materiales mates/semimates naturales para la corona fitoquímica de romero
+        const rosemaryGreenMat = new THREE.MeshStandardMaterial({
+          color: 0x489878,
+          roughness: 0.64,
+          metalness: 0.04,
+          transparent: true,
+          opacity: 0.95
+        });
+
+        const rosemaryGoldMat = new THREE.MeshStandardMaterial({
+          color: 0xcfa358,
+          roughness: 0.60,
+          metalness: 0.06,
+          transparent: true,
+          opacity: 0.95
+        });
+
+        const shortBondMat = new THREE.MeshStandardMaterial({
+          color: 0x7c9c8e,
+          roughness: 0.68,
+          metalness: 0.02,
+          transparent: true,
+          opacity: 0.85
+        });
+
+        const agGeo = new THREE.SphereGeometry(agRadius, 48, 36);
+        const beadGeoGreen = new THREE.SphereGeometry(0.052, 14, 12);
+        const beadGeoGold = new THREE.SphereGeometry(0.044, 14, 12);
+
+        agPositions.forEach((pos, idx) => {
+          const unitGroup = new THREE.Group();
+          unitGroup.position.copy(pos);
+
+          // Esfera metálica de plata bien definida
+          const coreMesh = new THREE.Mesh(agGeo, silverMat.clone());
+          coreMesh.castShadow = true;
+          coreMesh.receiveShadow = true;
+          registerInteractive(coreMesh, 'agnp', 'AgNP (Nanopartícula esférica de plata)');
+          unitGroup.add(coreMesh);
+
+          // Capa molecular superficial: distribución Fibonacci con ligera variación orgánica (sin cubos ni órbitas)
+          const coronaGroup = new THREE.Group();
+          const beadCount = idx === 0 ? 46 : 30; // Mayor detalle en la AgNP focal para el macro de Etapa 3
+          const beadPositions = [];
+          const coronaBeads = [];
+          const coronaBonds = [];
+
+          for (let b = 0; b < beadCount; b++) {
+            // Semilla determinista suave para aspecto natural pero organizado
+            const hash = Math.sin(b * 12.9898 + idx * 78.233) * 43758.5453;
+            const rand = hash - Math.floor(hash);
+
+            const phi = Math.acos(1 - 2 * (b + 0.5) / beadCount) + (rand - 0.5) * 0.09;
+            const theta = Math.PI * (1 + Math.sqrt(5)) * b + (rand - 0.5) * 0.12;
+            const surfDist = agRadius + 0.068 + (b % 3 === 0 ? 0.026 : 0);
+
+            const bPos = new THREE.Vector3(
+              Math.sin(phi) * Math.cos(theta) * surfDist,
+              Math.cos(phi) * surfDist,
+              Math.sin(phi) * Math.sin(theta) * surfDist
+            );
+            beadPositions.push(bPos);
+
+            const isGold = (b % 3 === 1);
+            const bead = new THREE.Mesh(
+              isGold ? beadGeoGold : beadGeoGreen,
+              isGold ? rosemaryGoldMat : rosemaryGreenMat
+            );
+            bead.position.copy(bPos);
+            registerInteractive(bead, 'rosemary_corona', 'Corona fitoquímica de romero');
+            coronaGroup.add(bead);
+            coronaBeads.push(bead);
+
+            // Enlace radial corto y sutil hacia la superficie de la AgNP
+            const surfaceAnchor = bPos.clone().normalize().multiplyScalar(agRadius - 0.01);
+            const rLen = bPos.distanceTo(surfaceAnchor);
+            const rBond = new THREE.Mesh(
+              new THREE.CylinderGeometry(0.012, 0.012, rLen, 6),
+              shortBondMat
+            );
+            rBond.position.copy(bPos.clone().add(surfaceAnchor).multiplyScalar(0.5));
+            rBond.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), bPos.clone().sub(surfaceAnchor).normalize());
+            coronaGroup.add(rBond);
+            coronaBonds.push(rBond);
+          }
+
+          // Enlaces cortos laterales entre elementos vecinos de la corona para dar cohesión de recubrimiento molecular
+          for (let i = 0; i < beadPositions.length; i++) {
+            for (let j = i + 1; j < beadPositions.length; j++) {
+              const d = beadPositions[i].distanceTo(beadPositions[j]);
+              if (d < 0.21) {
+                const lBond = new THREE.Mesh(
+                  new THREE.CylinderGeometry(0.01, 0.01, d, 5),
+                  shortBondMat
+                );
+                lBond.position.copy(beadPositions[i].clone().add(beadPositions[j]).multiplyScalar(0.5));
+                lBond.quaternion.setFromUnitVectors(
+                  new THREE.Vector3(0, 1, 0),
+                  beadPositions[j].clone().sub(beadPositions[i]).normalize()
+                );
+                coronaGroup.add(lBond);
+                coronaBonds.push(lBond);
+              }
+            }
+          }
+
+          unitGroup.add(coronaGroup);
+          nanogelAssembly.add(unitGroup);
+
+          agnpUnits.push({
+            group: unitGroup,
+            coreMesh,
+            coronaGroup,
+            basePos: pos.clone(),
+            isFocal: idx === 0
+          });
+        });
+      }
+
+      /**
+       * 4. CÉLULA TUMORAL: Morfología orgánica editorial sobria para la Etapa 4 (Proximidad conceptual)
+       */
+      function buildTumorCellContext() {
+        tumorCellGroup = new THREE.Group();
+        // Posicionada a la derecha-abajo con separación extracelular limpia respecto al nanogel
+        tumorCellGroup.position.set(6.9, -1.25, -0.35);
+        tumorCellGroup.visible = false;
+        scene.add(tumorCellGroup);
+
+        const cellGeo = new THREE.SphereGeometry(4.0, 72, 56);
+        const posAttr = cellGeo.attributes.position;
+        for (let i = 0; i < posAttr.count; i++) {
+          const vx = posAttr.getX(i);
+          const vy = posAttr.getY(i);
+          const vz = posAttr.getZ(i);
+          // Relieve orgánico suave propio de membrana celular tumoral en ilustración biomédica
+          const undulation =
+            Math.sin(vx * 1.15) * Math.cos(vy * 1.15) * 0.18 +
+            Math.sin(vz * 2.1 + vx * 1.4) * 0.07;
+          const dir = new THREE.Vector3(vx, vy, vz).normalize();
+          posAttr.setXYZ(
+            i,
+            vx + dir.x * undulation,
+            vy + dir.y * undulation,
+            vz + dir.z * undulation
+          );
+        }
+        cellGeo.computeVertexNormals();
+
+        tumorMembraneMesh = new THREE.Mesh(
+          cellGeo,
+          new THREE.MeshPhysicalMaterial({
+            color: 0x9e5260,
+            roughness: 0.52,
+            metalness: 0.03,
+            clearcoat: 0.18,
+            clearcoatRoughness: 0.5,
+            transparent: true,
+            opacity: 0.88
+          })
+        );
+        tumorMembraneMesh.receiveShadow = true;
+        registerInteractive(tumorMembraneMesh, 'tumor_cell', 'Célula tumoral (Proximidad terapéutica propuesta)');
+        tumorCellGroup.add(tumorMembraneMesh);
+
+        // Silueta interna tenue de núcleo celular para dar escala biológica
+        tumorNucleusMesh = new THREE.Mesh(
+          new THREE.SphereGeometry(2.1, 36, 28),
+          new THREE.MeshStandardMaterial({
+            color: 0x5c2834,
+            roughness: 0.7,
+            transparent: true,
+            opacity: 0.45
+          })
+        );
+        tumorNucleusMesh.position.set(0.6, -0.3, -0.2);
+        tumorCellGroup.add(tumorNucleusMesh);
+      }
+
+      /**
+       * ========================================================================
+       * ACTUALIZACIÓN DE LAS 4 ETAPAS Y MATERIALES (Sin movimientos caóticos simultáneos)
+       * ========================================================================
+       */
+      function updateSimulation(dt, elapsed) {
+        const stageSpan = 25; // 4 etapas: [0-25), [25-50), [50-75), [75-100]
+        const speedMult = SPEED_OPTIONS[state.speedIdx];
+
+        if (state.isPlaying) {
+          state.progress += state.baseSpeed * speedMult * dt;
+          if (state.loopStage) {
+            const minP = state.currentStage * stageSpan;
+            const maxP = (state.currentStage + 1) * stageSpan - 0.05;
+            if (state.progress >= maxP) state.progress = minP;
+          } else if (state.progress >= 100) {
+            state.progress = 100;
+            state.isPlaying = false;
+            updatePlayPauseIcon();
+          }
+          document.getElementById('slider-progress').value = state.progress;
+        }
+
+        const p = THREE.MathUtils.clamp(state.progress, 0, 100);
+        const computedStage = Math.min(3, Math.floor(p / stageSpan));
+        const localT = THREE.MathUtils.clamp((p - computedStage * stageSpan) / stageSpan, 0, 1);
+
+        if (computedStage !== state.currentStage) {
+          syncStageUI(computedStage, false);
+        }
+
+        document.getElementById('progress-percent').textContent = `${Math.round(p)}%`;
+
+        // Control de Corte Hemisférico vs Esfera Completa
+        outerSphereFull.visible = !state.xrayMode;
+        outerSphereCut.visible = state.xrayMode;
+
+        // Opacidad base regulable por el usuario
+        const userGelOpacity = 0.08 + state.gelOpacitySetting * 0.34;
+
+        // ----------------------------------------------------------------------
+        // ETAPA 1: ESTRUCTURA (Nanogel y su red polimérica porosa)
+        // ----------------------------------------------------------------------
+        if (state.currentStage === 0) {
+          const reveal = THREE.MathUtils.smoothstep(localT, 0.0, 0.45);
+          const scaleIn = 0.92 + 0.08 * reveal;
+          nanogelAssembly.scale.setScalar(scaleIn);
+          nanogelAssembly.position.set(0, 0, 0);
+
+          outerSphereFull.material.opacity = userGelOpacity;
+          outerSphereCut.material.opacity = userGelOpacity + 0.04;
+          filamentMeshes.forEach((m) => { m.material.opacity = 0.78; });
+          crosslinkMeshes.forEach((m) => { m.material.opacity = 0.95; });
+
+          // Las AgNPs están presentes discretamente sin protagonismo aún
+          agnpUnits.forEach((u) => {
+            u.group.scale.setScalar(0.85);
+            u.coronaGroup.visible = false;
+            u.coreMesh.material.emissive.setHex(0x000000);
+          });
+
+          tumorCellGroup.visible = false;
+        }
+
+        // ----------------------------------------------------------------------
+        // ETAPA 2: FUNCIONALIZACIÓN (Se destacan las nanopartículas de plata AgNPs)
+        // ----------------------------------------------------------------------
+        else if (state.currentStage === 1) {
+          const emph = THREE.MathUtils.smoothstep(localT, 0.0, 0.5);
+          nanogelAssembly.scale.setScalar(1.0);
+          nanogelAssembly.position.set(0, 0, 0);
+
+          // Atenuar suavemente la red para dar claridad visual a las esferas plateadas
+          outerSphereFull.material.opacity = userGelOpacity * 0.75;
+          outerSphereCut.material.opacity = userGelOpacity * 0.8;
+          filamentMeshes.forEach((m) => { m.material.opacity = 0.38; });
+          crosslinkMeshes.forEach((m) => { m.material.opacity = 0.52; });
+
+          agnpUnits.forEach((u) => {
+            u.group.scale.setScalar(0.85 + 0.22 * emph);
+            u.coronaGroup.visible = false;
+            u.coreMesh.material.emissive.setHex(0x1e293b);
+            u.coreMesh.material.emissiveIntensity = 0.22 * emph;
+          });
+
+          tumorCellGroup.visible = false;
+        }
+
+        // ----------------------------------------------------------------------
+        // ETAPA 3: CORONA FITOQUÍMICA (Acercamiento macro a una AgNP + recubrimiento de romero)
+        // ----------------------------------------------------------------------
+        else if (state.currentStage === 2) {
+          const coatReveal = THREE.MathUtils.smoothstep(localT, 0.05, 0.55);
+          nanogelAssembly.scale.setScalar(1.0);
+          nanogelAssembly.position.set(0, 0, 0);
+
+          outerSphereFull.material.opacity = userGelOpacity * 0.45;
+          outerSphereCut.material.opacity = userGelOpacity * 0.45;
+          filamentMeshes.forEach((m) => { m.material.opacity = 0.25; });
+          crosslinkMeshes.forEach((m) => { m.material.opacity = 0.35; });
+
+          agnpUnits.forEach((u) => {
+            u.group.scale.setScalar(1.05);
+            u.coronaGroup.visible = true;
+            u.coronaGroup.scale.setScalar(0.75 + 0.25 * coatReveal);
+            u.coreMesh.material.emissive.setHex(0x0f172a);
+            u.coreMesh.material.emissiveIntensity = 0.12;
+          });
+
+          tumorCellGroup.visible = false;
+        }
+
+        // ----------------------------------------------------------------------
+        // ETAPA 4: APLICACIÓN ONCOLÓGICA (Presentación del nanogel cerca de célula tumoral)
+        // ----------------------------------------------------------------------
+        else if (state.currentStage === 3) {
+          const approach = THREE.MathUtils.smoothstep(localT, 0.0, 0.65);
+          nanogelAssembly.scale.setScalar(0.92);
+          // Aproximación serena hacia la proximidad extracelular sin penetrar ni destruir la célula
+          nanogelAssembly.position.set(-1.35 + approach * 1.15, 0.35 - approach * 0.15, 0);
+
+          outerSphereFull.material.opacity = userGelOpacity;
+          outerSphereCut.material.opacity = userGelOpacity + 0.04;
+          filamentMeshes.forEach((m) => { m.material.opacity = 0.58; });
+          crosslinkMeshes.forEach((m) => { m.material.opacity = 0.78; });
+
+          agnpUnits.forEach((u) => {
+            u.group.scale.setScalar(1.0);
+            u.coronaGroup.visible = true;
+            u.coronaGroup.scale.setScalar(1.0);
+            u.coreMesh.material.emissive.setHex(0x0f172a);
+            u.coreMesh.material.emissiveIntensity = 0.1;
+          });
+
+          tumorCellGroup.visible = true;
+          tumorMembraneMesh.material.opacity = 0.35 + 0.53 * approach;
+        }
+
+        // Rotación orbital lenta y pausada digna de visualización editorial (evitando mareo)
+        if (state.autoRotate && !orbit.isDragging) {
+          const rotRate = state.currentStage === 2 ? 0.045 : 0.065;
+          orbit.targetTheta += dt * rotRate * speedMult;
+        }
+
+        updateCameraPosition(false);
+        updateEditorialLabels();
+      }
+
+      /**
+       * Proyecta los puntos 3D de interés a rótulos discretos exteriores con línea guía fina
+       */
+      function updateEditorialLabels() {
+        const overlay = document.getElementById('labels-overlay');
+        if (!state.labelsVisible) {
+          overlay.classList.add('hidden');
+          return;
+        }
+        overlay.classList.remove('hidden');
+
+        const rect = overlay.getBoundingClientRect();
+        const isMobile = window.innerWidth < 768;
+
+        // Definir qué etiquetas mostrar limpiamente en cada etapa para no saturar
+        const visibilityMap = {
+          nanogel: state.currentStage === 0 || state.currentStage === 3,
+          matrix: state.currentStage === 0 || state.currentStage === 1,
+          agnp: state.currentStage === 1 || state.currentStage === 2,
+          corona: state.currentStage === 2 || state.currentStage === 3,
+          tumor: state.currentStage === 3
+        };
+
+        Object.keys(labelAnchors).forEach((key) => {
+          const item = labelAnchors[key];
+          const el = document.getElementById(item.elId);
+          const line = document.getElementById(item.lineId);
+          const dot = document.getElementById(item.dotId);
+
+          if (!visibilityMap[key]) {
+            el.classList.add('hidden');
+            line.setAttribute('visibility', 'hidden');
+            dot.setAttribute('visibility', 'hidden');
+            return;
+          }
+
+          // Calcular posición mundial actual según la posición del nanogel o célula
+          const worldPt = item.world.clone();
+          if (key !== 'tumor') {
+            worldPt.multiplyScalar(nanogelAssembly.scale.x).add(nanogelAssembly.position);
+          }
+
+          const projected = worldPt.clone().project(camera);
+          if (projected.z > 1 || projected.z < -1) {
+            el.classList.add('hidden');
+            line.setAttribute('visibility', 'hidden');
+            dot.setAttribute('visibility', 'hidden');
+            return;
+          }
+
+          const ax = (projected.x * 0.5 + 0.5) * rect.width;
+          const ay = (-projected.y * 0.5 + 0.5) * rect.height;
+
+          const scaleOff = isMobile ? 0.62 : 1.0;
+          const lx = THREE.MathUtils.clamp(ax + item.offset.x * scaleOff, 58, rect.width - 58);
+          const ly = THREE.MathUtils.clamp(ay + item.offset.y * scaleOff, 24, rect.height - 96);
+
+          el.classList.remove('hidden');
+          el.style.left = `${lx}px`;
+          el.style.top = `${ly}px`;
+
+          dot.setAttribute('visibility', 'visible');
+          dot.setAttribute('cx', ax);
+          dot.setAttribute('cy', ay);
+
+          line.setAttribute('visibility', 'visible');
+          line.setAttribute('x1', ax);
+          line.setAttribute('y1', ay);
+          line.setAttribute('x2', lx);
+          line.setAttribute('y2', ly);
+        });
+      }
+
+      function syncStageUI(stageIdx, instantCam) {
+        state.currentStage = stageIdx;
+        const st = STAGES_DATA[stageIdx];
+
+        document.getElementById('stage-badge').textContent = st.badge;
+        document.getElementById('stage-title').textContent = st.title;
+        document.getElementById('header-status-badge').textContent = st.headerBadge;
+
+        selectComponent(st.defaultComp, false);
+
+        const isMobile = window.innerWidth < 768;
+        orbit.targetTheta = st.cam.theta;
+        orbit.targetPhi = st.cam.phi;
+        orbit.targetRadius = isMobile ? st.cam.radius * 1.24 : st.cam.radius;
+        orbit.targetFocus.copy(st.focus);
+
+        if (instantCam) updateCameraPosition(true);
+
+        document.querySelectorAll('.stage-btn').forEach((btn, idx) => {
+          btn.classList.toggle('stage-card-active', idx === stageIdx);
+        });
+      }
+
+      function selectComponent(compKey, openSheetOnMobile = true) {
+        const info = COMPONENT_INFO[compKey];
+        if (!info) return;
+        state.selectedComp = compKey;
+
+        document.getElementById('inspector-tag').textContent = info.tag;
+        document.getElementById('inspector-title').textContent = info.title;
+        document.getElementById('inspector-meta').textContent = info.meta;
+        document.getElementById('inspector-desc').textContent = info.desc;
+        document.getElementById('inspector-note-label').textContent = info.noteLabel;
+        document.getElementById('inspector-impact').textContent = info.impact;
+
+        document.querySelectorAll('.ident-row').forEach((row) => {
+          row.classList.toggle('ident-row-active', row.getAttribute('data-inspect') === compKey);
+        });
+        document.querySelectorAll('.editorial-callout').forEach((lbl) => {
+          lbl.classList.toggle('callout-selected', lbl.getAttribute('data-inspect') === compKey);
+        });
+
+        if (openSheetOnMobile) {
+          if (window.innerWidth < 768) {
+            openMobileSheet('right');
+          } else if (state.rightDesktopMin) {
+            setDesktopRightMin(false);
+          }
+        }
+      }
+
+      function updateCameraPosition(instant) {
+        orbit.phi = THREE.MathUtils.clamp(orbit.phi, 0.3, Math.PI - 0.3);
+        orbit.targetPhi = THREE.MathUtils.clamp(orbit.targetPhi, 0.3, Math.PI - 0.3);
+        orbit.targetRadius = THREE.MathUtils.clamp(orbit.targetRadius, 2.8, 26);
+
+        if (instant) {
+          orbit.theta = orbit.targetTheta;
+          orbit.phi = orbit.targetPhi;
+          orbit.radius = orbit.targetRadius;
+          orbit.focus.copy(orbit.targetFocus);
+        } else {
+          const smooth = 0.065; // Interpolación progresiva suave de cámara y zoom
+          orbit.theta += (orbit.targetTheta - orbit.theta) * smooth;
+          orbit.phi += (orbit.targetPhi - orbit.phi) * smooth;
+          orbit.radius += (orbit.targetRadius - orbit.radius) * smooth;
+          orbit.focus.lerp(orbit.targetFocus, smooth);
+        }
+
+        camera.position.x = orbit.focus.x + orbit.radius * Math.sin(orbit.phi) * Math.sin(orbit.theta);
+        camera.position.y = orbit.focus.y + orbit.radius * Math.cos(orbit.phi);
+        camera.position.z = orbit.focus.z + orbit.radius * Math.sin(orbit.phi) * Math.cos(orbit.theta);
+        camera.lookAt(orbit.focus);
+      }
+
+      function updatePlayPauseIcon() {
+        document.getElementById('icon-play').classList.toggle('hidden', state.isPlaying);
+        document.getElementById('icon-pause').classList.toggle('hidden', !state.isPlaying);
+      }
+
+      function setDesktopLeftMin(min) {
+        state.leftDesktopMin = min;
+        document.getElementById('left-panel').classList.toggle('desktop-minimized', min);
+        const restore = document.getElementById('btn-restore-left');
+        restore.classList.toggle('hidden', !min);
+        restore.classList.toggle('md:flex', min);
+      }
+
+      function setDesktopRightMin(min) {
+        state.rightDesktopMin = min;
+        document.getElementById('right-panel').classList.toggle('desktop-minimized', min);
+        const restore = document.getElementById('btn-restore-right');
+        restore.classList.toggle('hidden', !min);
+        restore.classList.toggle('md:flex', min);
+      }
+
+      function openMobileSheet(which) {
+        state.mobileSheet = which;
+        document.getElementById('left-panel').classList.toggle('mobile-closed', which !== 'left');
+        document.getElementById('right-panel').classList.toggle('mobile-closed', which !== 'right');
+        document.getElementById('mobile-backdrop').classList.toggle('hidden', which === null);
+      }
+
+      function setBottomMin(min) {
+        state.bottomMin = min;
+        document.getElementById('bottom-panel').classList.toggle('minimized', min);
+        const btn = document.getElementById('btn-restore-bottom');
+        btn.classList.toggle('hidden', !min);
+        btn.classList.toggle('flex', min);
+      }
+
+      function initQRModal() {
+        const modal = document.getElementById('qr-modal');
+        const qrBox = document.getElementById('qrcode-box');
+        const urlLabel = document.getElementById('qr-url-label');
+        const targetUrl = window.location.protocol.startsWith('http') && !window.location.hostname.includes('localhost')
+          ? window.location.href
+          : PUBLIC_SHARE_URL;
+
+        urlLabel.textContent = targetUrl;
+        if (typeof QRCode !== 'undefined') {
+          new QRCode(qrBox, {
+            text: targetUrl,
+            width: 168,
+            height: 168,
+            colorDark: "#0B121C",
+            colorLight: "#FFFFFF",
+            correctLevel: QRCode.CorrectLevel.M
+          });
+        }
+
+        document.getElementById('btn-open-qr').addEventListener('click', () => {
+          modal.classList.remove('hidden');
+          modal.classList.add('flex');
+        });
+        document.getElementById('btn-close-qr').addEventListener('click', () => {
+          modal.classList.add('hidden');
+          modal.classList.remove('flex');
+        });
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) {
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+          }
+        });
+        document.getElementById('btn-copy-url').addEventListener('click', (e) => {
+          navigator.clipboard.writeText(targetUrl);
+          e.currentTarget.textContent = '¡Copiado!';
+          setTimeout(() => { document.getElementById('btn-copy-url').textContent = 'Copiar'; }, 1600);
+        });
+      }
+
+      function setupInteractions(container) {
+        const dom = renderer.domElement;
+        const tooltip = document.getElementById('hover-tooltip');
+        const tooltipTitle = document.getElementById('hover-tooltip-title');
+        let downPos = { x: 0, y: 0 };
+
+        function getVisibleIntersects() {
+          raycaster.setFromCamera(mouse, camera);
+          const candidates = interactiveObjects.filter((obj) => {
+            if (!obj.visible) return false;
+            let p = obj.parent;
+            while (p) {
+              if (!p.visible) return false;
+              p = p.parent;
+            }
+            return true;
+          });
+          return raycaster.intersectObjects(candidates, false);
+        }
+
+        dom.addEventListener('pointerdown', (e) => {
+          orbit.isDragging = true;
+          orbit.prevX = e.clientX;
+          orbit.prevY = e.clientY;
+          downPos = { x: e.clientX, y: e.clientY };
+        });
+
+        window.addEventListener('pointermove', (e) => {
+          const rect = dom.getBoundingClientRect();
+          mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+          mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+
+          if (orbit.isDragging) {
+            orbit.targetTheta -= (e.clientX - orbit.prevX) * 0.006;
+            orbit.targetPhi -= (e.clientY - orbit.prevY) * 0.006;
+            orbit.prevX = e.clientX;
+            orbit.prevY = e.clientY;
+            tooltip.classList.add('hidden');
+            return;
+          }
+
+          if (window.innerWidth < 768) return;
+
+          const hits = getVisibleIntersects();
+          if (hits.length > 0 && hits[0].object.userData.label) {
+            dom.style.cursor = 'pointer';
+            tooltipTitle.textContent = hits[0].object.userData.label;
+            tooltip.style.left = `${e.clientX}px`;
+            tooltip.style.top = `${e.clientY}px`;
+            tooltip.classList.remove('hidden');
+          } else {
+            dom.style.cursor = 'grab';
+            tooltip.classList.add('hidden');
+          }
+        });
+
+        window.addEventListener('pointerup', (e) => {
+          const dist = Math.hypot(e.clientX - downPos.x, e.clientY - downPos.y);
+          orbit.isDragging = false;
+          if (dist < 6) {
+            const rect = dom.getBoundingClientRect();
+            mouse.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+            mouse.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+            const hits = getVisibleIntersects();
+            if (hits.length > 0 && hits[0].object.userData.compKey) {
+              selectComponent(hits[0].object.userData.compKey, true);
+            }
+          }
+        });
+
+        dom.addEventListener('wheel', (e) => {
+          e.preventDefault();
+          orbit.targetRadius += e.deltaY * 0.009;
+        }, { passive: false });
+
+        dom.addEventListener('touchstart', (e) => {
+          if (e.touches.length === 2) {
+            orbit.pinchDist = Math.hypot(
+              e.touches[0].clientX - e.touches[1].clientX,
+              e.touches[0].clientY - e.touches[1].clientY
+            );
+          }
+        }, { passive: true });
+
+        dom.addEventListener('touchmove', (e) => {
+          if (e.touches.length === 2) {
+            const d = Math.hypot(
+              e.touches[0].clientX - e.touches[1].clientX,
+              e.touches[0].clientY - e.touches[1].clientY
+            );
+            orbit.targetRadius += (orbit.pinchDist - d) * 0.032;
+            orbit.pinchDist = d;
+          }
+        }, { passive: true });
+
+        window.addEventListener('resize', () => {
+          camera.fov = window.innerWidth < 768 ? 46 : 38;
+          camera.aspect = container.clientWidth / container.clientHeight;
+          camera.updateProjectionMatrix();
+          renderer.setSize(container.clientWidth, container.clientHeight);
+        });
+
+        // Minimizar y abrir hojas móviles
+        document.getElementById('btn-min-left').addEventListener('click', () => {
+          if (window.innerWidth < 768) openMobileSheet(null);
+          else setDesktopLeftMin(true);
+        });
+        document.getElementById('btn-min-right').addEventListener('click', () => {
+          if (window.innerWidth < 768) openMobileSheet(null);
+          else setDesktopRightMin(true);
+        });
+        document.getElementById('left-sheet-handle').addEventListener('click', () => openMobileSheet(null));
+        document.getElementById('right-sheet-handle').addEventListener('click', () => openMobileSheet(null));
+        document.getElementById('mobile-backdrop').addEventListener('click', () => openMobileSheet(null));
+
+        document.getElementById('btn-mobile-telemetry').addEventListener('click', () => {
+          openMobileSheet(state.mobileSheet === 'left' ? null : 'left');
+        });
+        document.getElementById('btn-mobile-pill-ident').addEventListener('click', () => openMobileSheet('left'));
+        document.getElementById('btn-mobile-inspect').addEventListener('click', () => openMobileSheet('right'));
+
+        document.getElementById('btn-restore-left').addEventListener('click', () => setDesktopLeftMin(false));
+        document.getElementById('btn-restore-right').addEventListener('click', () => setDesktopRightMin(false));
+        document.getElementById('btn-min-bottom').addEventListener('click', () => setBottomMin(true));
+        document.getElementById('btn-restore-bottom').addEventListener('click', () => setBottomMin(false));
+
+        document.getElementById('btn-toggle-all-panels').addEventListener('click', () => {
+          const shouldMin = !(state.leftDesktopMin && state.rightDesktopMin);
+          setDesktopLeftMin(shouldMin);
+          setDesktopRightMin(shouldMin);
+        });
+
+        // Botón Velocidad
+        document.getElementById('btn-speed').addEventListener('click', (e) => {
+          state.speedIdx = (state.speedIdx + 1) % SPEED_OPTIONS.length;
+          e.currentTarget.textContent = `${SPEED_OPTIONS[state.speedIdx].toFixed(1)}×`;
+        });
+
+        // Transparencia del Nanogel
+        document.getElementById('slider-opacity').addEventListener('input', (e) => {
+          const v = parseInt(e.target.value, 10);
+          state.gelOpacitySetting = v / 100;
+          const lbl = v < 32 ? 'Alta' : v > 62 ? 'Sólida' : 'Media';
+          document.getElementById('label-gel-opacity').textContent = lbl;
+        });
+
+        // Navegación entre las 4 Etapas
+        const sliderProgress = document.getElementById('slider-progress');
+        sliderProgress.addEventListener('input', (e) => {
+          state.progress = parseFloat(e.target.value);
+          state.isPlaying = false;
+          updatePlayPauseIcon();
+        });
+
+        function jumpToStage(stIdx) {
+          const clamped = THREE.MathUtils.clamp(stIdx, 0, 3);
+          state.progress = clamped * 25 + 0.2;
+          sliderProgress.value = state.progress;
+          syncStageUI(clamped, false);
+        }
+
+        document.querySelectorAll('.stage-btn').forEach((btn) => {
+          btn.addEventListener('click', () => jumpToStage(parseInt(btn.getAttribute('data-stage'), 10)));
+        });
+
+        document.getElementById('btn-prev-stage').addEventListener('click', () => jumpToStage(state.currentStage - 1));
+        document.getElementById('btn-next-stage').addEventListener('click', () => jumpToStage(state.currentStage + 1));
+
+        document.getElementById('btn-play-pause').addEventListener('click', () => {
+          if (state.progress >= 99.5) state.progress = 0;
+          state.isPlaying = !state.isPlaying;
+          updatePlayPauseIcon();
+        });
+
+        document.getElementById('btn-loop-stage').addEventListener('click', (e) => {
+          state.loopStage = !state.loopStage;
+          e.currentTarget.textContent = state.loopStage ? 'Fijar Etapa: ON' : 'Fijar Etapa: OFF';
+          e.currentTarget.classList.toggle('nav-btn-active', state.loopStage);
+        });
+
+        document.getElementById('btn-xray').addEventListener('click', (e) => {
+          state.xrayMode = !state.xrayMode;
+          e.currentTarget.classList.toggle('nav-btn-active', state.xrayMode);
+        });
+
+        document.getElementById('btn-labels').addEventListener('click', (e) => {
+          state.labelsVisible = !state.labelsVisible;
+          e.currentTarget.classList.toggle('nav-btn-active', state.labelsVisible);
+        });
+
+        document.getElementById('btn-autorotate').addEventListener('click', (e) => {
+          state.autoRotate = !state.autoRotate;
+          e.currentTarget.classList.toggle('nav-btn-active', state.autoRotate);
+        });
+
+        document.getElementById('btn-reset').addEventListener('click', () => {
+          state.progress = 0;
+          state.isPlaying = true;
+          sliderProgress.value = 0;
+          syncStageUI(0, false);
+          updatePlayPauseIcon();
+        });
+
+        // Selección desde Tabla de Identificadores y Rótulos Editoriales
+        document.querySelectorAll('.inspect-legend, .editorial-callout').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const key = btn.getAttribute('data-inspect');
+            selectComponent(key, true);
+          });
+        });
+
+        window.addEventListener('keydown', (e) => {
+          if (e.code === 'Space') {
+            e.preventDefault();
+            document.getElementById('btn-play-pause').click();
+          } else if (e.key === 'ArrowRight') {
+            jumpToStage(state.currentStage + 1);
+          } else if (e.key === 'ArrowLeft') {
+            jumpToStage(state.currentStage - 1);
+          } else if (e.key === '[') {
+            setDesktopLeftMin(!state.leftDesktopMin);
+          } else if (e.key === ']') {
+            setDesktopRightMin(!state.rightDesktopMin);
+          } else if (e.key.toLowerCase() === 'h') {
+            document.getElementById('btn-toggle-all-panels').click();
+          } else if (e.key.toLowerCase() === 'x') {
+            document.getElementById('btn-xray').click();
+          } else if (e.key.toLowerCase() === 'l') {
+            document.getElementById('btn-labels').click();
+          } else if (e.key.toLowerCase() === 'r') {
+            document.getElementById('btn-autorotate').click();
+          }
+        });
+      }
+
+      function animate() {
+        requestAnimationFrame(animate);
+        const dt = Math.min(clock.getDelta(), 0.05);
+        const elapsed = clock.getElapsedTime();
+        updateSimulation(dt, elapsed);
+        renderer.render(scene, camera);
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => {
+          initScene();
+          animate();
+        });
+      } else {
+        initScene();
+        animate();
+      }
+    })();
+  </script>
+</body>
+</html>

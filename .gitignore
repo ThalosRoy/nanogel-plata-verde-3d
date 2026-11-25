@@ -1,0 +1,9 @@
+*.zip
+*.log
+.env
+.DS_Store
+Thumbs.db
+ssss/
+stitch_render_molecular_hiperrealista/
+renderizado_molecular_interactivo_estr_s_oxidativo_en_la_mitocondria.html
+simulador_nanogel_plata_verde.html
